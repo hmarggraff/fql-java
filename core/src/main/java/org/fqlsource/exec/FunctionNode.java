@@ -12,6 +12,7 @@ public class FunctionNode extends FqlNode
     public FunctionNode(FqlBuiltinFunction function, FqlNodeInterface[] argNodes)
     {
 
+        super(row, col);
         this.function = function;
         this.argNodes = argNodes;
     }

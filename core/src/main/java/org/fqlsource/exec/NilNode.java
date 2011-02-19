@@ -9,6 +9,11 @@ public class NilNode extends FqlNode
 
     public static NilNode instance = new NilNode();
 
+    public NilNode()
+    {
+        super(row, col);
+    }
+
     public Object getValue(RunEnv env, Object from) throws FqlDataException
     {
         return null;

@@ -27,4 +27,7 @@ public interface FqlNodeInterface
 
     void collectVariables(Set<String> set, final Set<Object> seen);
 
+    int getRow();
+
+    int getCol();
 }

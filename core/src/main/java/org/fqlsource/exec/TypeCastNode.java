@@ -10,7 +10,7 @@ public class TypeCastNode extends UnaryNode
 
     public TypeCastNode(FqlNodeInterface left, String targetType)
     {
-        super(left);
+        super(left, row, col);
         this.targetType = targetType;
     }
 

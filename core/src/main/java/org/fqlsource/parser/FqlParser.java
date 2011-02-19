@@ -121,25 +121,31 @@ public class FqlParser
         return nextToken();
     }
 
-    private void parseWhere()
-    {
-        throw new NotYetImplementedError();
+    private void parseWhere() throws FqlParseException {
+        FqlWhere fqlWhere = new FqlWhere(this);
+        fqlWhere.parseQuestion(nextToken());
 
     }
 
     private void parseFrom()
       throws FqlParseException
     {
-        Token t;
-
         String name1;
-        name1 = name_or_string("connection, dataset or iterator variable");
+        final Token t1 = nextToken();
+        if (t1 == Token.String)
+            name1 = lex.stringVal;
+        else if (t1 == Token.Name)
+            name1 = lex.nameVal;
+        else
+            throw new FqlParseException("Expected " + "connection, dataset or iterator variable" + " as name or string", this);
 
         FromNode fromNode;
 
-        t = nextToken();
+        Token t  = nextToken();
         if (t == Token.In)
         {
+            if (t1 == Token.String)
+                throw new FqlParseException("Iterator variable (\"" + name1+ "\")must be a name, not a string", this);
             String name2 = name_or_string("dataset or connection");
             t = nextToken();
             if (t == Token.Dot)

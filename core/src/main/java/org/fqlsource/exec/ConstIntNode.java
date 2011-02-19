@@ -10,6 +10,7 @@ public class ConstIntNode extends FqlNode
 
     public ConstIntNode(long intVal)
     {
+        super(row, col);
         this.intVal = intVal;
     }
 

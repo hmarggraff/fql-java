@@ -86,17 +86,21 @@ public class Lexer
         As,
         Connect,
         Open,
+        Matches,
     }
 
     protected static Hashtable<String, Token> keywords = new Hashtable<String, Token>();
     protected Token currToken;
     protected int pos;
+    protected int row;
+    protected int col;
     protected String src;
     protected long intVal;
     protected double floatVal;
     protected String stringVal;
     protected String nameVal;
     protected boolean isPushBack;
+    protected boolean haveCR;
 
     static
     {
@@ -117,6 +121,7 @@ public class Lexer
         keywords.put("as", Token.As);
         keywords.put("from", Token.From);
         keywords.put("where", Token.Where);
+        keywords.put("matches", Token.Matches);
     }
 
     public Lexer(String expression)
@@ -129,6 +134,16 @@ public class Lexer
         return pos;
     }
 
+    public int getCol()
+    {
+        return col;
+    }
+
+    public int getRow()
+    {
+        return row;
+    }
+
     public String getText()
     {
         return src;
@@ -137,17 +152,39 @@ public class Lexer
     protected char nextChar() throws FqlParseException
     {
         if (pos >= src.length())
+        {
             throw new FqlParseException("UnexpectedEof", src, pos);
+        }
         else
-            return src.charAt(pos++);
+        {
+            char c = src.charAt(pos++);
+            if (c == '\n')
+            {
+                if (!haveCR)
+                    row++;
+                col = 0;
+                haveCR = false;
+            }
+            else if (c == '\r')
+            {
+                row++;
+                col = 0;
+            }
+            col++;
+            return c;
+        }
     }
 
     public Token nextToken() throws FqlParseException
     {
         if (isPushBack)
+        {
             isPushBack = false;
+        }
         else
+        {
             currToken = nextToken1();
+        }
         return currToken;
     }
 
@@ -203,9 +240,13 @@ public class Lexer
                             else if (cc == '/')
                             {
                                 if (foundStar)
+                                {
                                     return nextToken1();
+                                }
                                 else
+                                {
                                     foundStar = false;
+                                }
                             }
                         }
                     }
@@ -215,7 +256,9 @@ public class Lexer
                         {
                             cc = nextChar();
                             if (cc == '\n' || cc == '\r')
+                            {
                                 return nextToken1();
+                            }
                         }
                         return Token.EOFComment;
                     }
@@ -245,7 +288,9 @@ public class Lexer
                 {
                     char cc = nextChar();
                     if (cc == '.')
+                    {
                         return Token.Elipses;
+                    }
                     else
                     {
                         pos--;
@@ -256,7 +301,9 @@ public class Lexer
                 {
                     char cc = nextChar();
                     if (cc == '>')
+                    {
                         return Token.Dot;
+                    }
                     else
                     {
                         pos--;
@@ -267,9 +314,13 @@ public class Lexer
                 {
                     char cc = nextChar();
                     if (cc == '=')
+                    {
                         return Token.LessOrEqual;
+                    }
                     else if (cc == '<')
+                    {
                         return Token.ExRange;
+                    }
                     else
                     {
                         pos--;
@@ -280,7 +331,9 @@ public class Lexer
                 {
                     char cc = nextChar();
                     if (cc == '=')
+                    {
                         return Token.GreaterOrEqual;
+                    }
                     else
                     {
                         pos--;
@@ -291,7 +344,9 @@ public class Lexer
                 {
                     char cc = nextChar();
                     if (cc == '=')
+                    {
                         return Token.Unequal;
+                    }
                     else
                     {
                         pos--;
@@ -312,7 +367,9 @@ public class Lexer
                         return Token.Param;
                     }
                     else
+                    {
                         return Token.Unknown;
+                    }
                 }
                 default:
                 {
@@ -325,7 +382,9 @@ public class Lexer
                         return scanName(c);
                     }
                     else
+                    {
                         return Token.Unknown;
+                    }
                 }
             }
         }
@@ -396,7 +455,9 @@ public class Lexer
                 isDot = true;
             }
             else if (c == 'e' || c == 'E')
+            {
                 isFloat = true;
+            }
             b.append(c);
         }
         if (isFloat)
@@ -426,9 +487,13 @@ public class Lexer
             {
                 c = nextChar();
                 if (c == 'n')
+                {
                     c = '\n';
+                }
                 else if (c == 't')
+                {
                     c = '\t';
+                }
             }
             b.append(c);
         }

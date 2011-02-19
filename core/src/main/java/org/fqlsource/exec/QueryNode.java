@@ -10,6 +10,7 @@ public class QueryNode extends FqlNode
 
     public QueryNode(List<FqlNodeInterface> clauses)
     {
+        super(row, col);
         this.clauses = clauses;
     }
 

@@ -10,6 +10,7 @@ public class ConstStringNode extends FqlNode
 
     public ConstStringNode(String stringConst)
     {
+        super(row, col);
         this.stringVal = stringConst;
     }
 

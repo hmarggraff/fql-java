@@ -10,6 +10,7 @@ public class AccessNode extends FqlNode
 
     public AccessNode(String member)
     {
+        super(row, col);
         this.member = member;
     }
 
