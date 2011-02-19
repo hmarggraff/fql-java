@@ -1,8 +1,7 @@
 package org.fqlsource.fqltest.mockdriver;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.testng.annotations.Test;
+
 import org.fqlsource.data.FqlDataException;
 import org.fqlsource.mockdriver.MockDriver;
 import org.fqlsource.mockdriver.MockDriverConnection;
@@ -10,30 +9,16 @@ import org.fqlsource.mockdriver.MockEntryPoint;
 
 import java.util.Properties;
 
+import org.testng.Assert;
+
 /**
  * Unit test for simple MockDriver.
  */
-public class MockDriverTest extends TestCase
+@Test
+public class MockDriverTest
 {
     private String defaultEntryPoint = "nowhere";
 
-    /**
-     * Create the test case
-     *
-     * @param testName name of the test case
-     */
-    public MockDriverTest(String testName)
-    {
-        super(testName);
-    }
-
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite()
-    {
-        return new TestSuite(MockDriverTest.class);
-    }
 
     /**
      * Rigourous Test :-)
@@ -41,7 +26,7 @@ public class MockDriverTest extends TestCase
     public void testApp() throws FqlDataException
     {
         defaultEntryPoint = "nowhere";
-        assertNotNull(getEntryPoint(defaultEntryPoint));
+        Assert.assertNotNull(getEntryPoint(defaultEntryPoint));
         //assertTrue(true);
     }
 
@@ -61,7 +46,7 @@ public class MockDriverTest extends TestCase
         try
         {
             getEntryPoint("fail");
-            fail("Entry point should not exist");
+            Assert.fail("Entry point should not exist");
         }
         catch (FqlDataException e)
         {
@@ -79,11 +64,11 @@ public class MockDriverTest extends TestCase
         int count = 1;
         for (Object it : entryPoint)
         {
-            assertTrue(driver.getBoolean(it, "yes", entryPoint));
-            assertFalse(driver.getBoolean(it, "no", entryPoint));
-            assertEquals(driver.getLong(it, "L" + Integer.toString(count), entryPoint), count);
-            assertEquals(driver.getString(it, "S" + count, entryPoint), "S" + count);
-            assertEquals(driver.getDate(it, "D" + count, entryPoint).getTime(), count);
+            Assert.assertTrue(driver.getBoolean(it, "yes", entryPoint));
+            Assert.assertFalse(driver.getBoolean(it, "no", entryPoint));
+            Assert.assertEquals(driver.getLong(it, "L" + Integer.toString(count), entryPoint), count);
+            Assert.assertEquals(driver.getString(it, "S" + count, entryPoint), "S" + count);
+            Assert.assertEquals(driver.getDate(it, "D" + count, entryPoint).getTime(), count);
             count++;
         }
         System.out.println("Basic fields exist");
