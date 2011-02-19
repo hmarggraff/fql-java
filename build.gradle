@@ -1,0 +1,20 @@
+subprojects {
+  group = 'org.fqlsource'
+  version = 1.0
+  repositories {
+    mavenCentral()
+  }
+
+  apply plugin: 'java'
+
+
+  dependencies {
+    testCompile 'org.testng:testng:5.14.2'
+  }
+
+  test {
+    useTestNG()
+  }
+}
+
+
