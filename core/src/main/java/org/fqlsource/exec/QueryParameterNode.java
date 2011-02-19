@@ -12,6 +12,7 @@ public class QueryParameterNode extends FqlNode
 
     public QueryParameterNode(FqlQueryParameter param)
     {
+        super(row, col);
         this.param = param;
     }
 

@@ -7,9 +7,9 @@ import org.fqlsource.data.FqlDataException;
  */
 public class IndexOpNode extends BinaryNode
 {
-    public IndexOpNode(FqlNodeInterface left, FqlNodeInterface right)
+    public IndexOpNode(FqlNodeInterface left, FqlNodeInterface right, int row, int col)
     {
-        super(left, right);
+        super(left, right, row, col);
     }
 
     public Object getValue(RunEnv env, Object from) throws FqlDataException

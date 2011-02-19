@@ -6,9 +6,9 @@ public abstract class BinaryNode extends UnaryNode
 {
     FqlNodeInterface left;
 
-    protected BinaryNode(FqlNodeInterface left, FqlNodeInterface right)
+    protected BinaryNode(FqlNodeInterface left, FqlNodeInterface right, int row, int col)
     {
-        super(right);
+        super(right, row, col);
         this.left = left;
     }
 }

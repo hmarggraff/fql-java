@@ -10,7 +10,7 @@ public class DotNode extends UnaryNode
 
     public DotNode(FqlNodeInterface left, String memberName)
     {
-        super(left);
+        super(left, row, col);
         this.memberName = memberName;
     }
 

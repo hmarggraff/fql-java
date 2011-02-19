@@ -12,6 +12,7 @@ public class ConstBooleanNode extends FqlNode
 
     private ConstBooleanNode(boolean boolConst)
     {
+        super(row, col);
         this.booleanVal = boolConst;
     }
 

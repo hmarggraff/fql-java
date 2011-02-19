@@ -10,6 +10,7 @@ public class ConstFloatNode extends FqlNode
 
     public ConstFloatNode(double floatVal)
     {
+        super(row, col);
         this.floatVal = floatVal;
     }
 

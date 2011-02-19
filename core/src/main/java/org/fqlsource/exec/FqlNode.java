@@ -22,13 +22,28 @@ import java.util.Set;
 
 public abstract class FqlNode implements FqlNodeInterface
 {
+    protected final int row;
+    protected final int col;
 
-    protected FqlNode()
+
+    protected FqlNode(int row, int col)
     {
+        this.row = row;
+        this.col = col;
     }
 
     public void collectVariables(final Set<String> set, final Set<Object> seen)
     {
         // nothing to do
+    }
+
+    public int getRow()
+    {
+        return row;
+    }
+
+    public int getCol()
+    {
+        return col;
     }
 }
