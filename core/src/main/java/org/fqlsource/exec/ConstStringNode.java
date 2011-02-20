@@ -8,7 +8,7 @@ public class ConstStringNode extends FqlNode
 {
     public final String stringVal;
 
-    public ConstStringNode(String stringConst)
+    public ConstStringNode(String stringConst, int row, int col)
     {
         super(row, col);
         this.stringVal = stringConst;

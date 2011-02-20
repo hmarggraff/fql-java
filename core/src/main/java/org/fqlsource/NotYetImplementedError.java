@@ -8,4 +8,8 @@ public class NotYetImplementedError extends Error
     {
         super(s);
     }
+
+    public NotYetImplementedError() {
+        
+    }
 }

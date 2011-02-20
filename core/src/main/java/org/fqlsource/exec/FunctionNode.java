@@ -9,7 +9,7 @@ public class FunctionNode extends FqlNode
     private final FqlBuiltinFunction function;
     private final FqlNodeInterface[] argNodes;
 
-    public FunctionNode(FqlBuiltinFunction function, FqlNodeInterface[] argNodes)
+    public FunctionNode(FqlBuiltinFunction function, FqlNodeInterface[] argNodes, int row, int col)
     {
 
         super(row, col);

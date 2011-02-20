@@ -6,11 +6,9 @@ import org.fqlsource.data.FqlDataException;
  */
 public class ConstBooleanNode extends FqlNode
 {
-    public static ConstBooleanNode TRUE = new ConstBooleanNode(true);
-    public static ConstBooleanNode FALSE = new ConstBooleanNode(false);
     public final boolean booleanVal;
 
-    private ConstBooleanNode(boolean boolConst)
+    public ConstBooleanNode(boolean boolConst, int row, int col)
     {
         super(row, col);
         this.booleanVal = boolConst;

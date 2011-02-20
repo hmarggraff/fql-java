@@ -30,7 +30,7 @@ public class FqlWhere
         {
             parameter = new FqlQueryParameter(paramName);
         }
-        return new QueryParameterNode(parameter);
+        return new QueryParameterNode(parameter, p.lex.getRow(), p.lex.getCol());
 
 
     }
@@ -83,7 +83,7 @@ public class FqlWhere
                     {
                         argNodes = null;
                     }
-                    left = new FunctionNode(builtin, argNodes);
+                    left = new FunctionNode(builtin, argNodes, p.lex.getRow(), p.lex.getCol());
                 }
                 else
                 {
@@ -95,24 +95,24 @@ public class FqlWhere
             {
                 if (p.connections.containsKey(symName))
                 {
-                    left = new ConnectionVarNode(symName);
+                    left = new ConnectionVarNode(symName, p.lex.getRow(), p.lex.getCol());
                 }
                 else
                 {
                     final IteratorVar it = p.entryPoints.get(symName);
                     if (it != null)
                     {
-                        left = new IteratorVarNode(it);
+                        left = new IteratorVarNode(it, p.lex.getRow(), p.lex.getCol());
                     }
                     else
                     {
-                        left = new AccessNode(p.findMember(symName));
+                        left = new AccessNode(p.findMember(symName), p.lex.getRow(), p.lex.getCol());
                     }
                 }
             }
             else
             {
-                left = new DotNode(left, symName);
+                left = new DotNode(left, symName, p.lex.getRow(), p.lex.getCol());
             }
             //after the symbol: check next operator
             if (tok == Lexer.Token.LBracket)
@@ -121,19 +121,19 @@ public class FqlWhere
                 tok = next();
                 if (tok == Lexer.Token.RBracket)
                 {
-                    left = new IndexOpNode(left, indexNode);
+                    left = new IndexOpNode(left, indexNode, p.lex.getRow(), p.lex.getCol());
                 }
                 else if (tok == Lexer.Token.Elipses)
                 {
                     tok = next();
                     if (tok == Lexer.Token.RBracket)
                     {
-                        left = new CollectionSliceNode(left, indexNode, null);
+                        left = new CollectionSliceNode(left, indexNode, null, p.lex.getRow(), p.lex.getCol());
                     }
                     else
                     {
                         FqlNodeInterface upperBound = parseQuestion();
-                        left = new CollectionSliceNode(left, indexNode, upperBound);
+                        left = new CollectionSliceNode(left, indexNode, upperBound, p.lex.getRow(), p.lex.getCol());
                         tok = next();
                         if (tok != Lexer.Token.RBracket)
                         {
@@ -182,32 +182,34 @@ public class FqlWhere
     }
 
 
-
     FqlNodeInterface parseCompare() throws FqlParseException
     {
         FqlNodeInterface l = parsePlus();
         Token t = next();
         if (t != Token.Less && t != Token.LessOrEqual && t != Token.Greater && t != Token.GreaterOrEqual
-          && t != Token.Equal && t != Token.Unequal && t != Token.Like && t != Token.Matches)
+              && t != Token.Equal && t != Token.Unequal && t != Token.Like && t != Token.Matches)
             return pushBack(l);
         FqlNodeInterface r = parsePlus();
 
+        final int row = p.lex.getRow();
+        final int col = p.lex.getCol();
         if (t == Token.Less)
-            return new LessNode(commonType, l, r);
+            return new LessNode(l, r, row, col);
         else if (t == Token.LessOrEqual)
-            return new LessOrEqualNode(commonType, l, r);
+            return new LessOrEqualNode(l, r, row, col);
         else if (t == Token.Greater)
-            return new GreaterNode(commonType, l, r);
+            return new GreaterNode(l, r, row, col);
         else if (t == Token.GreaterOrEqual)
-            return new GreaterOrEqualNode(commonType, l, r);
+            return new GreaterOrEqualNode(l, r, row, col);
         else if (t == Token.Equal)
-                return new EqualsNode(commonType, l, r);
+            return new EqualsNode(l, r, row, col);
         else if (t == Token.Unequal)
-                return new UnequalsNode(commonType, l, r);
+            return new NotEqualNode(l, r, row, col);
         else if (t == Token.Like)
-            return new LikeNode(l, r);
+            return new LikeNode(l, r, row, col);
         else if (t == Token.Matches)
-            return new MatchesNode(l, r);
+            return new MatchesNode(l, r, row, col);
+        throw new FqlAssertionError("Could not compare with token " + t, row, col);
     }
 
     private FqlNodeInterface parsePlus()
@@ -225,27 +227,27 @@ public class FqlWhere
     {
         if (t == Lexer.Token.ConstInteger)
         {
-            return new ConstIntNode(p.lex.intVal);
+            return new ConstIntNode(p.lex.intVal, p.lex.getRow(), p.lex.getCol());
         }
         else if (t == Lexer.Token.ConstFloat)
         {
-            return new ConstFloatNode(p.lex.floatVal);
+            return new ConstFloatNode(p.lex.floatVal, p.lex.getRow(), p.lex.getCol());
         }
         else if (t == Lexer.Token.String)
         {
-            return new ConstStringNode(p.lex.stringVal);
+            return new ConstStringNode(p.lex.stringVal, p.lex.getRow(), p.lex.getCol());
         }
         else if (t == Lexer.Token.True)
         {
-            return ConstBooleanNode.TRUE;
+            return new ConstBooleanNode(true, p.lex.getRow(), p.lex.getCol());
         }
         else if (t == Lexer.Token.False)
         {
-            return ConstBooleanNode.FALSE;
+            return new ConstBooleanNode(false, p.lex.getRow(), p.lex.getCol());
         }
         else if (t == Lexer.Token.Nil)
         {
-            return new NilNode();
+            return new NilNode(p.lex.getRow(), p.lex.getCol());
         }
         else if (t == Lexer.Token.LBrace)
         {
@@ -276,7 +278,7 @@ public class FqlWhere
         if (t == Lexer.Token.As)
         {
             final String className = p.lex.nameVal;
-            return new TypeCastNode(left, className);
+            return new TypeCastNode(left, className, p.lex.getRow(), p.lex.getCol());
         }
         else
         {

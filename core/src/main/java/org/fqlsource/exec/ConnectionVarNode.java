@@ -6,7 +6,7 @@ public class ConnectionVarNode extends FqlNode
 {
     protected final String connectionName;
 
-    public ConnectionVarNode(String connectionName)
+    public ConnectionVarNode(String connectionName, int row, int col)
     {
         super(row, col);
         this.connectionName = connectionName;

@@ -16,12 +16,13 @@ public class FromNode implements FqlStatement
     {
         connectionName = connection;
         this.datasetName = datasetName;
-        iteratorName = iteratorName;
+        this.iteratorName = iteratorName;
     }
 
     public FqlEntryPoint execute(RunEnv env, Iterator precedent) throws FqlDataException
     {
         FqlConnection fqlConnection = env.connections.get(connectionName);
+        @SuppressWarnings({"unchecked"})
         FqlEntryPoint entryPoint = fqlConnection.getDriver().getEntryPoint(datasetName, fqlConnection);
         return entryPoint;
     }

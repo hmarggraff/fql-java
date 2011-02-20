@@ -8,9 +8,9 @@ import java.math.BigInteger;
 
 /**
  */
-public class LessNode extends BinaryNode
+public class GreaterNode extends BinaryNode
 {
-    public LessNode(FqlNodeInterface left, FqlNodeInterface right, int row, int col)
+    public GreaterNode(FqlNodeInterface left, FqlNodeInterface right, int row, int col)
     {
         super(left, right, row, col);
     }
@@ -26,17 +26,17 @@ public class LessNode extends BinaryNode
         else if (leftValue instanceof Number)
         {
             if (!(rightValue instanceof Number))
-                throw new FqlDataException("Left operand of < is a number, but right operand is not. (" + rightValue.getClass() + ")", this);
+                throw new FqlDataException("Left operand of > is a number, but right operand is not. (" + rightValue.getClass() + ")", this);
             if (leftValue instanceof Float || leftValue instanceof Double || rightValue instanceof Float || rightValue instanceof Double)
             {
                 double rNum = ((Number) rightValue).doubleValue();
-                return (((Number) leftValue).doubleValue()) < rNum;
+                return (((Number) leftValue).doubleValue()) > rNum;
             }
             else if (leftValue instanceof Long || leftValue instanceof Integer || leftValue instanceof Byte || leftValue instanceof Short
                   || rightValue instanceof Long || rightValue instanceof Integer || rightValue instanceof Byte || rightValue instanceof Short)
             {
                 long rNum = ((Number) rightValue).longValue();
-                return ((Number) leftValue).longValue() < rNum;
+                return ((Number) leftValue).longValue() > rNum;
             }
             else if (leftValue instanceof BigInteger || leftValue instanceof BigDecimal || rightValue instanceof BigInteger || rightValue instanceof BigDecimal)
             {
@@ -47,8 +47,8 @@ public class LessNode extends BinaryNode
         {
             String lv = (String) leftValue;
             String rv = (String) rightValue;
-            return lv.compareTo(rv) < 0;
+            return lv.compareTo(rv) > 0;
         }
-        throw new FqlDataException("Comparing classes " + leftValue.getClass() + " with " + rightValue.getClass(), this);
+        throw new FqlDataException("Comparing (>) classes " + leftValue.getClass() + " with " + rightValue.getClass(), this);
     }
 }

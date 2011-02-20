@@ -10,7 +10,7 @@ public class IteratorVarNode extends FqlNode
 {
     IteratorVar it;
 
-    public IteratorVarNode(IteratorVar it)
+    public IteratorVarNode(IteratorVar it, int row, int col)
     {
         super(row, col);
         this.it = it;

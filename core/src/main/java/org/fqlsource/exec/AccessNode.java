@@ -8,7 +8,7 @@ public class AccessNode extends FqlNode
 {
     private final String member;
 
-    public AccessNode(String member)
+    public AccessNode(String member, int row, int col)
     {
         super(row, col);
         this.member = member;

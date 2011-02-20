@@ -7,9 +7,7 @@ import org.fqlsource.data.FqlDataException;
 public class NilNode extends FqlNode
 {
 
-    public static NilNode instance = new NilNode();
-
-    public NilNode()
+    public NilNode(int row, int col)
     {
         super(row, col);
     }
@@ -19,8 +17,4 @@ public class NilNode extends FqlNode
         return null;
     }
 
-    private boolean isClass()
-    {
-        return true;
-    }
 }
