@@ -3,16 +3,23 @@ package org.fqlsource.fqltest.mockdriver;
 import org.fqlsource.mockdriver.MockDriver;
 import org.fqlsource.mockdriver.MockDriverConnection;
 import org.fqlsource.parser.FqlParser;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.util.Iterator;
 import java.util.Properties;
 
 public class MockDriverQueriesTest
 {
+    /**
+     * Tests the minimal query against the mock driver
+     * @throws Exception
+     */
     @Test
     public void testFrom() throws Exception
     {
+        /**
+         * The test query: generates and returns 5 objects.
+         */
         String q = "from e5";
         Properties p = new Properties();
         p.put("driver", "org.fqlsource.mockdriver.MockDriver");

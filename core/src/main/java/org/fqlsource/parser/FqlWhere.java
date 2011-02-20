@@ -50,7 +50,7 @@ public class FqlWhere
                 while (t1 != Lexer.Token.RBrace)
                 {
                     p.lex.pushBack();
-                    FqlNodeInterface arg = parseQuestion();
+                    FqlNodeInterface arg = parseAs();
                     argList.add(arg);
                     t1 = next();
                     if (t1 == Lexer.Token.RBrace)
@@ -117,7 +117,7 @@ public class FqlWhere
             //after the symbol: check next operator
             if (tok == Lexer.Token.LBracket)
             {
-                FqlNodeInterface indexNode = parseQuestion();
+                FqlNodeInterface indexNode = parseAs();
                 tok = next();
                 if (tok == Lexer.Token.RBracket)
                 {
@@ -132,7 +132,7 @@ public class FqlWhere
                     }
                     else
                     {
-                        FqlNodeInterface upperBound = parseQuestion();
+                        FqlNodeInterface upperBound = parseAs();
                         left = new CollectionSliceNode(left, indexNode, upperBound, p.lex.getRow(), p.lex.getCol());
                         tok = next();
                         if (tok != Lexer.Token.RBracket)
@@ -157,7 +157,7 @@ public class FqlWhere
 
     FqlNodeInterface parseQuestion() throws FqlParseException
     {
-        return parseNot();
+        return parseCompare();
     }
 
     FqlNodeInterface parseNot() throws FqlParseException
@@ -165,19 +165,20 @@ public class FqlWhere
         Token atToken = next();
         if (atToken == Token.Not)
         {
-            return new NotNode(parseAtom(next()), p.lex.getRow(), p.lex.getCol());
+            return new NotNode(parseIs(), p.lex.getRow(), p.lex.getCol());
         }
         else if (atToken == Token.Minus)
         {
-            return new UnaryMinusNode(parseAtom(next()), p.lex.getRow(), p.lex.getCol());
+            return new UnaryMinusNode(parseIs(), p.lex.getRow(), p.lex.getCol());
         }
         else if (atToken == Token.Plus) // unary plus
         {
-            return parseAtom(next());
+            return parseIs();
         }
         else
         {
-            return parseAtom(atToken);
+            p.lex.pushBack();
+            return parseAtom();
         }
     }
 
@@ -189,10 +190,10 @@ public class FqlWhere
         if (t != Token.Less && t != Token.LessOrEqual && t != Token.Greater && t != Token.GreaterOrEqual
               && t != Token.Equal && t != Token.Unequal && t != Token.Like && t != Token.Matches)
             return pushBack(l);
-        FqlNodeInterface r = parsePlus();
-
         final int row = p.lex.getRow();
         final int col = p.lex.getCol();
+        FqlNodeInterface r = parsePlus();
+
         if (t == Token.Less)
             return new LessNode(l, r, row, col);
         else if (t == Token.LessOrEqual)
@@ -207,14 +208,62 @@ public class FqlWhere
             return new NotEqualNode(l, r, row, col);
         else if (t == Token.Like)
             return new LikeNode(l, r, row, col);
-        else if (t == Token.Matches)
+        else // if (t == Token.Matches)
             return new MatchesNode(l, r, row, col);
-        throw new FqlAssertionError("Could not compare with token " + t, row, col);
     }
 
-    private FqlNodeInterface parsePlus()
+    private FqlNodeInterface parseIs() throws FqlParseException
     {
-        throw new NotYetImplementedError();
+        FqlNodeInterface left = parseAtom();
+        final Lexer.Token t = next();
+
+        if (t == Lexer.Token.Is)
+        {
+            final String className = p.lex.nameVal;
+            return new InstanceofNode(left, className, p.lex.getRow(), p.lex.getCol());
+        }
+        else
+        {
+            p.lex.pushBack();
+            return left;
+        }
+    }
+
+    FqlNodeInterface parseMultiply() throws FqlParseException
+    {
+        FqlNodeInterface l = parseNot();
+        for (; ;)
+        {
+            Token t = next();
+            if (t != Token.Mod && t != Token.Star && t != Token.Slash)
+                return pushBack(l);
+            final int row = p.lex.getRow();
+            final int col = p.lex.getCol();
+            FqlNodeInterface r = parseNot();
+            if (t == Token.Mod)
+                l = new ModuloNode(l, r, row, col);
+            else if (t == Token.Star)
+                l = new MultiplyNode(l, r, row, col);
+            else
+                l = new DivideNode(l, r, row, col);
+        }
+    }
+
+
+    FqlNodeInterface parsePlus() throws FqlParseException
+    {
+        FqlNodeInterface l = parseMultiply();
+        for (; ;)
+        {
+            Token t = next();
+            if (t != Token.Plus && t != Token.Minus)
+                return pushBack(l);
+            FqlNodeInterface r = parseMultiply();
+            if (t == Token.Plus)
+                l = new PlusNode(l, r, p.lex.row, p.lex.col);
+            else
+                l = new MinusNode(l, r, p.lex.row, p.lex.col);
+        }
     }
 
     private FqlNodeInterface pushBack(FqlNodeInterface l)
@@ -223,8 +272,9 @@ public class FqlWhere
         return l;
     }
 
-    protected FqlNodeInterface parseAtom(Token t) throws FqlParseException
+    protected FqlNodeInterface parseAtom() throws FqlParseException
     {
+        Token t = next();
         if (t == Lexer.Token.ConstInteger)
         {
             return new ConstIntNode(p.lex.intVal, p.lex.getRow(), p.lex.getCol());
@@ -251,7 +301,10 @@ public class FqlWhere
         }
         else if (t == Lexer.Token.LBrace)
         {
-            return parseQuestion();
+            final FqlNodeInterface node = parseAs();
+            if (next() != Token.RBrace)
+                throw new FqlParseException("Missing )", p);
+            return node;
         }
         else if (t == Lexer.Token.Name)
         {
@@ -270,8 +323,6 @@ public class FqlWhere
 
     FqlNodeInterface parseAs() throws FqlParseException
     {
-        parseQuestion();
-
         FqlNodeInterface left = parseQuestion();
         final Lexer.Token t = next();
 

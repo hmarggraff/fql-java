@@ -53,8 +53,6 @@ public class Lexer
         Max,
         Avg,
         Intersect,
-        Union,
-        Except,
         Element,
         LBrace,
         RBrace,
@@ -86,7 +84,7 @@ public class Lexer
         As,
         Connect,
         Open,
-        Matches,
+        Matches, Is,
     }
 
     protected static Hashtable<String, Token> keywords = new Hashtable<String, Token>();

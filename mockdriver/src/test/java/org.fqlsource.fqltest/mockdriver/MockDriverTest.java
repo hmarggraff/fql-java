@@ -1,7 +1,7 @@
 package org.fqlsource.fqltest.mockdriver;
 
-import org.testng.annotations.Test;
 
+import junit.framework.Assert;
 import org.fqlsource.data.FqlDataException;
 import org.fqlsource.mockdriver.MockDriver;
 import org.fqlsource.mockdriver.MockDriverConnection;
@@ -9,20 +9,22 @@ import org.fqlsource.mockdriver.MockEntryPoint;
 
 import java.util.Properties;
 
-import org.testng.Assert;
+import org.junit.Test;
 
 /**
  * Unit test for simple MockDriver.
  */
-@Test
+
 public class MockDriverTest
 {
     private String defaultEntryPoint = "nowhere";
 
 
     /**
-     * Rigourous Test :-)
+     * Tests if getEntryPoint properly returns the entry point of the mock driver
+     * @throws FqlDataException Thrown if entry point access fails in driver
      */
+    @Test
     public void testApp() throws FqlDataException
     {
         defaultEntryPoint = "nowhere";
@@ -41,6 +43,10 @@ public class MockDriverTest
         return ep;
     }
 
+    /**
+     * Tests if getEntryPoint properly detects and signals a non existing entry point
+     */
+    @Test
     public void testApp2()
     {
         try
@@ -56,6 +62,11 @@ public class MockDriverTest
         }
     }
 
+    /**
+     * Tests if the mock driver returns data with the expected generated fields.
+     * @throws FqlDataException
+     */
+    @Test
     public void testAppFields() throws FqlDataException
     {
         final MockEntryPoint entryPoint = getEntryPoint(defaultEntryPoint);

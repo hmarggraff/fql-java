@@ -1,20 +1,28 @@
 subprojects {
   group = 'org.fqlsource'
   version = 1.0
+  apply plugin: 'java'
+  sourceCompatibility = 1.6
+  targetCompatibility = 1.6
+
   repositories {
     mavenCentral()
   }
 
-  apply plugin: 'java'
+
 
 
   dependencies {
-    testCompile 'org.testng:testng:5.14.2'
+    testCompile 'junit:junit:4.8.2'
   }
 
-  test {
-    useTestNG()
+task libs4Idea << {
+  copy {
+    from configurations.testCompile
+    into 'lib'
   }
+}
+
 }
 
 

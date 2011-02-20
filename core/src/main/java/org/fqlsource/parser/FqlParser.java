@@ -123,7 +123,7 @@ public class FqlParser
 
     private void parseWhere() throws FqlParseException {
         FqlWhere fqlWhere = new FqlWhere(this);
-        fqlWhere.parseQuestion();
+        fqlWhere.parseAs();
 
     }
 

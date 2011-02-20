@@ -13,6 +13,14 @@ public class MatchesNode extends BinaryNode
         super(left, right, row, col);
     }
 
+    /**
+     *
+     * @param env The run time environment object
+     * @param from  The parent data object
+     * @return a Boolean: true if the pattern matchges the string using javas standard regexp logic
+     * @throws FqlDataException
+     */
+
     public Object getValue(RunEnv env, Object from) throws FqlDataException
     {
         Object leftValue = left.getValue(env, from);
