@@ -105,4 +105,9 @@ public class MockDriver implements FqlDriver<MockDriverConnection, MockEntryPoin
             throw new FqlDataException("Mockdriver failed to parse Date from fieldname. Should be 'D'+ value", fex);
         }
     }
+
+    public void close()
+    {
+        // nothing
+    }
 }

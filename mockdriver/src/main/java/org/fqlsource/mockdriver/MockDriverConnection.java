@@ -1,9 +1,9 @@
 package org.fqlsource.mockdriver;
 
 
-import org.fqlsource.data.FqlConnection;
+import org.fqlsource.data.DefaultFqlConnection;
 
-public class MockDriverConnection extends FqlConnection<MockDriver>
+public class MockDriverConnection extends DefaultFqlConnection<MockDriver>
 {
     private final int count;
 
@@ -17,4 +17,5 @@ public class MockDriverConnection extends FqlConnection<MockDriver>
     {
         return count;
     }
+
 }

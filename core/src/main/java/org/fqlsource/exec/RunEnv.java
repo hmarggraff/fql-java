@@ -1,6 +1,6 @@
 package org.fqlsource.exec;
 
-import org.fqlsource.data.FqlConnection;
+import org.fqlsource.data.DefaultFqlConnection;
 import org.fqlsource.data.FqlQueryParameter;
 
 import java.util.HashMap;
@@ -8,9 +8,9 @@ import java.util.Map;
 
 public class RunEnv
 {
-    FqlConnection connection;
+    DefaultFqlConnection connection;
     public final Map<String, Object> parameterValues = new HashMap<String, Object>();
-    public final HashMap<String, FqlConnection> connections = new HashMap<String, FqlConnection>();
+    public final HashMap<String, DefaultFqlConnection> connections = new HashMap<String, DefaultFqlConnection>();
 
     public Object getVariable(FqlQueryParameter name)
     {

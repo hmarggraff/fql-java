@@ -1,7 +1,6 @@
 package org.fqlsource.parser;
 
-import org.fqlsource.NotYetImplementedError;
-import org.fqlsource.data.FqlConnection;
+import org.fqlsource.data.DefaultFqlConnection;
 import org.fqlsource.data.FqlDataException;
 import org.fqlsource.data.FqlQueryParameter;
 import org.fqlsource.exec.*;
@@ -31,7 +30,7 @@ public class FqlParser
         lex = new Lexer(txt);
     }
 
-    public static Iterator runQuery(String queryText, FqlConnection conn) throws FqlParseException, FqlDataException
+    public static Iterator runQuery(String queryText, DefaultFqlConnection conn) throws FqlParseException, FqlDataException
     {
         final FqlParser parser = new FqlParser(queryText);
         final List<FqlStatement> fqlStatements = parser.parseClauses();

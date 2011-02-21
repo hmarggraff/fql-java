@@ -2,18 +2,10 @@ package org.fqlsource.data;
 
 /**
  */
-public class FqlConnection<FqlDriverType extends FqlDriver>
+public interface FqlConnection<FqlDriverType extends FqlDriver>
 {
-    FqlDriverType driver;
 
-    public FqlConnection(FqlDriverType driver)
-    {
-        this.driver = driver;
-    }
+    public FqlDriverType getDriver();
 
-    public FqlDriverType getDriver()
-    {
-        return driver;
-    }
-
+    public void close();
 }

@@ -157,8 +157,39 @@ public class FqlWhere
 
     FqlNodeInterface parseQuestion() throws FqlParseException
     {
-        return parseCompare();
+        FqlNodeInterface conditionNode = parseOr();
+        Token atToken = next();
+        if (atToken != Token.Question)
+            return pushBack(conditionNode);
+        FqlNodeInterface trueBranchNode = parseOr();
+        atToken = next();
+        if (atToken != Token.Colon)
+            throw new FqlParseException("Colon expected", p);
+        FqlNodeInterface falseBranchNode = parseOr();
+
+        return new QuestionNode(conditionNode,trueBranchNode, falseBranchNode, conditionNode.getRow(), conditionNode.getCol());
     }
+
+    FqlNodeInterface parseOr() throws FqlParseException
+    {
+        FqlNodeInterface l = parseAnd();
+        Token atToken = next();
+        if (atToken != Token.Or)
+            return pushBack(l);
+        FqlNodeInterface r = parseAnd();
+        return new OrNode(l,r, l.getRow(), l.getCol());
+    }
+    FqlNodeInterface parseAnd() throws FqlParseException
+    {
+        FqlNodeInterface l = parseCompare();
+        Token atToken = next();
+        if (atToken != Token.And)
+            return pushBack(l);
+        FqlNodeInterface r = parseCompare();
+        return new AndNode(l,r, p.lex.getRow(), p.lex.getCol());
+    }
+
+
 
     FqlNodeInterface parseNot() throws FqlParseException
     {

@@ -6,7 +6,7 @@ import java.util.Properties;
 
 /**
  */
-public interface FqlDriver<ConnectionType extends FqlConnection, EntryPointType extends FqlEntryPoint>
+public interface FqlDriver<ConnectionType extends DefaultFqlConnection, EntryPointType extends FqlEntryPoint>
 {
     ConnectionType open(Properties props) throws FqlDataException;
 
@@ -23,5 +23,7 @@ public interface FqlDriver<ConnectionType extends FqlConnection, EntryPointType 
     boolean getBoolean(Object parent, String fieldName, EntryPointType entryPoint) throws FqlDataException;
 
     Date getDate(Object parent, String fieldName, EntryPointType entryPoint) throws FqlDataException;
+
+    void close();
 }
 

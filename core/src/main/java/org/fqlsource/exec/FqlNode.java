@@ -18,6 +18,8 @@
 package org.fqlsource.exec;
 
 
+import org.fqlsource.data.FqlDataException;
+
 import java.util.Set;
 
 public abstract class FqlNode implements FqlNodeInterface
@@ -46,4 +48,14 @@ public abstract class FqlNode implements FqlNodeInterface
     {
         return col;
     }
+
+    protected void checkClassOf(Object val, Class clazz, final String side, final String operator) throws FqlDataException
+    {
+        if (!clazz.isInstance(val)){
+            String name = clazz.getName();
+            name = name.substring(name.lastIndexOf('.'));
+            throw new FqlDataException(side + " operand of " + operator + " must be a " + name + ", but is a: \"" + val.getClass() + "\"", this);
+        }
+    }
+
 }

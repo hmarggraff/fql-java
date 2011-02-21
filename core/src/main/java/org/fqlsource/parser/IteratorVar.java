@@ -1,21 +1,21 @@
 package org.fqlsource.parser;
 
-import org.fqlsource.data.FqlConnection;
+import org.fqlsource.data.DefaultFqlConnection;
 import org.fqlsource.util.NamedImpl;
 
 public class IteratorVar extends NamedImpl
 {
 
-    FqlConnection connection;
+    DefaultFqlConnection connection;
 
     Object current;
 
-    public FqlConnection getConnection()
+    public DefaultFqlConnection getConnection()
     {
         return connection;
     }
 
-    public void setConnection(FqlConnection connection)
+    public void setConnection(DefaultFqlConnection connection)
     {
         this.connection = connection;
     }

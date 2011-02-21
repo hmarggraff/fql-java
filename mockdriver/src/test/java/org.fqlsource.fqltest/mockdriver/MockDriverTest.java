@@ -6,10 +6,11 @@ import org.fqlsource.data.FqlDataException;
 import org.fqlsource.mockdriver.MockDriver;
 import org.fqlsource.mockdriver.MockDriverConnection;
 import org.fqlsource.mockdriver.MockEntryPoint;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Properties;
-
-import org.junit.Test;
 
 /**
  * Unit test for simple MockDriver.
@@ -18,10 +19,29 @@ import org.junit.Test;
 public class MockDriverTest
 {
     private String defaultEntryPoint = "nowhere";
+    MockDriver mockDriver;
+    MockDriverConnection conn;
 
+    @Before
+    void openConnction() throws FqlDataException
+    {
+        Properties p = new Properties();
+        p.put("driver", "org.fqlsource.mockdriver.MockDriver");
+        p.put("count", "1");
+        mockDriver = new MockDriver();
+        conn = mockDriver.open(p);
+    }
+
+    @After
+    void closeConnection()
+    {
+        conn.close();
+        mockDriver.close();
+    }
 
     /**
      * Tests if getEntryPoint properly returns the entry point of the mock driver
+     *
      * @throws FqlDataException Thrown if entry point access fails in driver
      */
     @Test
@@ -34,36 +54,23 @@ public class MockDriverTest
 
     private MockEntryPoint getEntryPoint(final String entryPointName) throws FqlDataException
     {
-        Properties p = new Properties();
-        p.put("driver", "org.fqlsource.mockdriver.MockDriver");
-        p.put("count", "1");
-        final MockDriver mockDriver = new MockDriver();
-        final MockDriverConnection open = mockDriver.open(p);
-        final MockEntryPoint ep = mockDriver.getEntryPoint(entryPointName, open);
+        final MockEntryPoint ep = mockDriver.getEntryPoint(entryPointName, conn);
         return ep;
     }
 
     /**
      * Tests if getEntryPoint properly detects and signals a non existing entry point
      */
-    @Test
-    public void testApp2()
+    @Test(expected = FqlDataException.class)
+    public void testApp2() throws FqlDataException
     {
-        try
-        {
-            getEntryPoint("fail");
-            Assert.fail("Entry point should not exist");
-        }
-        catch (FqlDataException e)
-        {
-            final String message = e.getMessage();
-            System.out.println("Expected exception: " + message);
-            return;
-        }
+        getEntryPoint("fail");
+        Assert.fail("Entry point should not exist");
     }
 
     /**
      * Tests if the mock driver returns data with the expected generated fields.
+     *
      * @throws FqlDataException
      */
     @Test
