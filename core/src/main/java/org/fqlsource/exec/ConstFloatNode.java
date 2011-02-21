@@ -6,17 +6,17 @@ import org.fqlsource.data.FqlDataException;
  */
 public class ConstFloatNode extends FqlNode
 {
-    public final double floatVal;
+    public final double doubleVal;
 
-    public ConstFloatNode(double floatVal, int row, int col)
+    public ConstFloatNode(double doubleVal, int row, int col)
     {
         super(row, col);
-        this.floatVal = floatVal;
+        this.doubleVal = doubleVal;
     }
 
     public Object getValue(RunEnv env, Object from) throws FqlDataException
     {
-        return this;
+        return doubleVal;
     }
 
     private boolean isFloat()

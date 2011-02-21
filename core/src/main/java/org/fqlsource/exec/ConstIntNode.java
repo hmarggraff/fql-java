@@ -16,7 +16,7 @@ public class ConstIntNode extends FqlNode
 
     public Object getValue(RunEnv env, Object from) throws FqlDataException
     {
-        return this;
+        return intVal;
     }
 
     private boolean isInteger()

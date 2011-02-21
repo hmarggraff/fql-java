@@ -16,7 +16,7 @@ public class ConstBooleanNode extends FqlNode
 
     public Object getValue(RunEnv env, Object from) throws FqlDataException
     {
-        return this;
+        return booleanVal;
     }
 
     private boolean isBoolean()
