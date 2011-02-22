@@ -23,4 +23,9 @@ public class ConstIntNode extends FqlNode
     {
         return true;
     }
+
+    public long getIntVal()
+    {
+        return intVal;
+    }
 }

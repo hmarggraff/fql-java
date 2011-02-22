@@ -7,6 +7,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.fqlsource.exec.*;
 
+import java.util.*;
+
 /**
  * Unit test for simple MockDriver.
  */
@@ -17,12 +19,20 @@ public class NodesTest
     ConstIntNode in0;
     private ConstIntNode in1;
     private ConstIntNode in2;
+    private ConstIntNode in6;
+    private ConstIntNode in9;
     private ConstFloatNode fn2;
     private ConstBooleanNode bnt;
     private ConstBooleanNode bnf;
     private NilNode nilNode;
     private ConstStringNode sne;
     private ConstStringNode sng;
+    private String[] stringArray;
+    private List<String> listVal;
+    private SortedSet<String> setVal;
+    TestValueNode arrayNode;
+    TestValueNode listNode;
+    TestValueNode setNode;
 
     @Before
     public void openConnction() throws FqlDataException
@@ -30,6 +40,8 @@ public class NodesTest
         in0 = new ConstIntNode(0,1,1);
         in1 = new ConstIntNode(1,1,1);
         in2 = new ConstIntNode(2,1,1);
+        in6 = new ConstIntNode(6,1,1);
+        in9 = new ConstIntNode(9,1,1);
         fn2 = new ConstFloatNode(2.0,1,1);
         bnt = new ConstBooleanNode(true,1,1);
         bnf = new ConstBooleanNode(false,1,1);
@@ -37,7 +49,12 @@ public class NodesTest
         sne = new ConstStringNode("",1,1);
         sng = new ConstStringNode("Germering",1,1);
         env = new RunEnv();
-
+        stringArray = new String[]{"a", "b", "c", "d", "e", "f"};
+        arrayNode = new TestValueNode(stringArray);
+        listVal = Arrays.asList(stringArray);
+        listNode = new TestValueNode(listVal);
+        setVal = new TreeSet<String>(listVal);
+        setNode = new TestValueNode(setVal);
     }
 
     /**
@@ -74,6 +91,35 @@ public class NodesTest
         AndNode ann2 = new AndNode(nilNode, nilNode, 1,1);
         Assert.assertFalse(((Boolean) ann2.getValue(env, null)).booleanValue());
 
+        for (FqlNode node: new FqlNode[] {arrayNode, listNode, setNode})
+        {
+            System.out.println(node.getValue(env,null).getClass().getName());
+            checkCollectionSlice(node, in0, in2, 2);
+            checkCollectionSlice(node, in1, in2, 1);
+            checkCollectionSlice(node, in0, in6, 6);
+            checkCollectionSlice(node, in1, in9, 5);
+            checkCollectionSlice(node, in0, in0, 0);
+            checkCollectionSlice(node, in1, in0, 0);
+            checkCollectionSlice(node, in6, in9, 0);
+        }
+    }
+
+    private void checkCollectionSlice(final FqlNode arrayVal, final ConstIntNode start, final ConstIntNode end, int len)
+          throws FqlDataException
+    {
+        CollectionSliceNode csn = new CollectionSliceNode(arrayVal, start, end, 1,1);
+        final Object csVal = csn.getValue(env, null);
+        if ((csVal == null && len == 0))
+            return; // no elements: nothing more to check
+        Assert.assertTrue(csVal instanceof Iterable);
+        int cnt = 0;
+        Iterable<String> itVal = (Iterable<String>) csVal;
+        for (String s : itVal)
+        {
+            Assert.assertEquals(stringArray[(int)start.getIntVal() + cnt], s);
+            cnt++;
+        }
+        Assert.assertEquals(len, cnt);
     }
 
 
@@ -83,6 +129,8 @@ public class NodesTest
     @Test(expected = FqlDataException.class)
     public void testExceptions() throws FqlDataException
     {
+        AndNode ann2 = new AndNode(in1, nilNode, 1,1);
+        ann2.getValue(env,null);
         Assert.fail("Exception not thrown");
     }
 }
