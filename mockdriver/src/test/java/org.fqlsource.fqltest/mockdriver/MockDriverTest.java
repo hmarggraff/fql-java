@@ -18,7 +18,6 @@ import java.util.Properties;
 
 public class MockDriverTest
 {
-    private String defaultEntryPoint = "nowhere";
     MockDriver mockDriver;
     MockDriverConnection conn;
 
@@ -47,8 +46,8 @@ public class MockDriverTest
     @Test
     public void testApp() throws FqlDataException
     {
-        defaultEntryPoint = "nowhere";
-        Assert.assertNotNull(getEntryPoint(defaultEntryPoint));
+        MockEntryPoint.defaultEntryPointName = "nowhere";
+        Assert.assertNotNull(getEntryPoint(MockEntryPoint.defaultEntryPointName));
         //assertTrue(true);
     }
 
@@ -76,7 +75,7 @@ public class MockDriverTest
     @Test
     public void testAppFields() throws FqlDataException
     {
-        final MockEntryPoint entryPoint = getEntryPoint(defaultEntryPoint);
+        final MockEntryPoint entryPoint = getEntryPoint(MockEntryPoint.defaultEntryPointName);
         final MockDriver driver = entryPoint.getConnection().getDriver();
 
         int count = 1;

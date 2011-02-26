@@ -7,6 +7,7 @@ import java.util.Iterator;
 
 public class MockEntryPoint implements FqlEntryPoint<MockDriverConnection>
 {
+    public static String defaultEntryPointName = "nowhere";
     final int count;
     private MockDriverConnection connection;
 

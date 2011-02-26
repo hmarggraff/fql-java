@@ -4,7 +4,7 @@ package org.fqlsource.data;
  */
 public class DefaultFqlConnection<FqlDriverType extends FqlDriver> implements FqlConnection<FqlDriverType>
 {
-    FqlDriverType driver;
+    protected FqlDriverType driver;
 
     public DefaultFqlConnection(FqlDriverType driver)
     {
@@ -20,4 +20,10 @@ public class DefaultFqlConnection<FqlDriverType extends FqlDriver> implements Fq
     {
         //nothing to do
     }
+    public FqlEntryPoint getEntryPoint(String name) throws FqlDataException
+    {
+        return driver.getEntryPoint(name, this);
+    }
+
+
 }

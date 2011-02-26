@@ -1,16 +1,18 @@
 package org.fqlsource.parser;
 
 import org.fqlsource.data.DefaultFqlConnection;
+import org.fqlsource.data.FqlConnection;
 import org.fqlsource.util.NamedImpl;
 
 public class IteratorVar extends NamedImpl
 {
 
-    DefaultFqlConnection connection;
+    FqlConnection connection;
+    int entryPointIndex; // key for fast lookup in RunEnv
 
     Object current;
 
-    public DefaultFqlConnection getConnection()
+    public FqlConnection getConnection()
     {
         return connection;
     }

@@ -84,7 +84,7 @@ public class Lexer
         As,
         Connect,
         Open,
-        Matches, Is,
+        Matches, Is, Use,
     }
 
     protected static Hashtable<String, Token> keywords = new Hashtable<String, Token>();
@@ -120,6 +120,7 @@ public class Lexer
         keywords.put("from", Token.From);
         keywords.put("where", Token.Where);
         keywords.put("matches", Token.Matches);
+        keywords.put("use", Token.Use);
     }
 
     public Lexer(String expression)

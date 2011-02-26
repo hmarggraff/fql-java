@@ -7,6 +7,7 @@ import org.fqlsource.data.FqlDataException;
 public class DotNode extends UnaryNode
 {
     protected String memberName;
+    int connectionKey; // the key in the array of open connections
 
     public DotNode(FqlNodeInterface left, String memberName, int row, int col)
     {
