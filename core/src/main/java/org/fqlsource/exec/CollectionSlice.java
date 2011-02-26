@@ -84,7 +84,7 @@ public class CollectionSlice implements Iterable
 
         public void remove()
         {
-            throw new FqlAssertionError("Remove from collections not supported", row, col);
+            throw new FqlAssertionError("Remove from collections will not be supported", row, col);
         }
     }
 
