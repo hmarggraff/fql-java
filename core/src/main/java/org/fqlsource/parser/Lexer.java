@@ -90,8 +90,10 @@ public class Lexer
     protected static Hashtable<String, Token> keywords = new Hashtable<String, Token>();
     protected Token currToken;
     protected int pos;
-    protected int row;
+    protected int row = 1;
     protected int col;
+    protected int lastRowLen;
+
     protected String src;
     protected long intVal;
     protected double floatVal;
@@ -152,22 +154,28 @@ public class Lexer
     {
         if (pos >= src.length())
         {
-            throw new FqlParseException("UnexpectedEof", src, pos);
+            throw new FqlParseException("UnexpectedEof", src, row, col);
         }
         else
         {
             char c = src.charAt(pos++);
+            System.out.print("'" + c + "', ");
             if (c == '\n')
             {
                 if (!haveCR)
+                {
                     row++;
+                    lastRowLen = col;
+                }
                 col = 0;
                 haveCR = false;
             }
             else if (c == '\r')
             {
                 row++;
+                lastRowLen = col;
                 col = 0;
+                haveCR = true;
             }
             col++;
             return c;
@@ -183,6 +191,7 @@ public class Lexer
         else
         {
             currToken = nextToken1();
+            System.out.print("|");
         }
         return currToken;
     }
@@ -263,7 +272,7 @@ public class Lexer
                     }
                     else
                     {
-                        pos--;
+                        charBack();
                         return Token.Slash;
                     }
                 }
@@ -292,7 +301,7 @@ public class Lexer
                     }
                     else
                     {
-                        pos--;
+                        charBack();
                         return Token.Dot;
                     }
                 }
@@ -305,7 +314,7 @@ public class Lexer
                     }
                     else
                     {
-                        pos--;
+                        charBack();
                         return Token.Minus;
                     }
                 }
@@ -322,7 +331,7 @@ public class Lexer
                     }
                     else
                     {
-                        pos--;
+                        charBack();
                         return Token.Less;
                     }
                 }
@@ -335,7 +344,7 @@ public class Lexer
                     }
                     else
                     {
-                        pos--;
+                        charBack();
                         return Token.Greater;
                     }
                 }
@@ -348,8 +357,8 @@ public class Lexer
                     }
                     else
                     {
-                        pos--;
-                        throw new FqlParseException("not a token: !. Maybe you meant not", src, pos);
+                        charBack();
+                        throw new FqlParseException("not a token: !. Maybe you meant not", src, row, col);
                     }
                 }
                 case '"':
@@ -411,7 +420,7 @@ public class Lexer
             }
             else
             {
-                pos--;
+                charBack();
                 break;
             }
         }
@@ -427,6 +436,17 @@ public class Lexer
         }
     }
 
+    private void charBack()
+    {
+        pos--;
+        col--;
+        if (col == 0)
+        {
+            row--;
+            col=lastRowLen;
+        }
+    }
+
     protected Token scanNumber(char p0) throws FqlParseException
     {
         boolean isFloat = false;
@@ -438,7 +458,7 @@ public class Lexer
             char c = nextChar();
             if (!Character.isDigit(c) && c != 'e' && c != 'E' && c != '.')
             {
-                pos--;
+                charBack();
                 break;
             }
             if (c == '.')
@@ -496,7 +516,7 @@ public class Lexer
             }
             b.append(c);
         }
-        throw new FqlParseException("Unexpected EOF in String", src, pos);
+        throw new FqlParseException("Unexpected EOF in String", src, row, col);
     }
 
 }

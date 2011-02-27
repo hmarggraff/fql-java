@@ -1,15 +1,14 @@
 package org.fqlsource.fqltest.nodes;
 
 
-import junit.framework.Assert;
 import org.fqlsource.data.FqlDataException;
 import org.fqlsource.data.FqlEntryPoint;
 import org.fqlsource.exec.*;
 import org.fqlsource.mockdriver.MockDriver;
 import org.fqlsource.mockdriver.MockDriverConnection;
-import org.fqlsource.mockdriver.MockEntryPoint;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.Assert;
+import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.Test;
 
 import java.util.Properties;
 
@@ -32,7 +31,7 @@ public class NavNodesTest
     private MockDriver mockDriver;
     private MockDriverConnection conn;
 
-    @Before
+    @BeforeSuite
     public void openConnction() throws FqlDataException
     {
         in0 = new ConstIntNode(0,1,1);

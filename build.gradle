@@ -4,25 +4,16 @@ subprojects {
   apply plugin: 'java'
   sourceCompatibility = 1.6
   targetCompatibility = 1.6
-
   repositories {
     mavenCentral()
   }
 
-
-
-
-  dependencies {
-    testCompile 'junit:junit:4.8.2'
+  task getlibs << {
+    copy {
+      from configurations.testCompile
+      into 'lib'
+    }
   }
 
-task libs4Idea << {
-  copy {
-    from configurations.testCompile
-    into 'lib'
-  }
-}
 
 }
-
-

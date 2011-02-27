@@ -49,6 +49,18 @@ public class FqlParser
         return precedent;
     }
 
+    public static List<FqlStatement> parse(String queryText, DefaultFqlConnection conn) throws FqlParseException
+    {
+        final FqlParser parser = new FqlParser(queryText);
+        final List<FqlStatement> fqlStatements = parser.parseClauses();
+        final RunEnv runEnv = new RunEnv();
+        if (conn != null)
+        {
+            runEnv.connections.put("connection", conn);
+        }
+        return fqlStatements;
+    }
+
     public static void runQuery(String queryText) throws FqlParseException, FqlDataException
     {
         runQuery(queryText, null);
@@ -71,21 +83,31 @@ public class FqlParser
         {
             parseOpen();
         }
-        else if (t == Token.From)
-        {
-            fromStatement = parseFrom();
-        }
-        else if (t == Token.Use)
+        else lex.pushBack();
+        t = nextToken();
+        while (t == Token.Use)
         {
             parseEntryPoint();
         }
-        else if (t == Token.Where)
+        ;
+
+        if (t == Token.From)
         {
-            parseWhere();
+            fromStatement = parseFrom();
         }
         else
         {
             throw new FqlParseException("expected from", this);
+        }
+        t = nextToken();
+        for (; ;)
+        {
+            if (t == Token.Where)
+            {
+                parseWhere();
+            }
+            else if (t == Token.EOF)
+                break;
         }
         return clauses;
     }
@@ -106,7 +128,7 @@ public class FqlParser
         }
         if (!config.containsKey("driver"))
         {
-            throw new FqlParseException("Connection must contain driver key.");
+            throw new FqlParseException("Connection must contain driver key.", this);
         }
         t = nextToken();
         if (t == Token.As)
@@ -118,7 +140,7 @@ public class FqlParser
         {
             if (connections.containsKey(default_connection_pseudo_name))
             {
-                throw new FqlParseException("Only one unnamed connection allowed");
+                throw new FqlParseException("Only one unnamed connection allowed", this);
             }
             clauses.add(new ConnectClause(default_connection_pseudo_name, config));
         }
@@ -172,26 +194,27 @@ public class FqlParser
 
         }
     }
+
     protected EntryPointStatement parseFrom() throws FqlParseException
     {
-            final Token t1 = nextToken();
-            String entryPointName = name_or_string(t1);
-            EntryPointStatement entryPointStatement;
+        final Token t1 = nextToken();
+        String entryPointName = name_or_string(t1);
+        EntryPointStatement entryPointStatement;
 
-            Token t = nextToken();
-            if (t == Token.As)
-            {
-                String alias = expect_name("entry point alias");
-                entryPointStatement = new EntryPointStatement(entryPointName, alias, entryPoints.size(), connections.size());
-                clauses.add(entryPointStatement);
-            }
-            else
-            {
-                if (t1 == Token.String)
-                    throw new FqlParseException("If entry point (\"" + entryPointName + "\") is a string, then you must specify an alias.", this);
-                entryPointStatement = new EntryPointStatement(entryPointName, "it", entryPoints.size(), connections.size());
-                clauses.add(entryPointStatement);
-            }
+        Token t = nextToken();
+        if (t == Token.As)
+        {
+            String alias = expect_name("entry point alias");
+            entryPointStatement = new EntryPointStatement(entryPointName, alias, entryPoints.size(), connections.size());
+            clauses.add(entryPointStatement);
+        }
+        else
+        {
+            if (t1 == Token.String)
+                throw new FqlParseException("If entry point (\"" + entryPointName + "\") is a string, then you must specify an alias.", this);
+            entryPointStatement = new EntryPointStatement(entryPointName, "it", entryPoints.size(), connections.size());
+            clauses.add(entryPointStatement);
+        }
         return entryPointStatement;
     }
 

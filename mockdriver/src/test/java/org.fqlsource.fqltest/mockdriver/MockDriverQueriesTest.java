@@ -24,7 +24,7 @@ public class MockDriverQueriesTest
          * The test query: generates and returns 5 objects.
          */
         String[] q = {
-          "from e5", "use abc from e5", "use \"x y\" as xy from e1", "from \"bla blubb\" as e5"
+          "from e5"
         };
         Properties p = new Properties();
         p.put("driver", "org.fqlsource.mockdriver.MockDriver");

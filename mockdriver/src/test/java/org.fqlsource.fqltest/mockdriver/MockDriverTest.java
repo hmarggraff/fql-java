@@ -1,12 +1,12 @@
 package org.fqlsource.fqltest.mockdriver;
 
 
-import junit.framework.Assert;
 import org.fqlsource.data.FqlDataException;
 import org.fqlsource.mockdriver.MockDriver;
 import org.fqlsource.mockdriver.MockDriverConnection;
 import org.fqlsource.mockdriver.MockEntryPoint;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 

@@ -1,11 +1,13 @@
 package org.fqlsource.fqltest.nodes;
 
 
-import junit.framework.Assert;
+import junit.framework.TestCase;
 import org.fqlsource.data.FqlDataException;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.Assert;
 import org.fqlsource.exec.*;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.util.*;
 
@@ -13,7 +15,7 @@ import java.util.*;
  * Unit test for simple MockDriver.
  */
 
-public class NodesTest
+public class NodesTest extends TestCase
 {
     RunEnv env;
     ConstIntNode in0;
@@ -34,7 +36,9 @@ public class NodesTest
     TestValueNode listNode;
     TestValueNode setNode;
 
-    @Before
+    
+
+    @BeforeClass
     public void openConnction() throws FqlDataException
     {
         in0 = new ConstIntNode(0,1,1);

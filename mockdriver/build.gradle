@@ -1,4 +1,8 @@
 dependencies {
   compile project(':core')
 
+  dependencies {
+    testCompile 'junit:junit:4.8.2'
+  }
+
 }

@@ -22,24 +22,33 @@ public class FqlParseException extends Exception
 
     // fields
     public String query;
-    public int pos;
+    public final int col;
+    public final int row;
 
-    public FqlParseException(final String message)
+    private FqlParseException(final String message)
     {
         super(message);
+        row = col = 0;
     }
 
-    public FqlParseException(String message, String queryText, int errorPos)
+    public FqlParseException(String message, String queryText, int row, int col)
     {
         super(message);
         query = queryText;
-        pos = errorPos;
+        this.row = row;
+        this.col = col;
     }
 
     public FqlParseException(String message, FqlParser fqlParser)
     {
         super(message);
         query = fqlParser.getQueryString();
-        pos = fqlParser.getPos();
+        row = fqlParser.lex.getRow();
+        col = fqlParser.lex.getCol();
+    }
+
+    public String getMessageLong()
+    {
+        return "Error:(" + row+ ", " + col + ") " + getMessage(); 
     }
 }
