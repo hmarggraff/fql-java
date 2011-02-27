@@ -159,7 +159,6 @@ public class Lexer
         else
         {
             char c = src.charAt(pos++);
-            System.out.print("'" + c + "', ");
             if (c == '\n')
             {
                 if (!haveCR)
@@ -191,7 +190,6 @@ public class Lexer
         else
         {
             currToken = nextToken1();
-            System.out.print("|");
         }
         return currToken;
     }

@@ -88,8 +88,8 @@ public class FqlParser
         while (t == Token.Use)
         {
             parseEntryPoint();
+            t = nextToken();
         }
-        ;
 
         if (t == Token.From)
         {
