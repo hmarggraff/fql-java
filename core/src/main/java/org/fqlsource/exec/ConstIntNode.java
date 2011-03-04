@@ -28,4 +28,10 @@ public class ConstIntNode extends FqlNode
     {
         return intVal;
     }
+
+    public void dump(StringBuffer sb)
+    {
+        sb.append(intVal);
+    }
+
 }

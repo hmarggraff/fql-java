@@ -17,4 +17,10 @@ public class NilNode extends FqlNode
         return null;
     }
 
+    public void dump(StringBuffer sb)
+    {
+        sb.append("nil");
+    }
+
+
 }

@@ -19,8 +19,14 @@ public class ConstFloatNode extends FqlNode
         return doubleVal;
     }
 
-    private boolean isFloat()
+    public boolean isFloat()
     {
         return true;
     }
+
+    public void dump(StringBuffer sb)
+    {
+        sb.append(doubleVal);
+    }
+
 }

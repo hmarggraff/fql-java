@@ -20,4 +20,10 @@ public class DotNode extends UnaryNode
         Object leftVal = right.getValue(env, from);
         return env.getValue(memberName, leftVal);
     }
+
+    public void dump(StringBuffer sb)
+    {
+        lispify(sb, "memberName", "right");
+    }
+
 }

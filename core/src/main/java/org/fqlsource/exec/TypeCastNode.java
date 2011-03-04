@@ -18,4 +18,10 @@ public class TypeCastNode extends UnaryNode
     {
         return right.getValue(env, from);
     }
+
+    public void dump(StringBuffer sb)
+    {
+        lispify(sb, "targetType", "right");
+    }
+
 }

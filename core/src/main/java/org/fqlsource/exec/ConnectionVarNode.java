@@ -16,4 +16,10 @@ public class ConnectionVarNode extends FqlNode
     {
         return env.connections.get(connectionName);
     }
+
+    public void dump(StringBuffer sb)
+    {
+        lispify(sb, "connectionName");
+    }
+
 }

@@ -27,4 +27,10 @@ public class FunctionNode extends FqlNode
         }
         return function.val(env, from, argvals);
     }
+
+    public void dump(StringBuffer sb)
+    {
+        lispify(sb, "function");
+    }
+
 }

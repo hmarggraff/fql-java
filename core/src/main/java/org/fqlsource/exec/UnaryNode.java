@@ -12,4 +12,10 @@ public abstract class UnaryNode extends FqlNode
         this.right = right;
     }
 
+    public void dump(StringBuffer sb)
+    {
+        lispify(sb, "right");
+    }
+
+
 }

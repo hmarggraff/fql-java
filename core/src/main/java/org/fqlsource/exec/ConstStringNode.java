@@ -18,4 +18,10 @@ public class ConstStringNode extends FqlNode
     {
         return stringVal;
     }
+
+    public void dump(StringBuffer sb)
+    {
+        sb.append('"').append(stringVal).append('"');
+    }
+
 }

@@ -11,4 +11,10 @@ public abstract class TernaryNode extends BinaryNode
         super(left, right, row, col);
         this.head = head;
     }
+
+    public void dump(StringBuffer sb)
+    {
+        lispify(sb, "head", "left", "right");
+    }
+
 }

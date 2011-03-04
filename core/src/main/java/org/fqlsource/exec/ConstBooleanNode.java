@@ -19,8 +19,14 @@ public class ConstBooleanNode extends FqlNode
         return booleanVal;
     }
 
-    private boolean isBoolean()
+    public boolean isBoolean()
     {
         return true;
     }
+
+    public void dump(StringBuffer sb)
+    {
+        sb.append(booleanVal);
+    }
+
 }

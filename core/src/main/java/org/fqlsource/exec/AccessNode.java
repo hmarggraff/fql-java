@@ -16,7 +16,13 @@ public class AccessNode extends FqlNode
 
     public Object getValue(RunEnv env, Object from) throws FqlDataException
     {
-        return env.getValue(member, from);
+        return env.getValue(member, from, env.interatorEntryPoint());
     }
+
+    public void dump(StringBuffer sb)
+    {
+        lispify(sb, "member");
+    }
+
 
 }

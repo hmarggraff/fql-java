@@ -30,4 +30,6 @@ public interface FqlNodeInterface
     int getRow();
 
     int getCol();
+
+    void dump(StringBuffer sb);
 }

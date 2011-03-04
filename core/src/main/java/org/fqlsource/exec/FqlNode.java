@@ -19,7 +19,9 @@ package org.fqlsource.exec;
 
 
 import org.fqlsource.data.FqlDataException;
+import org.fqlsource.util.Named;
 
+import java.lang.reflect.Field;
 import java.util.Set;
 
 public abstract class FqlNode implements FqlNodeInterface
@@ -51,11 +53,87 @@ public abstract class FqlNode implements FqlNodeInterface
 
     protected void checkClassOf(Object val, Class clazz, final String side, final String operator) throws FqlDataException
     {
-        if (!clazz.isInstance(val)){
+        if (!clazz.isInstance(val))
+        {
             String name = clazz.getName();
             name = name.substring(name.lastIndexOf('.'));
             throw new FqlDataException(side + " operand of " + operator + " must be a " + name + ", but is a: \"" + val.getClass() + "\"", this);
         }
     }
 
+
+    protected void lispify(StringBuffer sb, String... members)
+    {
+        lispify1(sb, members);
+        sb.append(')');
+    }
+
+    private void lispify1(StringBuffer sb, String[] members)
+    {
+        try
+        {
+            sb.append('(');
+            String simpleName = getClass().getSimpleName();
+            if (simpleName.endsWith("Node"))
+            {
+                simpleName = simpleName.substring(0, simpleName.length() - 4);
+            }
+            sb.append(simpleName);
+            for (String member : members)
+            {
+
+                Field field = findField(member, getClass());
+                Class<?> type = field.getType();
+                field.setAccessible(true);
+                Object fieldVal = field.get(this);
+                sb.append(' ').append(member).append(':');
+                if (fieldVal instanceof FqlNodeInterface)
+                {
+                    ((FqlNodeInterface) fieldVal).dump(sb);
+                }
+                else if (Named.class.isAssignableFrom(type))
+                {
+                    sb.append(((Named) fieldVal).getName());
+                }
+                else
+                {
+                    String s = fieldVal.toString();
+                    if (s.contains(" "))
+                    {
+                        sb.append('"').append(s).append('"');
+                    }
+                    else
+                    {
+                        sb.append(s);
+                    }
+                }
+            }
+        }
+        catch (NoSuchFieldException e)
+        {
+            throw new Error(e);
+        }
+        catch (IllegalAccessException e)
+        {
+            throw new Error(e);
+        }
+    }
+
+    private Field findField(String member, Class<?> thisClass) throws NoSuchFieldException
+    {
+        if (thisClass == Object.class)
+        {
+            throw new NoSuchFieldException(member);
+        }
+        Field field = null;
+        try
+        {
+            field = thisClass.getDeclaredField(member);
+            return field;
+        }
+        catch (NoSuchFieldException e)
+        {
+            return findField(member, thisClass.getSuperclass());
+        }
+    }
 }

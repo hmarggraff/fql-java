@@ -25,4 +25,10 @@ public class QueryParameterNode extends FqlNode
     {
         return param;
     }
+
+    public void dump(StringBuffer sb)
+    {
+        lispify(sb, "param");
+    }
+
 }

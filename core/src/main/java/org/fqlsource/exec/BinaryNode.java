@@ -11,4 +11,10 @@ public abstract class BinaryNode extends UnaryNode
         super(right, row, col);
         this.left = left;
     }
+
+    public void dump(StringBuffer sb)
+    {
+        lispify(sb, "left", "right");
+    }
+
 }

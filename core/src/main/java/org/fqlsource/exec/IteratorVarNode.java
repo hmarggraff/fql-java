@@ -19,7 +19,15 @@ public class IteratorVarNode extends FqlNode
     public Object getValue(RunEnv env, Object from) throws FqlDataException
     {
         if (it == null)
+        {
             throw new NotYetImplementedError();
+        }
         return it;
     }
+
+    public void dump(StringBuffer sb)
+    {
+        lispify(sb, "it");
+    }
+
 }

@@ -1,8 +1,7 @@
-package org.fqlsource.exec;
+package org.fqlsource.data;
 
-import org.fqlsource.data.FqlDataException;
+import org.fqlsource.exec.FqlAssertionError;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -29,30 +28,40 @@ public class CollectionSlice implements Iterable
 
     public Iterator iterator()
     {
-        if (end-start < 0)
+        if (end - start < 0)
+        {
             return new EmptyIterator();
+        }
         else if (srcValue instanceof List)
         {
             final List list = (List) srcValue;
             if (start >= list.size())
+            {
                 return new EmptyIterator();
+            }
             int maxEnd = Math.min(end, list.size());
-            return list.subList(start,maxEnd).iterator();
+            return list.subList(start, maxEnd).iterator();
         }
         else if (srcValue.getClass().isArray())
         {
             final Object[] objects = (Object[]) srcValue;
             if (start >= objects.length)
+            {
                 return new EmptyIterator();
+            }
             int maxEnd = Math.min(end, objects.length);
             Object[] slice = new Object[maxEnd - start];
-            System.arraycopy(srcValue, start, slice, 0, maxEnd-start);
+            System.arraycopy(srcValue, start, slice, 0, maxEnd - start);
             return Arrays.asList(slice).iterator();
         }
         else if (srcValue instanceof Iterable)
-            return new CollectionSliceIterator(((Iterable)srcValue).iterator());
+        {
+            return new CollectionSliceIterator(((Iterable) srcValue).iterator());
+        }
         else
+        {
             throw new FqlAssertionError("Source of collection slice is not an Iterable or Array: " + srcValue.getClass(), row, col);
+        }
     }
 
     class CollectionSliceIterator implements Iterator
@@ -60,6 +69,7 @@ public class CollectionSlice implements Iterable
 
         int at;
         Iterator it;
+
         CollectionSliceIterator(Iterator it)
         {
             this.it = it;
