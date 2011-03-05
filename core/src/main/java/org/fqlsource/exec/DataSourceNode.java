@@ -2,15 +2,15 @@ package org.fqlsource.exec;
 
 import org.fqlsource.NotYetImplementedError;
 import org.fqlsource.data.FqlDataException;
-import org.fqlsource.parser.IteratorVar;
+import org.fqlsource.util.NamedIndex;
 
 /**
  */
-public class IteratorVarNode extends FqlNode
+public class DataSourceNode extends FqlNode
 {
-    IteratorVar it;
+    NamedIndex it;
 
-    public IteratorVarNode(IteratorVar it, int row, int col)
+    public DataSourceNode(NamedIndex it, int row, int col)
     {
         super(row, col);
         this.it = it;

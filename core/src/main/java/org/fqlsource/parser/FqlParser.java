@@ -1,8 +1,8 @@
 package org.fqlsource.parser;
 
-import org.fqlsource.data.DefaultFqlConnection;
+import org.fqlsource.data.FqlConnection;
 import org.fqlsource.data.FqlDataException;
-import org.fqlsource.data.FqlQueryParameter;
+import org.fqlsource.util.NamedIndex;
 import org.fqlsource.exec.*;
 
 import java.util.*;
@@ -12,16 +12,20 @@ import static org.fqlsource.parser.Lexer.Token;
 public class FqlParser
 {
 
-    //ArrayList<String> scope;
+    public static final String default_provided_connection_name = "provided_connection";
+
     String txt;
     Lexer lex;
     private final List<FqlStatement> clauses = new ArrayList<FqlStatement>();
-    Map<String, FqlQueryParameter> parameters;
+    public Map<String, NamedIndex> parameters = new HashMap<String, NamedIndex>();
     public Map<String, FqlBuiltinFunction> functions = new HashMap<String, FqlBuiltinFunction>();
-    public HashMap<String, ConnectClause> connections = new HashMap<String, ConnectClause>();
-    public HashMap<String, IteratorVar> entryPoints = new HashMap<String, IteratorVar>();
-    private final String default_connection_pseudo_name = "*default_connection";
-    private EntryPointStatement fromStatement;
+    public Map<String, NamedIndex> sources = new HashMap<String, NamedIndex>();
+    protected EntryPointStatement fromStatement;
+    protected HashMap<String, NamedIndex> connections = new HashMap<String, NamedIndex>();
+    protected int connectionCount;
+    protected int entryPointCount;
+    protected int parameterCount;
+    protected NamedIndex iteratingSource;
 
 
     public FqlParser(String txt)
@@ -31,15 +35,20 @@ public class FqlParser
         lex = new Lexer(txt);
     }
 
-    public static Iterator runQuery(String queryText, DefaultFqlConnection conn) throws FqlParseException, FqlDataException
+    public FqlParser(String queryText, FqlConnection[] conn)
     {
-        final FqlParser parser = new FqlParser(queryText);
-        final List<FqlStatement> fqlStatements = parser.parseClauses();
-        final RunEnv runEnv = new RunEnv();
-        if (conn != null)
+        this(queryText);
+        for (FqlConnection fqlConnection : conn)
         {
-            runEnv.connections.put("connection", conn);
+            connections.put(fqlConnection.getName(), new ProvidedConnection(connectionCount++, fqlConnection));
         }
+    }
+
+    public static Iterator runQuery(String queryText, Object[] parameterValues, FqlConnection... conn) throws FqlParseException, FqlDataException
+    {
+        final FqlParser parser = new FqlParser(queryText, conn);
+        final List<FqlStatement> fqlStatements = parser.parseClauses();
+        final RunEnv runEnv = new RunEnv(parser.connectionCount, parser.entryPointCount, parameterValues);
         Iterator precedent = null;
         for (int i = 0; i < fqlStatements.size(); i++)
         {
@@ -49,15 +58,10 @@ public class FqlParser
         return precedent;
     }
 
-    public static List<FqlStatement> parse(String queryText, DefaultFqlConnection conn) throws FqlParseException
+    public static List<FqlStatement> parse(String queryText) throws FqlParseException
     {
         final FqlParser parser = new FqlParser(queryText);
         final List<FqlStatement> fqlStatements = parser.parseClauses();
-        final RunEnv runEnv = new RunEnv();
-        if (conn != null)
-        {
-            runEnv.connections.put("connection", conn);
-        }
         return fqlStatements;
     }
 
@@ -104,7 +108,8 @@ public class FqlParser
         {
             if (t == Token.Where)
             {
-                parseWhere();
+                clauses.add(new WhereClause(FqlExpressionParser.parseExpression(this)));
+
             }
             else if (t == Token.EOF)
                 break;
@@ -134,35 +139,17 @@ public class FqlParser
         if (t == Token.As)
         {
             String conn_name = expect_name("connection");
-            clauses.add(new ConnectClause(conn_name, config));
+            clauses.add(new ConnectClause(conn_name, connectionCount++, config));
         }
         else
         {
-            if (connections.containsKey(default_connection_pseudo_name))
+            if (connections.containsKey(default_provided_connection_name))
             {
                 throw new FqlParseException("Only one unnamed connection allowed", this);
             }
-            clauses.add(new ConnectClause(default_connection_pseudo_name, config));
+            clauses.add(new ConnectClause(default_provided_connection_name, connectionCount++, config));
         }
 
-
-    }
-
-    private Token expect_next(final Token expect) throws FqlParseException
-    {
-        final Token t;
-        t = nextToken();
-        if (t != expect)
-        {
-            throw new FqlParseException("Expected " + expect + " but ", this);
-        }
-        return nextToken();
-    }
-
-    private void parseWhere() throws FqlParseException
-    {
-        FqlWhere fqlWhere = new FqlWhere(this);
-        fqlWhere.parseAs();
 
     }
 
@@ -174,18 +161,34 @@ public class FqlParser
             String entryPointName = name_or_string(t1);
 
             Token t = nextToken();
+            NamedIndex connHolder;
+            if (t == Token.In)
+            {
+                String connectionName = expect_name("connection");
+                connHolder = connections.get(connectionName);
+                if (connHolder == null)
+                    throw new FqlParseException("Connection named '" + connectionName + "' not found.", this);
+                t = nextToken();
+            }
+            else if (connections.size() == 1)
+                connHolder = (NamedIndex) connections.values().toArray()[0];
+            else
+                throw new FqlParseException("Expected 'in connection_name'", this);
+
+
+
             if (t == Token.As)
             {
                 String alias = expect_name("entry point alias");
-                clauses.add(new EntryPointStatement(entryPointName, alias, entryPoints.size(), connections.size()));
+                clauses.add(new EntryPointStatement(entryPointName, alias, entryPointCount++, connHolder.getIndex()));
+                t1 = nextToken();
             }
             else
             {
                 if (t1 == Token.String)
                     throw new FqlParseException("If entry point (\"" + entryPointName + "\") is a string, then you must specify an alias.", this);
-                clauses.add(new EntryPointStatement(entryPointName, "it", entryPoints.size(), connections.size()));
+                clauses.add(new EntryPointStatement(entryPointName, "it", entryPointCount++, connHolder.getIndex()));
             }
-            t1 = nextToken();
             if (t1 != Token.Comma)
             {
                 lex.pushBack();
@@ -202,20 +205,55 @@ public class FqlParser
         EntryPointStatement entryPointStatement;
 
         Token t = nextToken();
+        NamedIndex connHolder;
+        if (t == Token.In)
+        {
+            String connectionName = expect_name("connection");
+            connHolder = connections.get(connectionName);
+            if (connHolder == null)
+                throw new FqlParseException("Connection named '" + connectionName + "' not found.", this);
+            t = nextToken();
+        }
+        else if (connections.size() == 1)
+            connHolder = (NamedIndex) connections.values().toArray()[0];
+        else
+            throw new FqlParseException("Expected 'in connection_name'", this);
+
         if (t == Token.As)
         {
             String alias = expect_name("entry point alias");
-            entryPointStatement = new EntryPointStatement(entryPointName, alias, entryPoints.size(), connections.size());
+            entryPointStatement = new EntryPointStatement(entryPointName, alias, entryPointCount++, connHolder.getIndex());
             clauses.add(entryPointStatement);
         }
         else
         {
             if (t1 == Token.String)
                 throw new FqlParseException("If entry point (\"" + entryPointName + "\") is a string, then you must specify an alias.", this);
-            entryPointStatement = new EntryPointStatement(entryPointName, "it", entryPoints.size(), connections.size());
+            entryPointStatement = new EntryPointStatement(entryPointName, "it", entryPointCount++, connHolder.getIndex());
             clauses.add(entryPointStatement);
         }
         return entryPointStatement;
+    }
+
+    Token expect_next(final Token expect) throws FqlParseException
+    {
+        final Token t;
+        t = nextToken();
+        if (t != expect)
+        {
+            throw new FqlParseException("Expected \"" + expect + "\" but found \"" + t + '"', this);
+        }
+        return nextToken();
+    }
+
+    void check_token(final Token expect) throws FqlParseException
+    {
+        final Token t;
+        t = nextToken();
+        if (t != expect)
+        {
+            throw new FqlParseException("Expected \"" + expect + "\" but found \"" + t + '"', this);
+        }
     }
 
     protected String name_or_string(Token t1) throws FqlParseException
@@ -262,7 +300,7 @@ public class FqlParser
         t = nextToken();
         if (t == Token.Name)
         {
-            return lex.stringVal;
+            return lex.nameVal;
         }
         else
         {
@@ -275,14 +313,20 @@ public class FqlParser
         return lex.nextToken();
     }
 
-    /**
-     * optionally check id member exists
-     *
-     * @param symName
-     * @return
-     */
-    public String findMember(String symName)
+    NamedIndex getParameter(String paramName)
     {
-        return symName;
+        NamedIndex parameter = parameters.get(paramName);
+        if (parameter == null)
+        {
+            parameter = new NamedIndex(paramName, parameterCount++);
+            parameters.put(paramName, parameter);
+        }
+        return parameter;
+    }
+
+
+    public NamedIndex getIteratingSource()
+    {
+        return iteratingSource;
     }
 }

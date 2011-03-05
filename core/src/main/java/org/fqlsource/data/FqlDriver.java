@@ -6,23 +6,23 @@ import java.util.Properties;
 
 /**
  */
-public interface FqlDriver<ConnectionType extends DefaultFqlConnection, EntryPointType extends FqlEntryPoint>
+public interface FqlDriver<ConnectionType extends DefaultFqlConnection>
 {
     ConnectionType open(Properties props) throws FqlDataException;
 
-    EntryPointType getEntryPoint(String name, ConnectionType fqlConnection) throws FqlDataException;
+    FqlDataSource getSource(String name, FqlConnection fqlConnection) throws FqlDataException;
 
-    Object getObject(Object parent, String fieldName, EntryPointType entryPoint) throws FqlDataException;
+    Object getObject(Object parent, String fieldName, FqlDataSource dataSource) throws FqlDataException;
 
-    long getLong(Object parent, String fieldName, EntryPointType entryPoint) throws FqlDataException;
+    long getLong(Object parent, String fieldName, FqlDataSource dataSource) throws FqlDataException;
 
-    double getDouble(Object parent, String fieldName, EntryPointType entryPoint) throws FqlDataException;
+    double getDouble(Object parent, String fieldName, FqlDataSource dataSource) throws FqlDataException;
 
-    String getString(Object parent, String fieldName, EntryPointType entryPoint) throws FqlDataException;
+    String getString(Object parent, String fieldName, FqlDataSource dataSource) throws FqlDataException;
 
-    boolean getBoolean(Object parent, String fieldName, EntryPointType entryPoint) throws FqlDataException;
+    boolean getBoolean(Object parent, String fieldName, FqlDataSource dataSource) throws FqlDataException;
 
-    Date getDate(Object parent, String fieldName, EntryPointType entryPoint) throws FqlDataException;
+    Date getDate(Object parent, String fieldName, FqlDataSource dataSource) throws FqlDataException;
 
     void close();
 }

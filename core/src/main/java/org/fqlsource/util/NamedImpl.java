@@ -4,10 +4,6 @@ public class NamedImpl implements Named
 {
     protected String name;
 
-    public NamedImpl()
-    {
-    }
-
     public NamedImpl(String name)
     {
         this.name = name;
@@ -18,8 +14,9 @@ public class NamedImpl implements Named
         return name;
     }
 
-    public int compareTo(String s)
+    public int compareTo(Named s)
     {
-        return name.compareTo(s);
+        return name.compareTo(s.getName());
     }
+
 }

@@ -1,8 +1,8 @@
 package org.fqlsource.exec;
 
-import org.fqlsource.data.DefaultFqlConnection;
+import org.fqlsource.data.FqlConnection;
 import org.fqlsource.data.FqlDataException;
-import org.fqlsource.data.FqlEntryPoint;
+import org.fqlsource.data.FqlDataSource;
 
 import java.util.Iterator;
 
@@ -11,7 +11,6 @@ public class EntryPointStatement implements FqlStatement
     private String alias;
     private final int entryPointIndex;
     private final int connectionIndex;
-    private String connectionName;
     private String entryPointName;
 
     public EntryPointStatement(String entryPointName, String alias, int entryPointIndex, int connectionIndex)
@@ -22,16 +21,21 @@ public class EntryPointStatement implements FqlStatement
         this.connectionIndex = connectionIndex;
     }
 
-    public FqlEntryPoint execute(RunEnv env, Iterator precedent) throws FqlDataException
+    public FqlDataSource execute(RunEnv env, Iterator precedent) throws FqlDataException
     {
-        DefaultFqlConnection fqlConnection = env.connections.get(connectionName);
-        @SuppressWarnings({"unchecked"})
-        FqlEntryPoint entryPoint = fqlConnection.getDriver().getEntryPoint(entryPointName, fqlConnection);
-        return entryPoint;
+        FqlConnection fqlConnection = env.getConnection(connectionIndex);
+        FqlDataSource dataSource = fqlConnection.getSource(entryPointName);
+        env.setSourceAt(entryPointIndex, dataSource);
+        return dataSource;
     }
 
     public String getAlias()
     {
         return alias;
+    }
+
+    public int getEntryPointIndex()
+    {
+        return entryPointIndex;
     }
 }

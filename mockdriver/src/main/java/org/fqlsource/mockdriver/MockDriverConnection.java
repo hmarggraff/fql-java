@@ -3,6 +3,7 @@ package org.fqlsource.mockdriver;
 
 import org.fqlsource.data.DefaultFqlConnection;
 import org.fqlsource.data.FqlDataException;
+import org.fqlsource.parser.FqlParser;
 
 public class MockDriverConnection extends DefaultFqlConnection<MockDriver>
 {
@@ -10,7 +11,7 @@ public class MockDriverConnection extends DefaultFqlConnection<MockDriver>
 
     public MockDriverConnection(MockDriver driver, int count)
     {
-        super(driver);
+        super(driver, FqlParser.default_provided_connection_name);
         this.count = count;
     }
 
@@ -19,9 +20,9 @@ public class MockDriverConnection extends DefaultFqlConnection<MockDriver>
         return count;
     }
 
-    public MockEntryPoint getEntryPoint() throws FqlDataException
+    public MockDataSource getEntryPoint() throws FqlDataException
     {
-        return (MockEntryPoint) getEntryPoint(MockEntryPoint.defaultEntryPointName);
+        return (MockDataSource) getSource(MockDataSource.defaultEntryPointName);
     }
 
 }

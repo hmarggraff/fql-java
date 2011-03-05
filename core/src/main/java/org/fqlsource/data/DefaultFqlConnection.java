@@ -1,13 +1,16 @@
 package org.fqlsource.data;
 
+import org.fqlsource.util.NamedImpl;
+
 /**
  */
-public class DefaultFqlConnection<FqlDriverType extends FqlDriver> implements FqlConnection<FqlDriverType>
+public class DefaultFqlConnection<FqlDriverType extends FqlDriver> extends NamedImpl implements FqlConnection
 {
     protected FqlDriverType driver;
 
-    public DefaultFqlConnection(FqlDriverType driver)
+    public DefaultFqlConnection(FqlDriverType driver, String name)
     {
+        super(name);
         this.driver = driver;
     }
 
@@ -20,10 +23,13 @@ public class DefaultFqlConnection<FqlDriverType extends FqlDriver> implements Fq
     {
         //nothing to do
     }
-    public FqlEntryPoint getEntryPoint(String name) throws FqlDataException
+    public FqlDataSource getSource(String sourceName) throws FqlDataException
     {
-        return driver.getEntryPoint(name, this);
+        return driver.getSource(sourceName, this);
     }
 
-
+    public Object getObject(Object from, String member, FqlDataSource dataSource) throws FqlDataException
+    {
+        return driver.getObject(from,member, dataSource);
+    }
 }

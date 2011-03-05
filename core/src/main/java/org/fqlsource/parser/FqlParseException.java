@@ -41,7 +41,7 @@ public class FqlParseException extends Exception
 
     public FqlParseException(String message, FqlParser fqlParser)
     {
-        super(message);
+        super("Error:(" + fqlParser.lex.getRow()+ ", " + fqlParser.lex.getCol() + ") " + message + '\n' + fqlParser.getQueryString());
         query = fqlParser.getQueryString();
         row = fqlParser.lex.getRow();
         col = fqlParser.lex.getCol();
@@ -49,6 +49,6 @@ public class FqlParseException extends Exception
 
     public String getMessageLong()
     {
-        return "Error:(" + row+ ", " + col + ") " + getMessage(); 
+        return "Error:(" + row+ ", " + col + ") " + getMessage();
     }
 }

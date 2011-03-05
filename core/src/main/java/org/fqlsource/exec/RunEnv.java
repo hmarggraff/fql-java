@@ -1,28 +1,31 @@
 package org.fqlsource.exec;
 
 import org.fqlsource.NotYetImplementedError;
-import org.fqlsource.data.DefaultFqlConnection;
-import org.fqlsource.data.FqlDataException;
-import org.fqlsource.data.FqlEntryPoint;
-import org.fqlsource.data.FqlQueryParameter;
+import org.fqlsource.data.*;
 
 import java.util.HashMap;
-import java.util.Map;
 
 public class RunEnv
 {
-    DefaultFqlConnection connection;
-    public final Map<String, Object> parameterValues = new HashMap<String, Object>();
-    public final HashMap<String, DefaultFqlConnection> connections = new HashMap<String, DefaultFqlConnection>();
+    Object[] parameterValues;
+    FqlConnection[] connections;
+    FqlDataSource[] dataSources;
 
-    public Object getVariable(FqlQueryParameter name)
+    public RunEnv(int connectionCount, int entryPointCount, Object[] parameterValues)
     {
-        return parameterValues.get(name);
+        connections = new FqlConnection[connectionCount];
+        dataSources = new FqlDataSource[entryPointCount];
+        this.parameterValues = parameterValues;
     }
 
-    public Object getValue(String member, Object from, FqlEntryPoint dataset) throws FqlDataException
+    public Object getVariable(int parameterIndex)
     {
-        Object object = dataset.getConnection().getDriver().getObject(from, member, dataset);
+        return parameterValues[parameterIndex];
+    }
+
+    public Object getValue(String member, Object from, int entryPointIndex) throws FqlDataException
+    {
+        Object object = dataSources[entryPointIndex].getObject(this, from, member);
         return object;
     }
 
@@ -31,8 +34,28 @@ public class RunEnv
         throw new NotYetImplementedError();
     }
 
-    public FqlEntryPoint interatorEntryPoint()
+    public FqlDataSource iteratorEntryPoint()
     {
-        return null;  //To change body of created methods use File | Settings | File Templates.
+        return dataSources[dataSources.length-1];
+    }
+
+    FqlDataSource getEntryPoint(int entryPointIndex)
+    {
+        return dataSources[entryPointIndex];
+    }
+
+    public FqlConnection getConnection(int connectionIndex)
+    {
+        return connections[connectionIndex];
+    }
+
+    public void setSourceAt(int entryPointIndex, FqlDataSource dataSource)
+    {
+        dataSources[entryPointIndex] = dataSource;
+    }
+
+    public void setConnectionAt(int index, FqlConnection conn)
+    {
+        connections[index] = conn;
     }
 }

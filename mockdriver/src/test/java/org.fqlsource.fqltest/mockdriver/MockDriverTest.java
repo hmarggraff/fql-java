@@ -1,10 +1,55 @@
 package org.fqlsource.fqltest.mockdriver;
 
 
+/*
+ *
+ *  * Copyright (C) 2011, Hans Marggraff
+ *  * and other copyright owners as documented in the project's IP log.
+ *  *
+ *  * This program and the accompanying materials are made available
+ *  * under the terms of the Eclipse Distribution License v1.0 which
+ *  * accompanies this distribution, is reproduced below, and is
+ *  * available at http://www.eclipse.org/org/documents/edl-v10.php
+ *  *
+ *  * All rights reserved.
+ *  *
+ *  * Redistribution and use in source and binary forms, with or
+ *  * without modification, are permitted provided that the following
+ *  * conditions are met:
+ *  *
+ *  * - Redistributions of source code must retain the above copyright
+ *  *   notice, this list of conditions and the following disclaimer.
+ *  *
+ *  * - Redistributions in binary form must reproduce the above
+ *  *   copyright notice, this list of conditions and the following
+ *  *   disclaimer in the documentation and/or other materials provided
+ *  *   with the distribution.
+ *  *
+ *  * - Neither the name of the Eclipse Foundation, Inc. nor the
+ *  *   names of its contributors may be used to endorse or promote
+ *  *   products derived from this software without specific prior
+ *  *   written permission.
+ *  *
+ *  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+ *  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ *  * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ *  * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ *  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ *  * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ *  * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ *  * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ *  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ *  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ *  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ *  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
+
 import org.fqlsource.data.FqlDataException;
+import org.fqlsource.mockdriver.MockDataSource;
 import org.fqlsource.mockdriver.MockDriver;
 import org.fqlsource.mockdriver.MockDriverConnection;
-import org.fqlsource.mockdriver.MockEntryPoint;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -39,26 +84,26 @@ public class MockDriverTest
     }
 
     /**
-     * Tests if getEntryPoint properly returns the entry point of the mock driver
+     * Tests if getSource properly returns the entry point of the mock driver
      *
      * @throws FqlDataException Thrown if entry point access fails in driver
      */
     @Test
     public void testApp() throws FqlDataException
     {
-        MockEntryPoint.defaultEntryPointName = "nowhere";
-        Assert.assertNotNull(getEntryPoint(MockEntryPoint.defaultEntryPointName));
+        MockDataSource.defaultEntryPointName = "nowhere";
+        Assert.assertNotNull(getEntryPoint(MockDataSource.defaultEntryPointName));
         //assertTrue(true);
     }
 
-    private MockEntryPoint getEntryPoint(final String entryPointName) throws FqlDataException
+    private MockDataSource getEntryPoint(final String entryPointName) throws FqlDataException
     {
-        final MockEntryPoint ep = mockDriver.getEntryPoint(entryPointName, conn);
+        final MockDataSource ep = mockDriver.getSource(entryPointName, conn);
         return ep;
     }
 
     /**
-     * Tests if getEntryPoint properly detects and signals a non existing entry point
+     * Tests if getSource properly detects and signals a non existing entry point
      */
     @Test(expected = FqlDataException.class)
     public void testApp2() throws FqlDataException
@@ -75,7 +120,7 @@ public class MockDriverTest
     @Test
     public void testAppFields() throws FqlDataException
     {
-        final MockEntryPoint entryPoint = getEntryPoint(MockEntryPoint.defaultEntryPointName);
+        final MockDataSource entryPoint = getEntryPoint(MockDataSource.defaultEntryPointName);
         final MockDriver driver = entryPoint.getConnection().getDriver();
 
         int count = 1;

@@ -1,6 +1,8 @@
 package org.fqlsource.mockdriver;
 
+import org.fqlsource.data.FqlConnection;
 import org.fqlsource.data.FqlDataException;
+import org.fqlsource.data.FqlDataSource;
 import org.fqlsource.data.FqlDriver;
 
 import java.util.Date;
@@ -9,7 +11,7 @@ import java.util.Properties;
 /**
  * Hello world!
  */
-public class MockDriver implements FqlDriver<MockDriverConnection, MockEntryPoint>
+public class MockDriver implements FqlDriver<MockDriverConnection>
 {
 
 
@@ -28,26 +30,27 @@ public class MockDriver implements FqlDriver<MockDriverConnection, MockEntryPoin
         }
     }
 
-    public MockEntryPoint getEntryPoint(String name, MockDriverConnection conn) throws FqlDataException
+    public MockDataSource getSource(String name, FqlConnection fqlConnection) throws FqlDataException
     {
+        MockDriverConnection conn = (MockDriverConnection) fqlConnection;
         if (name.equals("nowhere"))
         {
-            return new MockEntryPoint(conn, conn.getCount());
+            return new MockDataSource(conn, conn.getCount());
         }
         else if (Character.isJavaIdentifierStart(name.charAt(0)) && Character.isDigit(name.charAt(1)))
         {
             long count = letterNum(name);
-            return new MockEntryPoint(conn, (int) count);
+            return new MockDataSource(conn, (int) count);
         }
         throw new FqlDataException("Entry Point Named " + name + " does not exist");
     }
 
-    public Object getObject(Object parent, String fieldName, MockEntryPoint entryPoint)
+    public Object getObject(Object parent, String fieldName, FqlDataSource dataSource)
     {
-        return parent.toString();
+        return parent.toString()+ '.' + fieldName;
     }
 
-    public long getLong(Object parent, String fieldName, MockEntryPoint entryPoint) throws FqlDataException
+    public long getLong(Object parent, String fieldName, FqlDataSource dataSource) throws FqlDataException
     {
         return letterNum(fieldName);
     }
@@ -67,7 +70,7 @@ public class MockDriver implements FqlDriver<MockDriverConnection, MockEntryPoin
         }
     }
 
-    public double getDouble(Object parent, String fieldName, MockEntryPoint entryPoint) throws FqlDataException
+    public double getDouble(Object parent, String fieldName, FqlDataSource dataSource) throws FqlDataException
     {
         String vTxt = fieldName.substring(1);
         vTxt = vTxt.replace('_', '.');
@@ -82,17 +85,17 @@ public class MockDriver implements FqlDriver<MockDriverConnection, MockEntryPoin
         }
     }
 
-    public String getString(Object parent, String fieldName, MockEntryPoint entryPoint)
+    public String getString(Object parent, String fieldName, FqlDataSource dataSource)
     {
         return fieldName;
     }
 
-    public boolean getBoolean(Object parent, String fieldName, MockEntryPoint entryPoint)
+    public boolean getBoolean(Object parent, String fieldName, FqlDataSource dataSource)
     {
         return "yes".equals(fieldName);
     }
 
-    public Date getDate(Object parent, String fieldName, MockEntryPoint entryPoint) throws FqlDataException
+    public Date getDate(Object parent, String fieldName, FqlDataSource dataSource) throws FqlDataException
     {
         String vTxt = fieldName.substring(1);
         try

@@ -1,17 +1,19 @@
 package org.fqlsource.mockdriver;
 
 
-import org.fqlsource.data.FqlEntryPoint;
+import org.fqlsource.data.FqlDataSource;
+import org.fqlsource.exec.RunEnv;
+import org.fqlsource.util.Named;
 
 import java.util.Iterator;
 
-public class MockEntryPoint implements FqlEntryPoint<MockDriverConnection>
+public class MockDataSource implements FqlDataSource<MockDriverConnection>
 {
     public static String defaultEntryPointName = "nowhere";
     final int count;
     private MockDriverConnection connection;
 
-    public MockEntryPoint(MockDriverConnection connection, int count)
+    public MockDataSource(MockDriverConnection connection, int count)
     {
         this.connection = connection;
         this.count = count;
@@ -45,5 +47,20 @@ public class MockEntryPoint implements FqlEntryPoint<MockDriverConnection>
     public MockDriverConnection getConnection()
     {
         return connection;
+    }
+
+    public Object getObject(RunEnv runEnv, Object from, String member)
+    {
+        return connection.getDriver().getObject(from, member, this);
+    }
+
+    public String getName()
+    {
+        return defaultEntryPointName;
+    }
+
+    public int compareTo(Named n)
+    {
+        return getName().compareTo(n.getName());
     }
 }

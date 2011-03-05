@@ -1,16 +1,16 @@
 package org.fqlsource.exec;
 
 import org.fqlsource.data.FqlDataException;
-import org.fqlsource.data.FqlQueryParameter;
+import org.fqlsource.util.NamedIndex;
 
 /**
  */
 public class QueryParameterNode extends FqlNode
 {
 
-    FqlQueryParameter param;
+    NamedIndex param;
 
-    public QueryParameterNode(FqlQueryParameter param, int row, int col)
+    public QueryParameterNode(NamedIndex param, int row, int col)
     {
         super(row, col);
         this.param = param;
@@ -18,10 +18,10 @@ public class QueryParameterNode extends FqlNode
 
     public Object getValue(RunEnv env, Object from) throws FqlDataException
     {
-        return env.getVariable(param);
+        return env.getVariable(param.getIndex());
     }
 
-    public FqlQueryParameter getParam()
+    public NamedIndex getParam()
     {
         return param;
     }

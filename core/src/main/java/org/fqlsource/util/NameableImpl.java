@@ -6,6 +6,7 @@ public class NameableImpl extends NamedImpl
 {
     public NameableImpl()
     {
+        super(null);
     }
 
     public NameableImpl(String name)

@@ -1,11 +1,13 @@
 package org.fqlsource.data;
 
+import org.fqlsource.util.Named;
+
 /**
  */
-public interface FqlConnection<FqlDriverType extends FqlDriver>
+public interface FqlConnection extends Named
 {
 
-    public FqlDriverType getDriver();
-
     public void close();
+
+    FqlDataSource getSource(String sourceName) throws FqlDataException;
 }
