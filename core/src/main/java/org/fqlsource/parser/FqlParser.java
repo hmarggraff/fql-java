@@ -44,16 +44,16 @@ public class FqlParser
         }
     }
 
-    public static Iterator runQuery(String queryText, Object[] parameterValues, FqlConnection... conn) throws FqlParseException, FqlDataException
+    public static FqlIterator runQuery(String queryText, Object[] parameterValues, FqlConnection... conn) throws FqlParseException, FqlDataException
     {
         final FqlParser parser = new FqlParser(queryText, conn);
         final List<FqlStatement> fqlStatements = parser.parseClauses();
         final RunEnv runEnv = new RunEnv(parser.connectionCount, parser.entryPointCount, parameterValues);
-        Iterator precedent = null;
+        FqlIterator precedent = null;
         for (int i = 0; i < fqlStatements.size(); i++)
         {
             FqlStatement statement = fqlStatements.get(i);
-            precedent = statement.execute(runEnv, precedent).iterator();
+            precedent = statement.execute(runEnv, precedent);
         }
         return precedent;
     }
@@ -65,9 +65,9 @@ public class FqlParser
         return fqlStatements;
     }
 
-    public static void runQuery(String queryText) throws FqlParseException, FqlDataException
+    public static FqlIterator runQuery(String queryText) throws FqlParseException, FqlDataException
     {
-        runQuery(queryText, null);
+        return runQuery(queryText, null);
     }
 
     public String getQueryString()
@@ -111,10 +111,27 @@ public class FqlParser
                 clauses.add(new WhereClause(FqlExpressionParser.parseExpression(this)));
 
             }
+            if (t == Token.Select)
+            {
+                clauses.add(parseObject());
+
+            }
             else if (t == Token.EOF)
                 break;
         }
         return clauses;
+    }
+
+    private FqlStatement parseObject() throws FqlParseException
+    {
+        ArrayList<FqlNodeInterface> fieldList = new ArrayList<FqlNodeInterface>();
+        do
+        {
+            final FqlNodeInterface fqlNodeInterface = FqlExpressionParser.parseAssignedValue(this);
+            fieldList.add(fqlNodeInterface);
+        }
+        while (nextToken() == Token.Comma);
+        return new SelectStatement(fieldList);
     }
 
     private void parseOpen() throws FqlParseException

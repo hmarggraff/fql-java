@@ -6,5 +6,5 @@ import java.util.Iterator;
 
 public interface FqlStatement
 {
-    Iterable execute(RunEnv env, Iterator precedent) throws FqlDataException;
+    FqlIterator execute(RunEnv env, FqlIterator precedent) throws FqlDataException;
 }

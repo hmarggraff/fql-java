@@ -1,7 +1,6 @@
 package org.fqlsource.exec;
 
 import org.fqlsource.data.FqlDataException;
-import org.fqlsource.data.FqlDataSource;
 import org.fqlsource.util.NamedIndex;
 
 import java.util.HashMap;
@@ -17,7 +16,7 @@ public class ConnectClause extends NamedIndex implements FqlStatement
         this.config = config;
     }
 
-    public FqlDataSource execute(RunEnv env, Iterator precedent) throws FqlDataException
+    public FqlIterator execute(RunEnv env, FqlIterator precedent) throws FqlDataException
     {
         env.connect(name, config);
         return null;

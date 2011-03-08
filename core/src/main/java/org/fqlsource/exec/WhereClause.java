@@ -4,7 +4,7 @@ import org.fqlsource.data.FqlDataException;
 
 import java.util.Iterator;
 
-public class WhereClause implements FqlStatement
+public class WhereClause implements FqlStatementIterator
 {
     private final FqlNodeInterface expr;
 
@@ -13,27 +13,19 @@ public class WhereClause implements FqlStatement
         this.expr = expr;
     }
 
-    public Iterable execute(RunEnv env, Iterator precedent) throws FqlDataException
+    public FqlIterator execute(RunEnv env, FqlIterator precedent) throws FqlDataException
     {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return new DefaultFqlIterator(env, precedent, this);
     }
 
-    static class WhereIterator implements Iterator
+    public Object next(RunEnv env, Object parent) throws FqlDataException
     {
-
-        public boolean hasNext()
-        {
-            return false;  //To change body of implemented methods use File | Settings | File Templates.
-        }
-
-        public Object next()
-        {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
-        }
-
-        public void remove()
-        {
-            //To change body of implemented methods use File | Settings | File Templates.
-        }
+        Object val = expr.getValue(env, parent);
+        if (val instanceof Boolean)
+            return val;
+        if (val == null)
+            return Boolean.FALSE;
+        else
+            return Boolean.TRUE;
     }
 }

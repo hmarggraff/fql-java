@@ -3,10 +3,7 @@ package org.fqlsource.fqltest.nodes;
 
 import org.fqlsource.data.FqlDataException;
 import org.fqlsource.data.FqlDataSource;
-import org.fqlsource.exec.AccessNode;
-import org.fqlsource.exec.DotNode;
-import org.fqlsource.exec.FqlStatement;
-import org.fqlsource.exec.RunEnv;
+import org.fqlsource.exec.*;
 import org.fqlsource.mockdriver.MockDriver;
 import org.fqlsource.mockdriver.MockDriverConnection;
 import org.fqlsource.util.NamedIndex;
@@ -76,10 +73,10 @@ public class NavNodesTest extends NodeTestBase
 
     void clauses(List<FqlStatement> fqlStatements) throws FqlDataException
     {
-        Iterator precedent = null;
+        FqlIterator precedent = null;
         for (FqlStatement statement : fqlStatements)
         {
-            precedent = statement.execute(env, precedent).iterator();
+            precedent = statement.execute(env, precedent);
         }
     }
 

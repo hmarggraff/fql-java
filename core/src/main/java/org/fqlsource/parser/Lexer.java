@@ -22,6 +22,9 @@ import java.util.Hashtable;
 
 public class Lexer
 {
+
+
+
     public static enum Token
     {
         EOFComment,
@@ -54,8 +57,8 @@ public class Lexer
         Avg,
         Intersect,
         Element,
-        LBrace,
-        RBrace,
+        LParen,
+        RParen,
         LBracket,
         RBracket,
         Dot,
@@ -84,10 +87,10 @@ public class Lexer
         As,
         Connect,
         Open,
-        Matches, Is, Use,
+        Matches, Is, Use, Select, RBrace, LBrace, Assign,
     }
-
     protected static Hashtable<String, Token> keywords = new Hashtable<String, Token>();
+
     protected Token currToken;
     protected int pos;
     protected int row = 1;
@@ -99,8 +102,10 @@ public class Lexer
     protected double floatVal;
     protected String stringVal;
     protected String nameVal;
+    protected String pushedBackName;
     protected boolean isPushBack;
     protected boolean haveCR;
+    protected Token isPushback2;
 
     static
     {
@@ -183,6 +188,15 @@ public class Lexer
 
     public Token nextToken() throws FqlParseException
     {
+        if (isPushback2 != null)
+        {
+            isPushBack = true; // this is a hack to allow a pushback of two tokens for an optional assignment. If there are more, then nthis must be done properly
+            Token ret = isPushback2;
+            if (ret == Token.Name)
+                nameVal = pushedBackName;
+            isPushback2 = null;
+            return ret;
+        }
         if (isPushBack)
         {
             isPushBack = false;
@@ -212,11 +226,11 @@ public class Lexer
                 }
                 case '(':
                 {
-                    return Token.LBrace;
+                    return Token.LParen;
                 }
                 case ')':
                 {
-                    return Token.RBrace;
+                    return Token.RParen;
                 }
                 case '[':
                 {
@@ -225,6 +239,14 @@ public class Lexer
                 case ']':
                 {
                     return Token.RBracket;
+                }
+                case '{':
+                {
+                    return Token.LBrace;
+                }
+                case '}':
+                {
+                    return Token.RBrace;
                 }
                 case '*':
                 {
@@ -280,7 +302,16 @@ public class Lexer
                 }
                 case ':':
                 {
-                    return Token.Colon;
+                    char cc = nextChar();
+                    if (cc == '=')
+                    {
+                        return Token.Assign;
+                    }
+                    else
+                    {
+                        charBack();
+                        return Token.Colon;
+                    }
                 }
                 case ',':
                 {
@@ -396,10 +427,13 @@ public class Lexer
         }
         return Token.EOF;
     }
+    public void pushBack2(Token t, String name)
+    {
+        isPushback2 = t;
+        pushedBackName = name;
+    }
 
-    /**
-     * ----------------------------------------------------------------------- pushBack
-     */
+
     public void pushBack()
     {
         isPushBack = true;

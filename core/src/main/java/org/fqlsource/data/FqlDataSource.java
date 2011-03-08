@@ -1,11 +1,12 @@
 package org.fqlsource.data;
 
+import org.fqlsource.exec.FqlIterator;
 import org.fqlsource.exec.RunEnv;
 import org.fqlsource.util.Named;
 
 /**
  */
-public interface FqlDataSource<ConnectionType extends DefaultFqlConnection> extends Iterable, Named
+public interface FqlDataSource<ConnectionType extends DefaultFqlConnection> extends FqlIterator, Named
 {
     ConnectionType getConnection();
 

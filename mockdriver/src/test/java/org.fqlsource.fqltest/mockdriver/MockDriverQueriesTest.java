@@ -45,6 +45,8 @@ package org.fqlsource.fqltest.mockdriver;
  *
  */
 
+import org.fqlsource.data.FqlDataException;
+import org.fqlsource.exec.FqlIterator;
 import org.fqlsource.mockdriver.MockDriver;
 import org.fqlsource.mockdriver.MockDriverConnection;
 import org.fqlsource.parser.FqlParseException;
@@ -71,20 +73,25 @@ public class MockDriverQueriesTest
         String[] q = {
           "from e5 in conn"
         };
-        Properties p = new Properties();
-        p.put("driver", "org.fqlsource.mockdriver.MockDriver");
-        p.put("count", "1");
-        final MockDriver mockDriver = new MockDriver();
-        final MockDriverConnection conn = mockDriver.open(p);
+        final MockDriverConnection conn = openConnection();
         for (String query : q)
         {
-            Iterator iterator = FqlParser.runQuery(query, null, conn);
+            FqlIterator iterator = FqlParser.runQuery(query, null, conn);
             while (iterator.hasNext())
             {
                 Object next = iterator.next();
                 System.out.println(next);
             }
         }
+    }
+
+    public static MockDriverConnection openConnection() throws FqlDataException
+    {
+        Properties p = new Properties();
+        p.put("driver", "org.fqlsource.mockdriver.MockDriver");
+        p.put("count", "1");
+        final MockDriver mockDriver = new MockDriver();
+        return mockDriver.open(p);
     }
 
     /**
@@ -101,14 +108,10 @@ public class MockDriverQueriesTest
         String[] q = {
           "use abc in provided_connection from e1 in provided_connection", "use abc from e1", "use \"x y\" as xy from e1", "from \"bla blubb\" as e1"
         };
-        Properties p = new Properties();
-        p.put("driver", "org.fqlsource.mockdriver.MockDriver");
-        p.put("count", "1");
-        final MockDriver mockDriver = new MockDriver();
-        final MockDriverConnection conn = mockDriver.open(p);
+        final MockDriverConnection conn = openConnection();
         for (String query : q)
         {
-            Iterator iterator = FqlParser.runQuery(query, null, conn);
+            FqlIterator iterator = FqlParser.runQuery(query, null, conn);
             while (iterator.hasNext())
             {
                 Object next = iterator.next();
@@ -131,16 +134,12 @@ public class MockDriverQueriesTest
         String[] q = {
           "use \"x y\" from e1", "from \"bla blubb\"", "use x"
         };
-        Properties p = new Properties();
-        p.put("driver", "org.fqlsource.mockdriver.MockDriver");
-        p.put("count", "1");
-        final MockDriver mockDriver = new MockDriver();
-        final MockDriverConnection conn = mockDriver.open(p);
+        final MockDriverConnection conn = openConnection();
         for (String query : q)
         {
             try
             {
-                Iterator iterator = FqlParser.runQuery(query, null, conn);
+                FqlIterator iterator = FqlParser.runQuery(query, null, conn);
                 while (iterator.hasNext())
                 {
                     Object next = iterator.next();

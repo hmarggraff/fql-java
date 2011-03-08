@@ -38,7 +38,7 @@ public class FqlExpressionParser
         FqlNodeInterface left;
         String symName = p.lex.nameVal;
         tok = next();
-        if (tok == Lexer.Token.LBrace)// function: start parsing argList
+        if (tok == Lexer.Token.LParen)// function: start parsing argList
         {
             FqlBuiltinFunction builtin = p.functions.get(symName);
             if (builtin == null)
@@ -48,13 +48,13 @@ public class FqlExpressionParser
 
             ArrayList<FqlNodeInterface> argList = new ArrayList<FqlNodeInterface>();
             Token t1 = next();
-            while (t1 != Token.RBrace)
+            while (t1 != Token.RParen)
             {
                 p.lex.pushBack();
                 FqlNodeInterface arg = parseAs();
                 argList.add(arg);
                 t1 = next();
-                if (t1 == Lexer.Token.RBrace)
+                if (t1 == Lexer.Token.RParen)
                 {
                     break;
                 }
@@ -308,10 +308,10 @@ public class FqlExpressionParser
         {
             return new NilNode(p.lex.getRow(), p.lex.getCol());
         }
-        else if (t == Lexer.Token.LBrace)
+        else if (t == Lexer.Token.LParen)
         {
             final FqlNodeInterface node = parseAs();
-            if (next() != Token.RBrace)
+            if (next() != Token.RParen)
                 throw new FqlParseException("Missing )", p);
             return node;
         }
@@ -346,6 +346,22 @@ public class FqlExpressionParser
             return left;
         }
     }
+    FqlNodeInterface parseAssign() throws FqlParseException
+    {
+
+        Lexer.Token t = next();
+        if (t != Token.Name)
+            return parseAs();
+        String var = p.lex.nameVal;
+        t = next();
+        if (t != Token.Assign)
+        {
+            p.lex.pushBack2(t, var);
+            return parseAs();
+        }
+        final FqlNodeInterface right = parseAs();
+        return new AssignNode(var, right, p.lex.getRow(), p.lex.getCol());
+    }
 
 
     protected Lexer.Token next() throws FqlParseException
@@ -359,5 +375,11 @@ public class FqlExpressionParser
         FqlExpressionParser fqlExpressionParser = new FqlExpressionParser(p);
         return fqlExpressionParser.parseAs();
 
+    }
+
+    public static FqlNodeInterface parseAssignedValue(FqlParser parser) throws FqlParseException
+    {
+        FqlExpressionParser fqlExpressionParser = new FqlExpressionParser(parser);
+        return fqlExpressionParser.parseAssign();
     }
 }

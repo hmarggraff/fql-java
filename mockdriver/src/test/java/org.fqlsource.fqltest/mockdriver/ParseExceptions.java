@@ -1,4 +1,4 @@
-package org.fqlsource.fqltest.nodes;
+package org.fqlsource.fqltest.mockdriver;
 
 import org.fqlsource.data.FqlDataException;
 import org.fqlsource.mockdriver.MockDriver;

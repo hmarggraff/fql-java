@@ -21,7 +21,7 @@ public class EntryPointStatement implements FqlStatement
         this.connectionIndex = connectionIndex;
     }
 
-    public FqlDataSource execute(RunEnv env, Iterator precedent) throws FqlDataException
+    public FqlIterator execute(RunEnv env, FqlIterator precedent) throws FqlDataException
     {
         FqlConnection fqlConnection = env.getConnection(connectionIndex);
         FqlDataSource dataSource = fqlConnection.getSource(entryPointName);
@@ -38,4 +38,5 @@ public class EntryPointStatement implements FqlStatement
     {
         return entryPointIndex;
     }
+
 }

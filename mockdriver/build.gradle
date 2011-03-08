@@ -3,6 +3,7 @@ dependencies {
 
   dependencies {
     testCompile 'junit:junit:4.8.2'
+    testCompile 'org.yaml:snakeyaml:1.7'
   }
 
 }
