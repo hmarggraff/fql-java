@@ -10,20 +10,22 @@ public interface FqlDriver<ConnectionType extends DefaultFqlConnection>
 {
     ConnectionType open(Properties props) throws FqlDataException;
 
-    FqlDataSource getSource(String name, FqlConnection fqlConnection) throws FqlDataException;
+    FqlStreamContainer getStream(String name, ConnectionType fqlConnection) throws FqlDataException;
 
-    Object getObject(Object parent, String fieldName, FqlDataSource dataSource) throws FqlDataException;
+    Object getObject(Object parent, String fieldName, FqlContainer container) throws FqlDataException;
 
-    long getLong(Object parent, String fieldName, FqlDataSource dataSource) throws FqlDataException;
+    long getLong(Object parent, String fieldName, FqlContainer container) throws FqlDataException;
 
-    double getDouble(Object parent, String fieldName, FqlDataSource dataSource) throws FqlDataException;
+    double getDouble(Object parent, String fieldName, FqlContainer container) throws FqlDataException;
 
-    String getString(Object parent, String fieldName, FqlDataSource dataSource) throws FqlDataException;
+    String getString(Object parent, String fieldName, FqlContainer container) throws FqlDataException;
 
-    boolean getBoolean(Object parent, String fieldName, FqlDataSource dataSource) throws FqlDataException;
+    boolean getBoolean(Object parent, String fieldName, FqlContainer container) throws FqlDataException;
 
-    Date getDate(Object parent, String fieldName, FqlDataSource dataSource) throws FqlDataException;
+    Date getDate(Object parent, String fieldName, FqlContainer container) throws FqlDataException;
 
     void close();
+
+    FqlMapContainer getMap(String containerName, ConnectionType fqlConnection);
 }
 

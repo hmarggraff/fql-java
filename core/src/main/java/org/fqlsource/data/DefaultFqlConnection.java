@@ -23,13 +23,19 @@ public class DefaultFqlConnection<FqlDriverType extends FqlDriver> extends Named
     {
         //nothing to do
     }
-    public FqlDataSource getSource(String sourceName) throws FqlDataException
+
+    public FqlStreamContainer getStream(String streamName) throws FqlDataException
     {
-        return driver.getSource(sourceName, this);
+        return driver.getStream(streamName, this);
     }
 
-    public Object getObject(Object from, String member, FqlDataSource dataSource) throws FqlDataException
+    public FqlMapContainer getMap(String containerName) throws FqlDataException
     {
-        return driver.getObject(from,member, dataSource);
+        return driver.getMap(containerName, this);
+    }
+
+    public Object getObject(Object from, String member, FqlStreamContainer streamContainer) throws FqlDataException
+    {
+        return driver.getObject(from, member, streamContainer);
     }
 }

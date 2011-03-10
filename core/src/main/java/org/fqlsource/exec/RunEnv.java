@@ -1,20 +1,34 @@
 package org.fqlsource.exec;
 
 import org.fqlsource.NotYetImplementedError;
-import org.fqlsource.data.*;
+import org.fqlsource.data.FqlConnection;
+import org.fqlsource.data.FqlDataException;
+import org.fqlsource.data.FqlMapContainer;
+import org.fqlsource.data.FqlStreamContainer;
 
 import java.util.HashMap;
 
 public class RunEnv
 {
     Object[] parameterValues;
+    /**
+     * the list of open connections
+     */
     FqlConnection[] connections;
-    FqlDataSource[] dataSources;
+    /**
+     * List of secondary data sources with lookup access
+     */
+    FqlMapContainer[] lookups;
+    /**
+     * Stack of iterator streams, depth is equivalent to the nesting level of the query
+     */
+    FqlStreamContainer[] streams;
 
-    public RunEnv(int connectionCount, int entryPointCount, Object[] parameterValues)
+    public RunEnv(int connectionCount, int streamDepth, int secondaries, Object[] parameterValues)
     {
         connections = new FqlConnection[connectionCount];
-        dataSources = new FqlDataSource[entryPointCount];
+        streams = new FqlStreamContainer[streamDepth];
+        lookups = new FqlMapContainer[secondaries];
         this.parameterValues = parameterValues;
     }
 
@@ -23,9 +37,9 @@ public class RunEnv
         return parameterValues[parameterIndex];
     }
 
-    public Object getValue(String member, Object from, int entryPointIndex) throws FqlDataException
+    public Object getValue(String member, Object from, int depth) throws FqlDataException
     {
-        Object object = dataSources[entryPointIndex].getObject(this, from, member);
+        Object object = streams[depth].getObject(this, from, member);
         return object;
     }
 
@@ -34,14 +48,14 @@ public class RunEnv
         throw new NotYetImplementedError();
     }
 
-    public FqlDataSource iteratorEntryPoint()
+    public FqlStreamContainer iteratorEntryPoint(int depth)
     {
-        return dataSources[dataSources.length-1];
+        return streams[depth];
     }
 
-    FqlDataSource getEntryPoint(int entryPointIndex)
+    FqlMapContainer getEntryPoint(int entryPointIndex)
     {
-        return dataSources[entryPointIndex];
+        return lookups[entryPointIndex];
     }
 
     public FqlConnection getConnection(int connectionIndex)
@@ -49,9 +63,14 @@ public class RunEnv
         return connections[connectionIndex];
     }
 
-    public void setSourceAt(int entryPointIndex, FqlDataSource dataSource)
+    public void setStreamAt(int depth, FqlStreamContainer streamContainer)
     {
-        dataSources[entryPointIndex] = dataSource;
+        streams[depth] = streamContainer;
+    }
+
+    public void setMapContainer(int index, FqlMapContainer container)
+    {
+        lookups[index] = container;
     }
 
     public void setConnectionAt(int index, FqlConnection conn)

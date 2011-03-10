@@ -57,7 +57,7 @@ public class NodeTestBase
         nilNode = new NilNode(1, 1);
         sne = new ConstStringNode("", 1, 1);
         sng = new ConstStringNode("Germering", 1, 1);
-        env = new RunEnv(1,1,null);
+        env = new RunEnv(1, 1, 0, null);
         stringArray = new String[]{"a", "b", "c", "d", "e", "f"};
         arrayNode = new TestValueNode(stringArray);
         listVal = Arrays.asList(stringArray);

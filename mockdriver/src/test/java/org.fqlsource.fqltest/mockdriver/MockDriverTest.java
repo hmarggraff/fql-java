@@ -47,9 +47,9 @@ package org.fqlsource.fqltest.mockdriver;
  */
 
 import org.fqlsource.data.FqlDataException;
-import org.fqlsource.mockdriver.MockDataSource;
 import org.fqlsource.mockdriver.MockDriver;
 import org.fqlsource.mockdriver.MockDriverConnection;
+import org.fqlsource.mockdriver.MockStreamContainer;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -84,26 +84,26 @@ public class MockDriverTest
     }
 
     /**
-     * Tests if getSource properly returns the entry point of the mock driver
+     * Tests if getStream properly returns the entry point of the mock driver
      *
      * @throws FqlDataException Thrown if entry point access fails in driver
      */
     @Test
     public void testApp() throws FqlDataException
     {
-        MockDataSource.defaultEntryPointName = "nowhere";
-        Assert.assertNotNull(getEntryPoint(MockDataSource.defaultEntryPointName));
+        MockStreamContainer.defaultEntryPointName = "nowhere";
+        Assert.assertNotNull(getEntryPoint(MockStreamContainer.defaultEntryPointName));
         //assertTrue(true);
     }
 
-    private MockDataSource getEntryPoint(final String entryPointName) throws FqlDataException
+    private MockStreamContainer getEntryPoint(final String entryPointName) throws FqlDataException
     {
-        final MockDataSource ep = mockDriver.getSource(entryPointName, conn);
+        final MockStreamContainer ep = (MockStreamContainer) mockDriver.getStream(entryPointName, conn);
         return ep;
     }
 
     /**
-     * Tests if getSource properly detects and signals a non existing entry point
+     * Tests if getStream properly detects and signals a non existing entry point
      */
     @Test(expected = FqlDataException.class)
     public void testApp2() throws FqlDataException
@@ -120,12 +120,13 @@ public class MockDriverTest
     @Test
     public void testAppFields() throws FqlDataException
     {
-        final MockDataSource entryPoint = getEntryPoint(MockDataSource.defaultEntryPointName);
+        final MockStreamContainer entryPoint = getEntryPoint(MockStreamContainer.defaultEntryPointName);
         final MockDriver driver = entryPoint.getConnection().getDriver();
 
         int count = 1;
-        for (Object it : entryPoint)
+        while (entryPoint.hasNext())
         {
+            Object it = entryPoint.next();
             Assert.assertTrue(driver.getBoolean(it, "yes", entryPoint));
             Assert.assertFalse(driver.getBoolean(it, "no", entryPoint));
             Assert.assertEquals(driver.getLong(it, "L" + Integer.toString(count), entryPoint), count);

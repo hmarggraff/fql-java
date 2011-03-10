@@ -2,10 +2,13 @@ package org.fqlsource.parser;
 
 import org.fqlsource.data.FqlConnection;
 import org.fqlsource.data.FqlDataException;
-import org.fqlsource.util.NamedIndex;
 import org.fqlsource.exec.*;
+import org.fqlsource.util.NamedIndex;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.fqlsource.parser.Lexer.Token;
 
@@ -20,12 +23,13 @@ public class FqlParser
     public Map<String, NamedIndex> parameters = new HashMap<String, NamedIndex>();
     public Map<String, FqlBuiltinFunction> functions = new HashMap<String, FqlBuiltinFunction>();
     public Map<String, NamedIndex> sources = new HashMap<String, NamedIndex>();
-    protected EntryPointStatement fromStatement;
+    protected FromClause fromStatement;
     protected HashMap<String, NamedIndex> connections = new HashMap<String, NamedIndex>();
     protected int connectionCount;
     protected int entryPointCount;
     protected int parameterCount;
     protected NamedIndex iteratingSource;
+    protected int iteratorNesting;
 
 
     public FqlParser(String txt)
@@ -48,7 +52,11 @@ public class FqlParser
     {
         final FqlParser parser = new FqlParser(queryText, conn);
         final List<FqlStatement> fqlStatements = parser.parseClauses();
-        final RunEnv runEnv = new RunEnv(parser.connectionCount, parser.entryPointCount, parameterValues);
+        final RunEnv runEnv = new RunEnv(parser.connectionCount, parser.iteratorNesting, parser.entryPointCount, parameterValues);
+        for (int i = 0; i < conn.length; i++)
+        {
+            runEnv.setConnectionAt(i, conn[i]);
+        }
         FqlIterator precedent = null;
         for (int i = 0; i < fqlStatements.size(); i++)
         {
@@ -87,7 +95,10 @@ public class FqlParser
         {
             parseOpen();
         }
-        else lex.pushBack();
+        else
+        {
+            lex.pushBack();
+        }
         t = nextToken();
         while (t == Token.Use)
         {
@@ -117,7 +128,9 @@ public class FqlParser
 
             }
             else if (t == Token.EOF)
+            {
                 break;
+            }
         }
         return clauses;
     }
@@ -184,27 +197,34 @@ public class FqlParser
                 String connectionName = expect_name("connection");
                 connHolder = connections.get(connectionName);
                 if (connHolder == null)
+                {
                     throw new FqlParseException("Connection named '" + connectionName + "' not found.", this);
+                }
                 t = nextToken();
             }
             else if (connections.size() == 1)
+            {
                 connHolder = (NamedIndex) connections.values().toArray()[0];
+            }
             else
+            {
                 throw new FqlParseException("Expected 'in connection_name'", this);
-
+            }
 
 
             if (t == Token.As)
             {
                 String alias = expect_name("entry point alias");
-                clauses.add(new EntryPointStatement(entryPointName, alias, entryPointCount++, connHolder.getIndex()));
+                clauses.add(new FromClause(entryPointName, alias, entryPointCount++, connHolder.getIndex()));
                 t1 = nextToken();
             }
             else
             {
                 if (t1 == Token.String)
+                {
                     throw new FqlParseException("If entry point (\"" + entryPointName + "\") is a string, then you must specify an alias.", this);
-                clauses.add(new EntryPointStatement(entryPointName, "it", entryPointCount++, connHolder.getIndex()));
+                }
+                clauses.add(new UseClause(entryPointName, "it", entryPointCount++, connHolder.getIndex()));
             }
             if (t1 != Token.Comma)
             {
@@ -215,11 +235,11 @@ public class FqlParser
         }
     }
 
-    protected EntryPointStatement parseFrom() throws FqlParseException
+    protected FromClause parseFrom() throws FqlParseException
     {
         final Token t1 = nextToken();
         String entryPointName = name_or_string(t1);
-        EntryPointStatement entryPointStatement;
+        FromClause fromClause;
 
         Token t = nextToken();
         NamedIndex connHolder;
@@ -228,28 +248,37 @@ public class FqlParser
             String connectionName = expect_name("connection");
             connHolder = connections.get(connectionName);
             if (connHolder == null)
+            {
                 throw new FqlParseException("Connection named '" + connectionName + "' not found.", this);
+            }
             t = nextToken();
         }
         else if (connections.size() == 1)
+        {
             connHolder = (NamedIndex) connections.values().toArray()[0];
+        }
         else
+        {
             throw new FqlParseException("Expected 'in connection_name'", this);
+        }
 
         if (t == Token.As)
         {
             String alias = expect_name("entry point alias");
-            entryPointStatement = new EntryPointStatement(entryPointName, alias, entryPointCount++, connHolder.getIndex());
-            clauses.add(entryPointStatement);
+            fromClause = new FromClause(entryPointName, alias, entryPointCount++, connHolder.getIndex());
+            clauses.add(fromClause);
         }
         else
         {
             if (t1 == Token.String)
+            {
                 throw new FqlParseException("If entry point (\"" + entryPointName + "\") is a string, then you must specify an alias.", this);
-            entryPointStatement = new EntryPointStatement(entryPointName, "it", entryPointCount++, connHolder.getIndex());
-            clauses.add(entryPointStatement);
+            }
+            fromClause = new FromClause(entryPointName, "it", entryPointCount++, connHolder.getIndex());
+            clauses.add(fromClause);
         }
-        return entryPointStatement;
+        iteratorNesting++;
+        return fromClause;
     }
 
     Token expect_next(final Token expect) throws FqlParseException

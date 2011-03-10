@@ -17,13 +17,10 @@ package org.fqlsource.fqltest.mockdriver;
 
 import org.fqlsource.data.FqlDataException;
 import org.fqlsource.exec.FqlIterator;
-import org.fqlsource.exec.FqlStatement;
 import org.fqlsource.mockdriver.MockDriver;
 import org.fqlsource.mockdriver.MockDriverConnection;
-import org.fqlsource.parser.FqlParseException;
 import org.fqlsource.parser.FqlParser;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,7 +29,6 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Properties;
 
 
@@ -40,13 +36,14 @@ import java.util.Properties;
 public class Queries
 {
     String query;
-    private final String result;
+    String result;
     static MockDriverConnection conn;
     static ArrayList<Object[]> testParameters = new ArrayList<Object[]>();
     static Yaml yaml;
 
-    static void add(String query, String result){
-        testParameters.add(new Object[] {query, result});
+    static void add(String query, String result)
+    {
+        testParameters.add(new Object[]{query, result});
     }
 
     @Parameterized.Parameters

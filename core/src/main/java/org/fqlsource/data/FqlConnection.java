@@ -9,5 +9,7 @@ public interface FqlConnection extends Named
 
     public void close();
 
-    FqlDataSource getSource(String sourceName) throws FqlDataException;
+    FqlStreamContainer getStream(String streamName) throws FqlDataException;
+
+    FqlMapContainer getMap(String containerName) throws FqlDataException;
 }

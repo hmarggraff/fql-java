@@ -109,7 +109,7 @@ public class NodesTest extends NodeTestBase
 
 
     /**
-     * Tests if getSource properly detects and signals a non existing entry point
+     * Tests if getStream properly detects and signals a non existing entry point
      */
     @Test(expected = FqlDataException.class)
     public void testExceptions() throws FqlDataException

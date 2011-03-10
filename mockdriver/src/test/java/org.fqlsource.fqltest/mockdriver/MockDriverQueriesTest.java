@@ -54,7 +54,6 @@ import org.fqlsource.parser.FqlParser;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Iterator;
 import java.util.Properties;
 
 public class MockDriverQueriesTest
@@ -106,7 +105,7 @@ public class MockDriverQueriesTest
          * The test query: generates and returns 5 objects.
          */
         String[] q = {
-          "use abc in provided_connection from e1 in provided_connection", "use abc from e1", "use \"x y\" as xy from e1", "from \"bla blubb\" as e1"
+          "use m1 in provided_connection from e1 in provided_connection", "use m1 from e1", "use \"x y1\" as xy from e1", "from \"bla blubb1\" as e1"
         };
         final MockDriverConnection conn = openConnection();
         for (String query : q)

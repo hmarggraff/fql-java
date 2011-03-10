@@ -20,9 +20,9 @@ public class MockDriverConnection extends DefaultFqlConnection<MockDriver>
         return count;
     }
 
-    public MockDataSource getEntryPoint() throws FqlDataException
+    public MockStreamContainer getMockStream() throws FqlDataException
     {
-        return (MockDataSource) getSource(MockDataSource.defaultEntryPointName);
+        return (MockStreamContainer) getStream(MockStreamContainer.defaultEntryPointName);
     }
 
 }
