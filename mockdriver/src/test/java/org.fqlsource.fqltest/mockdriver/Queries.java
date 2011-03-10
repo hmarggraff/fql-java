@@ -73,7 +73,7 @@ public class Queries
     @Test
     public void test2() throws Exception
     {
-        final FqlIterator it = FqlParser.runQuery(query);
+        final FqlIterator it = FqlParser.runQuery(query,null,conn);
         ArrayList<Object[]> result = new ArrayList<Object[]>();
         while (it.hasNext())
         {

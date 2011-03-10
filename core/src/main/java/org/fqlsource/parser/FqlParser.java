@@ -237,6 +237,9 @@ public class FqlParser
 
     protected FromClause parseFrom() throws FqlParseException
     {
+        if (connections.size() == 0)
+            throw new FqlParseException("No connection specified", this);
+
         final Token t1 = nextToken();
         String entryPointName = name_or_string(t1);
         FromClause fromClause;
