@@ -23,7 +23,6 @@ public class FqlParser
     public Map<String, NamedIndex> parameters = new HashMap<String, NamedIndex>();
     public Map<String, FqlBuiltinFunction> functions = new HashMap<String, FqlBuiltinFunction>();
     public Map<String, NamedIndex> sources = new HashMap<String, NamedIndex>();
-    protected FromClause fromStatement;
     protected HashMap<String, NamedIndex> connections = new HashMap<String, NamedIndex>();
     protected int connectionCount;
     protected int entryPointCount;
@@ -34,7 +33,6 @@ public class FqlParser
 
     public FqlParser(String txt)
     {
-        //scope = new FqlScope();
         this.txt = txt;
         lex = new Lexer(txt);
     }
@@ -108,28 +106,23 @@ public class FqlParser
 
         if (t == Token.From)
         {
-            fromStatement = parseFrom();
+            parseFrom();
         }
         else
         {
             throw new FqlParseException("expected from", this);
         }
-        t = nextToken();
-        for (; ;)
+        while (Token.EOF != (t = nextToken()))
         {
             if (t == Token.Where)
             {
                 clauses.add(new WhereClause(FqlExpressionParser.parseExpression(this)));
 
             }
-            if (t == Token.Select)
+            else if (t == Token.Select)
             {
                 clauses.add(parseObject());
 
-            }
-            else if (t == Token.EOF)
-            {
-                break;
             }
         }
         return clauses;
@@ -235,7 +228,7 @@ public class FqlParser
         }
     }
 
-    protected FromClause parseFrom() throws FqlParseException
+    protected void parseFrom() throws FqlParseException
     {
         if (connections.size() == 0)
             throw new FqlParseException("No connection specified", this);
@@ -282,7 +275,8 @@ public class FqlParser
             clauses.add(fromClause);
         }
         iteratorNesting++;
-        return fromClause;
+        iteratingSource = new NamedIndex(fromClause.getAlias(), fromClause.getDepth());
+        clauses.add(fromClause);
     }
 
     Token expect_next(final Token expect) throws FqlParseException

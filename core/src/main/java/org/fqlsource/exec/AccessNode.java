@@ -8,24 +8,28 @@ import org.fqlsource.util.NamedIndex;
 public class AccessNode extends FqlNode
 {
     private final NamedIndex source;
-    private final String member;
+    private final String memberName;
 
-    public AccessNode(NamedIndex source, String member, int row, int col)
+    public AccessNode(NamedIndex source, String memberName, int row, int col)
     {
         super(row, col);
         this.source = source;
-        this.member = member;
+        this.memberName = memberName;
     }
 
     public Object getValue(RunEnv env, Object from) throws FqlDataException
     {
-        return env.getValue(member, from, source.getIndex());
+        return env.getValue(memberName, from, source.getIndex());
     }
 
     public void dump(StringBuffer sb)
     {
-        lispify(sb, "member");
+        lispify(sb, "memberName");
     }
 
 
+    public String getMemberName()
+    {
+        return memberName;
+    }
 }

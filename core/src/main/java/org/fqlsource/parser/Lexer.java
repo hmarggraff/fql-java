@@ -104,7 +104,6 @@ public class Lexer
     protected String nameVal;
     protected boolean isPushBack;
     protected boolean haveCR;
-    protected Token pushBack2;
 
     static
     {
@@ -188,14 +187,6 @@ public class Lexer
 
     public Token nextToken() throws FqlParseException
     {
-        if (pushBack2 != null)
-        {
-            isPushBack = true; // this is a hack to allow a pushback of two tokens for an optional assignment. If there are more, then this must be done properly
-            Token ret = currToken;
-            currToken = pushBack2;
-            pushBack2 = null;
-            return ret;
-        }
         if (isPushBack)
         {
             isPushBack = false;
@@ -426,19 +417,10 @@ public class Lexer
         }
         return Token.EOF;
     }
-    public void pushBackNameAndNext(Token t, String name)
-    {
-        assert t != Token.Name && t != Token.String && t != Token.ConstFloat && t != Token.ConstInteger;
-        pushBack2 = t;
-        currToken = Token.Name;
-        nameVal = name;
-    }
 
 
     public void pushBack()
     {
-        if (isPushBack)
-            pushBack2 = currToken;
         isPushBack = true;
     }
 
