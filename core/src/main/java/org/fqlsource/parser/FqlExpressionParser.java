@@ -325,7 +325,7 @@ public class FqlExpressionParser
         }
         else if (t == Lexer.Token.EOFComment || t == Lexer.Token.EOF)
         {
-            throw new FqlParseException(Res.str("Missing filter condition after where"), p);
+            throw new FqlParseException(Res.str("Missing expression"), p);
         }
         throw new FqlParseException(Res.str("Unexpected token: The character at this position cannot be understood"), p);
     }
@@ -356,7 +356,7 @@ public class FqlExpressionParser
         t = next();
         if (t != Token.Assign)
         {
-            p.lex.pushBack2(t, var);
+            p.lex.pushBackNameAndNext(t, var);
             return parseAs();
         }
         final FqlNodeInterface right = parseAs();

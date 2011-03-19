@@ -102,10 +102,9 @@ public class Lexer
     protected double floatVal;
     protected String stringVal;
     protected String nameVal;
-    protected String pushedBackName;
     protected boolean isPushBack;
     protected boolean haveCR;
-    protected Token isPushback2;
+    protected Token pushBack2;
 
     static
     {
@@ -128,6 +127,7 @@ public class Lexer
         keywords.put("where", Token.Where);
         keywords.put("matches", Token.Matches);
         keywords.put("use", Token.Use);
+        keywords.put("select", Token.Select);
     }
 
     public Lexer(String expression)
@@ -188,13 +188,12 @@ public class Lexer
 
     public Token nextToken() throws FqlParseException
     {
-        if (isPushback2 != null)
+        if (pushBack2 != null)
         {
-            isPushBack = true; // this is a hack to allow a pushback of two tokens for an optional assignment. If there are more, then nthis must be done properly
-            Token ret = isPushback2;
-            if (ret == Token.Name)
-                nameVal = pushedBackName;
-            isPushback2 = null;
+            isPushBack = true; // this is a hack to allow a pushback of two tokens for an optional assignment. If there are more, then this must be done properly
+            Token ret = currToken;
+            currToken = pushBack2;
+            pushBack2 = null;
             return ret;
         }
         if (isPushBack)
@@ -427,15 +426,19 @@ public class Lexer
         }
         return Token.EOF;
     }
-    public void pushBack2(Token t, String name)
+    public void pushBackNameAndNext(Token t, String name)
     {
-        isPushback2 = t;
-        pushedBackName = name;
+        assert t != Token.Name && t != Token.String && t != Token.ConstFloat && t != Token.ConstInteger;
+        pushBack2 = t;
+        currToken = Token.Name;
+        nameVal = name;
     }
 
 
     public void pushBack()
     {
+        if (isPushBack)
+            pushBack2 = currToken;
         isPushBack = true;
     }
 

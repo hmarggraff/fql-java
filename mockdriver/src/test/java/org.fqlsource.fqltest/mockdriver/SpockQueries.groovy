@@ -59,6 +59,7 @@ class SpockQueries extends spock.lang.Specification
 
     where:
     query | result
+    "from e2 select a" | "- [1]\n- [2]\n"
     "from e2" | "- [1]\n- [2]\n"
   }
 }

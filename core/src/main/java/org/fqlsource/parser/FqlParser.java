@@ -277,6 +277,7 @@ public class FqlParser
             {
                 throw new FqlParseException("If entry point (\"" + entryPointName + "\") is a string, then you must specify an alias.", this);
             }
+            lex.pushBack();
             fromClause = new FromClause(entryPointName, "it", entryPointCount++, connHolder.getIndex());
             clauses.add(fromClause);
         }
