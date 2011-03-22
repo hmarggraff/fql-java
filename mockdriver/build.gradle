@@ -1,10 +1,9 @@
+apply plugin:'groovy'
+
 dependencies {
+  groovy("org.codehaus.groovy:groovy-all:1.7.5")
   compile project(':core')
-
-  dependencies {
-    testCompile 'junit:junit:4.8.2'
-    testCompile 'org.yaml:snakeyaml:1.7'
-    testCompile 'org.spockframework:spock-core:0.5-groovy-1.7'
-  }
-
+  testCompile 'junit:junit:4.8.2'
+  testCompile 'org.yaml:snakeyaml:1.7'
+  testCompile 'org.spockframework:spock-core:0.5-groovy-1.7'
 }

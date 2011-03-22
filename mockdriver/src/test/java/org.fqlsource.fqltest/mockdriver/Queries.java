@@ -74,10 +74,10 @@ public class Queries
     public void test2() throws Exception
     {
         final FqlIterator it = FqlParser.runQuery(query,null,conn);
-        ArrayList<Object[]> result = new ArrayList<Object[]>();
+        ArrayList<Object> result = new ArrayList<Object>();
         while (it.hasNext())
         {
-            final Object[] next = (Object[]) it.next();
+            final Object next = it.next();
             result.add(next);
         }
         final String dump = yaml.dump(result);

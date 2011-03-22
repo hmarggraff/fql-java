@@ -5,9 +5,6 @@ import org.fqlsource.data.*;
 import java.util.Date;
 import java.util.Properties;
 
-/**
- * Hello world!
- */
 public class MockDriver implements FqlDriver<MockDriverConnection>
 {
 

@@ -67,7 +67,7 @@ public class MockDriverTest
     MockDriverConnection conn;
 
     @Before
-    void openConnction() throws FqlDataException
+    public void openConnction() throws FqlDataException
     {
         Properties p = new Properties();
         p.put("driver", "org.fqlsource.mockdriver.MockDriver");
@@ -77,7 +77,7 @@ public class MockDriverTest
     }
 
     @After
-    void closeConnection()
+    public void closeConnection()
     {
         conn.close();
         mockDriver.close();

@@ -70,7 +70,7 @@ public class MockDriverQueriesTest
          * The test query: generates and returns 5 objects.
          */
         String[] q = {
-          "from e5 in conn"
+          "from e5 in provided_connection"
         };
         final MockDriverConnection conn = openConnection();
         for (String query : q)
@@ -84,7 +84,7 @@ public class MockDriverQueriesTest
         }
     }
 
-    public static MockDriverConnection openConnection() throws FqlDataException
+    public MockDriverConnection openConnection() throws FqlDataException
     {
         Properties p = new Properties();
         p.put("driver", "org.fqlsource.mockdriver.MockDriver");
@@ -105,7 +105,7 @@ public class MockDriverQueriesTest
          * The test query: generates and returns 5 objects.
          */
         String[] q = {
-          "use m1 in provided_connection from e1 in provided_connection", "use m1 from e1", "use \"x y1\" as xy from e1", "from \"bla blubb1\" as e1"
+          "use m1 in provided_connection from e1 in provided_connection", "use m1 from e1", "use \"x y1\" as xy from e1"
         };
         final MockDriverConnection conn = openConnection();
         for (String query : q)
