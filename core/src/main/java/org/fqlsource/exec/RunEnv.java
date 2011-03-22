@@ -24,6 +24,11 @@ public class RunEnv
      */
     FqlStreamContainer[] streams;
 
+    /**
+     * the current nesting level. 0 for the top level
+     */
+    int currentNesting;
+
     public RunEnv(int connectionCount, int streamDepth, int secondaries, Object[] parameterValues)
     {
         connections = new FqlConnection[connectionCount];
@@ -37,9 +42,9 @@ public class RunEnv
         return parameterValues[parameterIndex];
     }
 
-    public Object getValue(String member, Object from, int depth) throws FqlDataException
+    public Object getValue(String member, Object from, int index) throws FqlDataException
     {
-        Object object = streams[depth].getObject(this, from, member);
+        Object object = lookups[index].getObject(this, from, member);
         return object;
     }
 
@@ -48,10 +53,6 @@ public class RunEnv
         throw new NotYetImplementedError();
     }
 
-    public FqlStreamContainer iteratorEntryPoint(int depth)
-    {
-        return streams[depth];
-    }
 
     FqlMapContainer getEntryPoint(int entryPointIndex)
     {
@@ -63,11 +64,6 @@ public class RunEnv
         return connections[connectionIndex];
     }
 
-    public void setStreamAt(int depth, FqlStreamContainer streamContainer)
-    {
-        streams[depth] = streamContainer;
-    }
-
     public void setMapContainer(int index, FqlMapContainer container)
     {
         lookups[index] = container;
@@ -76,5 +72,11 @@ public class RunEnv
     public void setConnectionAt(int index, FqlConnection conn)
     {
         connections[index] = conn;
+    }
+
+    public Object getValueFromIterator(String memberName, Object from)
+    {
+        Object object = lookups[currentNesting].getObject(this, from, memberName);
+        return object;
     }
 }
