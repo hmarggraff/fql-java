@@ -19,25 +19,16 @@ import org.fqlsource.data.FqlStreamContainer;
 
 public class FromClause extends ContainerActivationClause
 {
-    private final int depth;
-
-    public FromClause(String containerName, String alias, int depth, int connectionIndex)
+    public FromClause(String containerName, String alias, int connectionIndex)
     {
         super(connectionIndex, alias, containerName);
-        this.depth = depth;
     }
 
     public FqlIterator execute(RunEnv env, FqlIterator precedent) throws FqlDataException
     {
         FqlConnection fqlConnection = env.getConnection(connectionIndex);
         FqlStreamContainer streamContainer = fqlConnection.getStream(streamName);
-        env.setStreamAt(depth, streamContainer);
+        env.pushStream(streamContainer);
         return streamContainer;
     }
-
-    public int getDepth()
-    {
-        return depth;
-    }
-
 }

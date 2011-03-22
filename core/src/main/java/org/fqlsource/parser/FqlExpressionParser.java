@@ -353,7 +353,7 @@ public class FqlExpressionParser
 
         Lexer.Token t = next();
         if (t != Token.Assign)
-            return left;
+            return pushBack(left);
         if (!(left instanceof AccessNode))
             throw new FqlParseException("left of assignment is not a name but a " + left.getClass().getName(), p);
         AccessNode an = (AccessNode) left;
@@ -361,7 +361,7 @@ public class FqlExpressionParser
 
 
         final FqlNodeInterface right = parseAs();
-        return new AssignNode(targetName, right, p.lex.getRow(), p.lex.getCol());
+        return pushBack(new AssignNode(targetName, right, p.lex.getRow(), p.lex.getCol()));
     }
 
 

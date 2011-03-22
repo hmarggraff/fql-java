@@ -39,9 +39,9 @@ public class NavNodesTest extends NodeTestBase
         env = new RunEnv(1, 1, 0, null);
         defaultSourceIndex = new NamedIndex("e1", 0);
 
-        source = conn.getStream(defaultSourceIndex.getName());
-        env.setStreamAt(0, source);
         env.setConnectionAt(0, conn);
+        source = conn.getStream(defaultSourceIndex.getName());
+        env.pushStream(source);
     }
 
     @Test

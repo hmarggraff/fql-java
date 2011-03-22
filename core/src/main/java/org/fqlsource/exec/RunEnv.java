@@ -27,7 +27,7 @@ public class RunEnv
     /**
      * the current nesting level. 0 for the top level
      */
-    int currentNesting;
+    int currentNesting = -1;
 
     public RunEnv(int connectionCount, int streamDepth, int secondaries, Object[] parameterValues)
     {
@@ -54,7 +54,7 @@ public class RunEnv
     }
 
 
-    FqlMapContainer getEntryPoint(int entryPointIndex)
+    FqlMapContainer getMapContainer(int entryPointIndex)
     {
         return lookups[entryPointIndex];
     }
@@ -69,6 +69,17 @@ public class RunEnv
         lookups[index] = container;
     }
 
+    public void popStream()
+    {
+        streams[currentNesting] = null;
+        currentNesting--;
+    }
+    public void pushStream(FqlStreamContainer container)
+    {
+        currentNesting++;
+        streams[currentNesting] = container;
+    }
+
     public void setConnectionAt(int index, FqlConnection conn)
     {
         connections[index] = conn;
@@ -76,7 +87,7 @@ public class RunEnv
 
     public Object getValueFromIterator(String memberName, Object from)
     {
-        Object object = lookups[currentNesting].getObject(this, from, memberName);
+        Object object = streams[currentNesting].getObject(this, from, memberName);
         return object;
     }
 }

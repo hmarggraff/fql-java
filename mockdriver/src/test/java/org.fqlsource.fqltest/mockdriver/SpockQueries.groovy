@@ -59,7 +59,8 @@ class SpockQueries extends spock.lang.Specification
 
     where:
     query | result
-    "from e2 select a" | "- [1]\n- [2]\n"
+    "from e2 select a,b" | "- [1.a, 1.b]\n- [2.a, 2.b]\n"
+    "from e2 select a" | "- [1.a]\n- [2.a]\n"
     "from e2" | "- [1]\n- [2]\n"
   }
 }
