@@ -15,12 +15,12 @@
 
 package org.fqlsource.fqltest.mockdriver
 
-import spock.lang.Shared
-import org.fqlsource.mockdriver.MockDriverConnection
-import org.fqlsource.mockdriver.MockDriver
-import org.yaml.snakeyaml.Yaml
-import org.fqlsource.parser.FqlParser
 import org.fqlsource.exec.FqlIterator
+import org.fqlsource.mockdriver.MockDriver
+import org.fqlsource.mockdriver.MockDriverConnection
+import org.fqlsource.parser.FqlParser
+import org.yaml.snakeyaml.Yaml
+import spock.lang.Shared
 
 /**
  */
@@ -40,27 +40,35 @@ class SpockQueries extends spock.lang.Specification
 
   def String run(String query)
   {
-    final FqlIterator it = FqlParser.runQuery(query,null,conn);
-    ArrayList<Object[]> result = new ArrayList<Object[]>();
+    final FqlIterator it = FqlParser.runQuery(query, null, conn)
+    def result = new ArrayList()
     while (it.hasNext())
     {
-        final Object[] next = (Object[]) it.next();
-        result.add(next);
+      Object[] next = (Object[]) it.next()
+      if (next.length == 1)
+        result.add(next[0]); else
+        result.add(next)
     }
-    final String dump = yaml.dump(result);
+    final String dump;
+    if (result.size == 1)
+      dump = yaml.dump(result[0]) else
+      dump = yaml.dump(result);
     System.out.println(dump);
-    return dump
+    def shortRes = dump.substring(0, dump.length() - 1);
+    return shortRes
   }
 
   def "Basic Use And From Clauses"()
   {
     expect:
-      run(query).equals(result)
+    run(query).equals(result)
 
     where:
     query | result
-    "from e2 select a,b" | "- [1.a, 1.b]\n- [2.a, 2.b]\n"
-    "from e2 select a" | "- [1.a]\n- [2.a]\n"
-    "from e2" | "- [1]\n- [2]\n"
+    "from e1 select e1" | '1'
+    // "use xy from e1 select xy[a]" | "- [1]"
+    "from e2 select a,b" | "- [1.a, 1.b]\n- [2.a, 2.b]"
+    "from e2 select a" | "[1.a, 2.a]"
+    "from e2" | "[1, 2]"
   }
 }
