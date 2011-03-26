@@ -124,6 +124,10 @@ public class FqlParser
                 clauses.add(parseObject());
 
             }
+            else
+            {
+                throw new FqlParseException("expected keyword", this);
+            }
         }
         return clauses;
     }
@@ -209,6 +213,7 @@ public class FqlParser
             {
                 String alias = expect_name("entry point alias");
                 clauses.add(new UseClause(entryPointName, alias, entryPointCount++, connHolder.getIndex()));
+                sources.put(alias, new NamedIndex(alias, sources.size()));
                 t1 = nextToken();
             }
             else
@@ -217,7 +222,8 @@ public class FqlParser
                 {
                     throw new FqlParseException("If entry point (\"" + entryPointName + "\") is a string, then you must specify an alias.", this);
                 }
-                clauses.add(new UseClause(entryPointName, "it", entryPointCount++, connHolder.getIndex()));
+                clauses.add(new UseClause(entryPointName, entryPointName, entryPointCount++, connHolder.getIndex()));
+                sources.put(entryPointName, new NamedIndex(entryPointName, sources.size()));
             }
             if (t1 != Token.Comma)
             {
@@ -230,17 +236,20 @@ public class FqlParser
     protected void parseFrom() throws FqlParseException
     {
         if (connections.size() == 0)
+        {
             throw new FqlParseException("No connection specified", this);
+        }
 
         final Token t1 = nextToken();
         String entryPointName = name_or_string(t1);
 
+        NamedIndex connectionIndex;
         Token t = nextToken();
         if (t == Token.In)
         {
             String connectionName = expect_name("connection");
-            iteratingSource = connections.get(connectionName);
-            if (iteratingSource == null)
+            connectionIndex = connections.get(connectionName);
+            if (connectionIndex == null)
             {
                 throw new FqlParseException("Connection named '" + connectionName + "' not found.", this);
             }
@@ -248,7 +257,7 @@ public class FqlParser
         }
         else if (connections.size() == 1)
         {
-            iteratingSource = (NamedIndex) connections.values().toArray()[0];
+            connectionIndex = (NamedIndex) connections.values().toArray()[0];
         }
         else
         {
@@ -258,7 +267,8 @@ public class FqlParser
         if (t == Token.As)
         {
             String alias = expect_name("entry point alias");
-            FromClause fromClause  = new FromClause(entryPointName, alias, iteratingSource.getIndex());
+            FromClause fromClause = new FromClause(entryPointName, alias, connectionIndex.getIndex());
+            sources.put(alias, new NamedIndex(alias, sources.size()));
             clauses.add(fromClause);
         }
         else
@@ -268,7 +278,9 @@ public class FqlParser
                 throw new FqlParseException("If entry point (\"" + entryPointName + "\") is a string, then you must specify an alias.", this);
             }
             lex.pushBack();
-            FromClause fromClause = new FromClause(entryPointName, "it", iteratingSource.getIndex());
+            FromClause fromClause = new FromClause(entryPointName, entryPointName, connectionIndex.getIndex());
+            sources.put(entryPointName, new NamedIndex(entryPointName, sources.size()));
+
             clauses.add(fromClause);
         }
         iteratorNesting++;

@@ -5,12 +5,14 @@ import org.fqlsource.data.FqlDataException;
 import org.fqlsource.util.NamedIndex;
 
 /**
+ * Allows to use the stream name in an expression.
+ * getValue returns the current object of the iterator
  */
-public class DataSourceNode extends FqlNode
+public class IteratorNameNode extends FqlNode
 {
     NamedIndex it;
 
-    public DataSourceNode(NamedIndex it, int row, int col)
+    public IteratorNameNode(NamedIndex it, int row, int col)
     {
         super(row, col);
         this.it = it;
@@ -22,12 +24,12 @@ public class DataSourceNode extends FqlNode
         {
             throw new NotYetImplementedError();
         }
-        return it;
+        return from;
     }
 
     public void dump(StringBuffer sb)
     {
-        lispify(sb, "it");
+        lispify(sb, it.getName());
     }
 
 }
