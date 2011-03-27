@@ -1,9 +1,7 @@
 package org.fqlsource.exec;
 
 import org.fqlsource.data.FqlDataException;
-
-import java.math.BigDecimal;
-import java.math.BigInteger;
+import org.fqlsource.data.RunEnv;
 
 public class NotNode extends UnaryNode
 {
@@ -14,7 +12,7 @@ public class NotNode extends UnaryNode
         if (value instanceof Boolean)
             return !((Boolean) value).booleanValue();
         else
-            throw new FqlDataException("Operand of not is not a boolean.", this);
+            throw fqlDataException("Operand of not is not a boolean.");
     }
 
     public NotNode(FqlNodeInterface right, int row, int col)

@@ -1,11 +1,9 @@
 package org.fqlsource.exec;
 
 import org.fqlsource.data.FqlDataException;
+import org.fqlsource.data.RunEnv;
 
 import java.util.Collection;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.regex.Pattern;
 
 /**
  */
@@ -35,7 +33,7 @@ public class PlusNode extends BinaryNode
         else if (leftValue instanceof Number)
         {
             if (!(rightValue instanceof Number))
-                throw new FqlDataException("Left operand of + is a number, but right operand is not. (" + rightValue.getClass() + ")", this);
+                throw fqlDataException("Left operand of + is a number, but right operand is not. (" + rightValue.getClass() + ")");
             if (leftValue instanceof Float || leftValue instanceof Double || rightValue instanceof Float || rightValue instanceof Double)
             {
                 double rNum = ((Number) rightValue).doubleValue();
@@ -60,6 +58,6 @@ public class PlusNode extends BinaryNode
         {
             return new ConcatenatedCollection(leftValue, rightValue, row, col);
         }
-        throw new FqlDataException("Cannot add classes " + leftValue.getClass() + " with " + rightValue.getClass(), this);
+        throw fqlDataException("Cannot add classes " + leftValue.getClass() + " with " + rightValue.getClass());
     }
 }

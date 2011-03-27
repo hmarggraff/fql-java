@@ -1,6 +1,7 @@
 package org.fqlsource.exec;
 
 import org.fqlsource.data.FqlDataException;
+import org.fqlsource.data.RunEnv;
 
 /**
  */
@@ -25,7 +26,7 @@ public class LikeNode extends BinaryNode
             String rv = (String) rightValue;
             return match(lv, rv, 0, 0);
         }
-        throw new FqlDataException("Comparing classes " + leftValue.getClass() + " with " + rightValue.getClass(), this);
+        throw fqlDataException("Comparing classes " + leftValue.getClass() + " with " + rightValue.getClass());
     }
 
     protected boolean match(final String source, String matcher, int sx, int px)

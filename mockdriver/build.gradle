@@ -1,12 +1,6 @@
-apply plugin:'groovy'
-apply from: "https://github.com/valkolovos/gradle_cobertura/raw/master/ivy/gradle_cobertura/gradle_cobertura/1.0-rc4/coberturainit.gradle"
-
-
 dependencies {
-  groovy("org.codehaus.groovy:groovy-all:1.7.5")
-  compile project(':core')
+  compile project(':driverapi')
+  //compile project(':core')
   testCompile 'junit:junit:4.8.2'
-  testCompile 'org.yaml:snakeyaml:1.7'
-  testCompile 'org.spockframework:spock-core:0.5-groovy-1.7'
 }
 

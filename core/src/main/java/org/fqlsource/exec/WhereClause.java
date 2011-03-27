@@ -1,8 +1,8 @@
 package org.fqlsource.exec;
 
 import org.fqlsource.data.FqlDataException;
-
-import java.util.Iterator;
+import org.fqlsource.data.FqlIterator;
+import org.fqlsource.data.RunEnv;
 
 public class WhereClause implements FqlStatementIterator
 {

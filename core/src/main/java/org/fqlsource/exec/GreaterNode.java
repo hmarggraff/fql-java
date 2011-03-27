@@ -2,6 +2,7 @@ package org.fqlsource.exec;
 
 import org.fqlsource.NotYetImplementedError;
 import org.fqlsource.data.FqlDataException;
+import org.fqlsource.data.RunEnv;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -48,7 +49,7 @@ public class GreaterNode extends BinaryNode
             String rv = (String) rightValue;
             return lv.compareTo(rv) > 0;
         }
-        throw new FqlDataException("Comparing (>) classes " + leftValue.getClass() + " with " + rightValue.getClass(), this);
+        throw fqlDataException("Comparing (>) classes " + leftValue.getClass() + " with " + rightValue.getClass());
     }
 
 }

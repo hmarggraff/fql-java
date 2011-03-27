@@ -2,6 +2,7 @@ package org.fqlsource.exec;
 
 import org.fqlsource.NotYetImplementedError;
 import org.fqlsource.data.FqlDataException;
+import org.fqlsource.data.RunEnv;
 
 /**
  */

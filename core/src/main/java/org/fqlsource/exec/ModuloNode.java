@@ -1,8 +1,7 @@
 package org.fqlsource.exec;
 
 import org.fqlsource.data.FqlDataException;
-
-import java.util.Collection;
+import org.fqlsource.data.RunEnv;
 
 /**
  */
@@ -40,6 +39,6 @@ public class ModuloNode extends BinaryNode
                 throw new FqlDataException(ex, row, col);
             }
         }
-        throw new FqlDataException("Cannot apply modulo operator to classes " + leftValue.getClass() + " and " + rightValue.getClass(), this);
+        throw fqlDataException("Cannot apply modulo operator to classes " + leftValue.getClass() + " and " + rightValue.getClass());
     }
 }

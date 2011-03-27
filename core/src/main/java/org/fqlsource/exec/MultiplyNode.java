@@ -1,6 +1,7 @@
 package org.fqlsource.exec;
 
 import org.fqlsource.data.FqlDataException;
+import org.fqlsource.data.RunEnv;
 
 /**
  */
@@ -30,7 +31,7 @@ public class MultiplyNode extends BinaryNode
         else if (leftValue instanceof Number)
         {
             if (!(rightValue instanceof Number))
-                throw new FqlDataException("Left operand of * is a number, but right operand is not. (" + rightValue.getClass() + ")", this);
+                throw fqlDataException("Left operand of * is a number, but right operand is not. (" + rightValue.getClass() + ")");
             if (leftValue instanceof Float || leftValue instanceof Double || rightValue instanceof Float || rightValue instanceof Double)
             {
                 double rNum = ((Number) rightValue).doubleValue();
@@ -43,6 +44,6 @@ public class MultiplyNode extends BinaryNode
                 return ((Number) leftValue).longValue() * rNum;
             }
         }
-        throw new FqlDataException("Cannot multiply classes " + leftValue.getClass() + " and " + rightValue.getClass(), this);
+        throw fqlDataException("Cannot multiply classes " + leftValue.getClass() + " and " + rightValue.getClass());
     }
 }

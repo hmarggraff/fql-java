@@ -17,6 +17,7 @@ package org.fqlsource.exec;
 
 
 import org.fqlsource.data.FqlDataException;
+import org.fqlsource.data.RunEnv;
 
 public interface FqlStatementIterator extends FqlStatement
 {

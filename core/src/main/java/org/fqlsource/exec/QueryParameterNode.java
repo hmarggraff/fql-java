@@ -1,6 +1,7 @@
 package org.fqlsource.exec;
 
 import org.fqlsource.data.FqlDataException;
+import org.fqlsource.data.RunEnv;
 import org.fqlsource.util.NamedIndex;
 
 /**

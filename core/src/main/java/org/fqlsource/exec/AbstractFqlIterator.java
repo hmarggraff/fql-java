@@ -16,7 +16,8 @@ package org.fqlsource.exec;
  */
 
 
-import java.util.Iterator;
+import org.fqlsource.data.FqlIterator;
+import org.fqlsource.data.RunEnv;
 
 public abstract class AbstractFqlIterator implements FqlIterator
 {

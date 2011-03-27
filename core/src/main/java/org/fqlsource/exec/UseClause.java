@@ -1,8 +1,6 @@
 package org.fqlsource.exec;
 
-import org.fqlsource.data.FqlConnection;
-import org.fqlsource.data.FqlDataException;
-import org.fqlsource.data.FqlMapContainer;
+import org.fqlsource.data.*;
 
 public class UseClause extends ContainerActivationClause
 {

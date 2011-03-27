@@ -1,7 +1,24 @@
 package org.fqlsource.parser;
 
+/*
+   Copyright (C) 2011, Hans Marggraff and other copyright owners as documented in the project's IP log.
+ This program and the accompanying materials are made available under the terms of the Eclipse Distribution License v1.0 which accompanies this distribution, is reproduced below, and is available at http://www.eclipse.org/org/documents/edl-v10.php
+ All rights reserved.
+ Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+ - Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+ - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+ - Neither the name of the Eclipse Foundation, Inc. nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 import org.fqlsource.data.FqlConnection;
 import org.fqlsource.data.FqlDataException;
+import org.fqlsource.data.FqlIterator;
+import org.fqlsource.data.RunEnv;
 import org.fqlsource.exec.*;
 import org.fqlsource.util.NamedIndex;
 
@@ -14,8 +31,6 @@ import static org.fqlsource.parser.Lexer.Token;
 
 public class FqlParser
 {
-
-    public static final String default_provided_connection_name = "provided_connection";
 
     String txt;
     Lexer lex;
@@ -110,7 +125,7 @@ public class FqlParser
         }
         else
         {
-            throw new FqlParseException("expected from", this);
+            throw new FqlParseException("Expected from, but found " + t, this);
         }
         while (Token.EOF != (t = nextToken()))
         {
@@ -126,7 +141,7 @@ public class FqlParser
             }
             else
             {
-                throw new FqlParseException("expected keyword", this);
+                throw new FqlParseException("Expected keyword, but found " + t, this);
             }
         }
         return clauses;
@@ -148,19 +163,31 @@ public class FqlParser
     {
         Token t;
 
-        t = expect_next(Token.LBrace);
+        check_token(Token.LBrace);
         HashMap<String, String> config = new HashMap<String, String>();
-        while (t != Token.RBrace)
+        while (Token.RBrace != (t = nextToken()))
         {
-            String key = name_or_string("connection key");
-            expect_next(Token.Equal);
-            t = expect_next(Token.String);
+            final String key;
+            if (t == Token.String)
+            {
+                key = lex.stringVal;
+            }
+            else if (t == Token.Name)
+            {
+                key = lex.nameVal;
+            }
+            else
+            {
+                throw new FqlParseException("Expected " + "driver configuration" + " as name or string, but found " + t, this);
+            }
+            check_token(Token.Equal);
+            check_token(Token.String);
             String val = lex.stringVal;
             config.put(key, val);
         }
         if (!config.containsKey("driver"))
         {
-            throw new FqlParseException("Connection must contain driver key.", this);
+            throw new FqlParseException("Connection must specify a driver. (driver=\"driverclass\")", this);
         }
         t = nextToken();
         if (t == Token.As)
@@ -170,11 +197,11 @@ public class FqlParser
         }
         else
         {
-            if (connections.containsKey(default_provided_connection_name))
+            if (connections.containsKey(FqlConnection.default_provided_connection_name))
             {
                 throw new FqlParseException("Only one unnamed connection allowed", this);
             }
-            clauses.add(new ConnectClause(default_provided_connection_name, connectionCount++, config));
+            clauses.add(new ConnectClause(FqlConnection.default_provided_connection_name, connectionCount++, config));
         }
 
 
@@ -320,7 +347,7 @@ public class FqlParser
         }
         else
         {
-            throw new FqlParseException("Expected " + "connection, dataset or iterator variable" + " as name or string", this);
+            throw new FqlParseException("Expected connection, dataset or iterator variable as name or string, but found " + t1, this);
         }
         return entryPointName;
     }
@@ -340,7 +367,7 @@ public class FqlParser
         }
         else
         {
-            throw new FqlParseException("Expected " + msg + " as name or string", this);
+            throw new FqlParseException("Expected " + msg + " as name or string, but found " + t, this);
         }
         return name1;
     }
@@ -355,7 +382,7 @@ public class FqlParser
         }
         else
         {
-            throw new FqlParseException("Expected " + msg + "name", this);
+            throw new FqlParseException("Expected " + msg + "name, but found " + t, this);
         }
     }
 

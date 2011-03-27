@@ -1,6 +1,7 @@
 package org.fqlsource.exec;
 
 import org.fqlsource.data.FqlDataException;
+import org.fqlsource.data.RunEnv;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -21,7 +22,7 @@ public class UnaryMinusNode extends UnaryNode
         else if (value instanceof BigInteger)
             return ((BigInteger) value).multiply(BigInteger.valueOf(-1));
         else
-            throw new FqlDataException("Operand of unary minus is not a number.", this);
+            throw fqlDataException("Operand of unary minus is not a number.");
     }
 
     public UnaryMinusNode(FqlNodeInterface right, int row, int col)

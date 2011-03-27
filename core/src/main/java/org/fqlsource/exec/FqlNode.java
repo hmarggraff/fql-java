@@ -57,7 +57,7 @@ public abstract class FqlNode implements FqlNodeInterface
         {
             String name = clazz.getName();
             name = name.substring(name.lastIndexOf('.'));
-            throw new FqlDataException(side + " operand of " + operator + " must be a " + name + ", but is a: \"" + val.getClass() + "\"", this);
+            throw fqlDataException(side + " operand of " + operator + " must be a " + name + ", but is a: \"" + val.getClass() + "\"");
         }
     }
 
@@ -136,4 +136,11 @@ public abstract class FqlNode implements FqlNodeInterface
             return findField(member, thisClass.getSuperclass());
         }
     }
+
+    protected FqlDataException fqlDataException(final String msg)
+    {
+        return new FqlDataException(msg, getRow(), getCol());
+    }
+
+
 }

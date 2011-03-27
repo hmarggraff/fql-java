@@ -1,6 +1,7 @@
 package org.fqlsource.exec;
 
 import org.fqlsource.data.FqlDataException;
+import org.fqlsource.data.RunEnv;
 
 import java.util.regex.Pattern;
 
@@ -36,6 +37,6 @@ public class MatchesNode extends BinaryNode
             return Pattern.matches(lv, rv);
 
         }
-        throw new FqlDataException("Comparing classes " + leftValue.getClass() + " with " + rightValue.getClass(), this);
+        throw fqlDataException("Comparing classes " + leftValue.getClass() + " with " + rightValue.getClass());
     }
 }

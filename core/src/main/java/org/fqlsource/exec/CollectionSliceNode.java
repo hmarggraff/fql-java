@@ -1,7 +1,7 @@
 package org.fqlsource.exec;
 
-import org.fqlsource.data.CollectionSlice;
 import org.fqlsource.data.FqlDataException;
+import org.fqlsource.data.RunEnv;
 
 /**
  */
