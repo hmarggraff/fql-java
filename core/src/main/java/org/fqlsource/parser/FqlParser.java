@@ -98,7 +98,7 @@ public class FqlParser
         return lex.getPos();
     }
 
-    List<FqlStatement> parseClauses() throws FqlParseException
+    public List<FqlStatement> parseClauses() throws FqlParseException
     {
         Lexer.Token t = nextToken();
         if (t == Token.Open)
@@ -158,11 +158,11 @@ public class FqlParser
 
     private void parseOpen() throws FqlParseException
     {
-        Token t;
 
         check_token(Token.LBrace);
         HashMap<String, String> config = new HashMap<String, String>();
-        while (Token.RBrace != (t = nextToken()))
+        Token t =  nextToken();
+        for (;;)
         {
             final String key;
             if (t == Token.String)
@@ -181,6 +181,17 @@ public class FqlParser
             check_token(Token.String);
             String val = lex.stringVal;
             config.put(key, val);
+            t = nextToken();
+            if (t == Token.RBrace)
+                break;
+            if(t == Token.Comma)
+            {
+                t = nextToken();
+                if (t == Token.RBrace)
+                    break;
+            }
+            else
+                throw new FqlParseException("Expected comma or right brace (,}), but found " + t, this);
         }
         if (!config.containsKey("driver"))
         {
@@ -190,7 +201,9 @@ public class FqlParser
         if (t == Token.As)
         {
             String conn_name = expect_name("connection");
-            clauses.add(new ConnectClause(conn_name, connectionCount++, config, lex.getRow(), lex.getCol()));
+            final ConnectClause connectClause = new ConnectClause(conn_name, connectionCount++, config, lex.getRow(), lex.getCol());
+            clauses.add(connectClause);
+            connections.put(conn_name, connectClause);
         }
         else
         {

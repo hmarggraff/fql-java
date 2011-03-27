@@ -19,6 +19,8 @@ import org.fqlsource.parser.FqlParser
 import org.yaml.snakeyaml.Yaml
 import spock.lang.Shared
 import org.fqlsource.parser.FqlParseException
+import org.fqlsource.data.FqlDataException
+import spock.lang.IgnoreRest
 
 /**
  */
@@ -34,31 +36,22 @@ class TestOpenStatement extends spock.lang.Specification
     {
       Object[] next = (Object[]) it.next()
       if (next.length == 1)
-        result.add(next[0]); else
+        result.add(next[0]);
+      else
         result.add(next)
     }
     final String dump;
     if (result.size() == 1)
-      dump = yaml.dump(result[0]) else
+      dump = yaml.dump(result[0])
+    else
       dump = yaml.dump(result);
-    System.out.println(dump);
     def shortRes = dump.substring(0, dump.length() - 1);
+    //System.out.println(shortRes);
     return shortRes
   }
 
-  def "Variations of the open statement"()
-  {
-    expect:
-      run(query).equals(result)
 
-    where:
-      query | result
-      'init {"driver" = "org.fqlsource.fqltest.mockdriver.MockDriver"} from e1' | '1'
-      'init {driver = "org.fqlsource.fqltest.mockdriver.MockDriver"} from e1' | '1'
-      'init {driver = "org.fqlsource.fqltest.mockdriver.MockDriver"} as c from e1' | '1'
-  }
-
-  def "Checking if invalid open statements are reported properly"()
+  def CheckSyntaxErrorReporting()
   {
     when: FqlParser.runQuery(query)
     then:
@@ -66,9 +59,37 @@ class TestOpenStatement extends spock.lang.Specification
       println x.messageLong
     where:
       query << ['from e1', // this must fail, because no connection is provided from here, nor in the query
-              'init {driver = "non-existing"} from e1',
-              'init {driver = "org.fqlsource.fqltest.mockdriver.MockDriver", noOpen="true"} from e1',
+              'open {driver = ""; more=""} from e1', // semicolon is bad
+              'open {} ', // properties may not be empty
 
       ]
   }
+
+  def CheckRuntimeErrorReporting()
+  {
+    when: FqlParser.runQuery(query)
+    then:
+      FqlDataException x = thrown()
+      println x.getMessage()
+    where:
+      query <<
+      [
+        'open {driver = "non-existing"} from e1',
+        'open {driver = "org.fqlsource.fqltest.mockdriver.MockDriverConnection", testExceptionHandling="true"} from e1',
+      ]
+  }
+  def "Variations of the open statement"()
+  {
+    expect:
+      run(query).equals(result)
+
+    where:
+      query | result
+      'open {"driver" = "org.fqlsource.fqltest.mockdriver.MockDriverConnection"} from e1' | '1'
+      'open {driver = "org.fqlsource.fqltest.mockdriver.MockDriverConnection"} from e1' | '1'
+      'open {driver = "org.fqlsource.fqltest.mockdriver.MockDriverConnection",} from e1' | '1'
+      'open {driver = "org.fqlsource.fqltest.mockdriver.MockDriverConnection", more=""} from e1' | '1'
+      'open {driver = "org.fqlsource.fqltest.mockdriver.MockDriverConnection"} as c from e1' | '1'
+  }
+
 }

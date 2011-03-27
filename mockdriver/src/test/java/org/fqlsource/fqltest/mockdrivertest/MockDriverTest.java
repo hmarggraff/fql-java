@@ -96,8 +96,8 @@ public class MockDriverTest
             Object it = stream.next();
             Assert.assertTrue((Boolean) stream.getObject(env, it, "yes"));
             Assert.assertFalse((Boolean) stream.getObject(env, it, "no"));
-            Assert.assertEquals(stream.getObject(env, it, "L" + Integer.toString(count)), count);
-            Assert.assertEquals(stream.getObject(env, it, "S" + count), "S" + count);
+            Assert.assertEquals(stream.getObject(env, it, "L" + Integer.toString(count)), (long) count);
+            Assert.assertEquals(stream.getObject(env, it, "S" + count), count + ".S" + count);
             Assert.assertEquals(stream.getObject(env, it, "D" + count), (double)count);
             Assert.assertEquals(((Date)stream.getObject(env, it, "T" + count)).getTime(), count);
             count++;

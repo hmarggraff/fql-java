@@ -42,7 +42,7 @@ public class NavNodesTest extends NodeTestBase
     public static NamedIndex defaultSourceIndex;
 
     @BeforeClass
-    public void openConnction() throws FqlDataException
+    public static void openConnction() throws FqlDataException
     {
         Map<String, String> p = new HashMap<String, String>();
         p.put("driver", "MockDriver");

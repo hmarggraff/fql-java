@@ -30,16 +30,17 @@ public class FqlDataException extends Exception
 
     public FqlDataException(Throwable cause, int row, int col)
     {
-        super(cause);
+        super("Error:(" + row+ ", " + col + ") " + cause.getMessage());
     }
 
-    public FqlDataException(String s, int row, int col)
+    public FqlDataException(String msg, int row, int col)
     {
-        super(s + " Row:" + row + " Col:" + col);
+        super("Error:(" + row+ ", " + col + ") " + msg);
     }
 
     public FqlDataException(String msg, Throwable cause, int row, int col)
     {
-        super(msg + " Row:" + row + " Col:" + col, cause);
+        super("Error:(" + row+ ", " + col + ") " + msg, cause);
     }
+
 }

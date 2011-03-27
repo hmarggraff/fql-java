@@ -120,7 +120,7 @@ public class Lexer
         keywords.put("nil", Token.Nil);
         keywords.put("not", Token.Not);
         keywords.put("null", Token.Nil);
-        keywords.put("init", Token.Open);
+        keywords.put("open", Token.Open);
         keywords.put("or", Token.Or);
         keywords.put("select", Token.Select);
         keywords.put("true", Token.True);

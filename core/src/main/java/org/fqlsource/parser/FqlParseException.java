@@ -23,12 +23,6 @@ public class FqlParseException extends Exception
     public final int col;
     public final int row;
 
-    private FqlParseException(final String message)
-    {
-        super(message);
-        row = col = 0;
-    }
-
     public FqlParseException(String message, String queryText, int row, int col)
     {
         super(message);

@@ -20,6 +20,8 @@ import org.fqlsource.data.FqlIterator
 import org.fqlsource.parser.FqlParser
 import org.yaml.snakeyaml.Yaml
 import spock.lang.Shared
+import org.fqlsource.parser.FqlParseException
+import spock.lang.IgnoreRest
 
 /**
  */
@@ -31,8 +33,6 @@ class SimpleQueries extends spock.lang.Specification
   MockDriverConnection makeConn()
   {
     Map<String, String> p = new HashMap<String, String>();
-    p.put("driver", "MockDriver");
-    p.put("count", "1");
     MockDriverConnection tconn = new MockDriverConnection();
     tconn.init(p);
     return tconn
@@ -46,22 +46,39 @@ class SimpleQueries extends spock.lang.Specification
     {
       Object[] next = (Object[]) it.next()
       if (next.length == 1)
-        result.add(next[0]); else
+        result.add(next[0]);
+      else
         result.add(next)
     }
     final String dump;
     if (result.size() == 1)
-      dump = yaml.dump(result[0]) else
+      dump = yaml.dump(result[0])
+    else
       dump = yaml.dump(result);
-    System.out.println(dump);
+    //System.out.println(dump);
     def shortRes = dump.substring(0, dump.length() - 1);
     return shortRes
+  }
+
+  //@IgnoreRest
+  def testBasicParsing()
+  {
+    setup:
+      def query = "from e0"
+      def p = new FqlParser(query, conn)
+    when:
+      def clauses = p.parseClauses()
+    then:
+      clauses.size() == 1
+      p.getQueryString() == query
+      p.getPos() == query.length()
+
   }
 
   def "Basic Use And From Clauses"()
   {
     expect:
-    run(query).equals(result)
+    run(query) == result
 
     where:
     query | result

@@ -38,12 +38,12 @@ public class MockDriverConnection extends NamedImpl implements FqlConnection
 
     public FqlStreamContainer getStream(String streamName) throws FqlDataException
     {
-        if (Character.isJavaIdentifierStart(name.charAt(0)) && Character.isDigit(name.charAt(1)))
+        if (Character.isJavaIdentifierStart(streamName.charAt(0)) && Character.isDigit(streamName.charAt(1)))
         {
-            long count = letterNum(name);
+            long count = letterNum(streamName);
             return new MockStreamContainer(this, streamName, (int) count);
         }
-        throw new FqlDataException("Entry Point Named " + name + " does not exist");
+        throw new FqlDataException("Entry Point streamNamed " + streamName + " does not exist");
     }
 
     public FqlMapContainer getMap(String containerName) throws FqlDataException
@@ -78,7 +78,7 @@ public class MockDriverConnection extends NamedImpl implements FqlConnection
         }
         catch (NumberFormatException fex)
         {
-            throw new FqlDataException("Mockdriver failed to parse long from fieldname. Should be 'E'+ value", fex);
+            throw new FqlDataException("Mockdriver failed to parse long from fieldname. Should be character + value", fex);
         }
     }
 
