@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011, Hans Marggraff and other copyright owners as documented in the project's IP log.
+ *   Copyright (C) 2011, Hans Marggraff and other copyright owners as documented in the project's IP log.
  * This program and the accompanying materials are made available under the terms of the Eclipse Distribution License v1.0 which accompanies this distribution, is reproduced below, and is available at http://www.eclipse.org/org/documents/edl-v10.php
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -13,19 +13,20 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.fqlsource.fqltest.mockdriver;
+package org.fqlsource.fqltest.mockdriver
 
+import org.fqlsource.data.FqlIterator
 
 import org.fqlsource.parser.FqlParser
-
+import org.yaml.snakeyaml.Yaml
 import spock.lang.Shared
-import org.fqlsource.parser.FqlParseException
 
 /**
  */
-class BadQueries extends spock.lang.Specification
+class SimpleQueries extends spock.lang.Specification
 {
   @Shared conn = makeConn();
+  @Shared yaml = new Yaml();
 
   MockDriverConnection makeConn()
   {
@@ -37,14 +38,37 @@ class BadQueries extends spock.lang.Specification
     return tconn
   }
 
-  def "Recognize erroneous queries"()
+  def String run(String query)
   {
-    when: FqlParser.runQuery(query, null, conn)
-    then:
-      FqlParseException x = thrown()
-      println x.messageLong
+    final org.fqlsource.data.FqlIterator it = FqlParser.runQuery(query, null, conn)
+    def result = new ArrayList()
+    while (it.hasNext())
+    {
+      Object[] next = (Object[]) it.next()
+      if (next.length == 1)
+        result.add(next[0]); else
+        result.add(next)
+    }
+    final String dump;
+    if (result.size() == 1)
+      dump = yaml.dump(result[0]) else
+      dump = yaml.dump(result);
+    System.out.println(dump);
+    def shortRes = dump.substring(0, dump.length() - 1);
+    return shortRes
+  }
+
+  def "Basic Use And From Clauses"()
+  {
+    expect:
+    run(query).equals(result)
+
     where:
-      query << ['silly', 'from "', 'from "ep1"', 'use "ep2"', 'use b as from a ', 'use b', 'use b as "bla"',
-                'init {}', 'init { driver="bla"}', 'init from', 'init { from="bla"']
+    query | result
+    "from e1 select e1" | '1'
+    // "use xy from e1 select xy[a]" | "- [1]"
+    "from e2 select a,b" | "- [1.a, 1.b]\n- [2.a, 2.b]"
+    "from e2 select a" | "[1.a, 2.a]"
+    "from e2" | "[1, 2]"
   }
 }

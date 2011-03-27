@@ -2,7 +2,7 @@ package org.fqlsource.fqltest.mockdriver;
 
 
 /*
-   Copyright (C) 2011, Hans Marggraff and other copyright owners as documented in the project's IP log.
+ Copyright (C) 2011, Hans Marggraff and other copyright owners as documented in the project's IP log.
  This program and the accompanying materials are made available under the terms of the Eclipse Distribution License v1.0 which accompanies this distribution, is reproduced below, and is available at http://www.eclipse.org/org/documents/edl-v10.php
  All rights reserved.
  Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -16,19 +16,21 @@ package org.fqlsource.fqltest.mockdriver;
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.fqlsource.data.FqlDataException;
 import org.fqlsource.data.FqlStreamContainer;
 import org.fqlsource.data.RunEnv;
 import org.fqlsource.util.Named;
+import org.fqlsource.util.NamedImpl;
 
-public class MockStreamContainer implements FqlStreamContainer<MockDriverConnection>
+public class MockStreamContainer extends NamedImpl implements FqlStreamContainer<MockDriverConnection>
 {
-    public static String defaultEntryPointName = "nowhere";
     final int count;
     private MockDriverConnection connection;
     int at = 0;
 
-    public MockStreamContainer(MockDriverConnection connection, int count)
+    public MockStreamContainer(MockDriverConnection connection, String name, int count)
     {
+        super(name);
         this.connection = connection;
         this.count = count;
     }
@@ -50,18 +52,8 @@ public class MockStreamContainer implements FqlStreamContainer<MockDriverConnect
         return connection;
     }
 
-    public Object getObject(RunEnv runEnv, Object from, String member)
+    public Object getObject(RunEnv runEnv, Object from, String member) throws FqlDataException
     {
-        return connection.getDriver().getObject(from, member, this);
-    }
-
-    public String getName()
-    {
-        return defaultEntryPointName;
-    }
-
-    public int compareTo(Named n)
-    {
-        return getName().compareTo(n.getName());
+        return connection.getObject(from, member, this);
     }
 }

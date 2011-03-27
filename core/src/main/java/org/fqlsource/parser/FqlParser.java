@@ -15,10 +15,7 @@ package org.fqlsource.parser;
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.fqlsource.data.FqlConnection;
-import org.fqlsource.data.FqlDataException;
-import org.fqlsource.data.FqlIterator;
-import org.fqlsource.data.RunEnv;
+import org.fqlsource.data.*;
 import org.fqlsource.exec.*;
 import org.fqlsource.util.NamedIndex;
 
@@ -193,15 +190,18 @@ public class FqlParser
         if (t == Token.As)
         {
             String conn_name = expect_name("connection");
-            clauses.add(new ConnectClause(conn_name, connectionCount++, config));
+            clauses.add(new ConnectClause(conn_name, connectionCount++, config, lex.getRow(), lex.getCol()));
         }
         else
         {
-            if (connections.containsKey(FqlConnection.default_provided_connection_name))
+            if (connections.containsKey(RunEnv.default_provided_connection_name))
             {
                 throw new FqlParseException("Only one unnamed connection allowed", this);
             }
-            clauses.add(new ConnectClause(FqlConnection.default_provided_connection_name, connectionCount++, config));
+            final ConnectClause connectClause = new ConnectClause(RunEnv.default_provided_connection_name, connectionCount++, config, lex.getRow(), lex.getCol());
+            clauses.add(connectClause);
+            connections.put(RunEnv.default_provided_connection_name, connectClause);
+            lex.pushBack();
         }
 
 

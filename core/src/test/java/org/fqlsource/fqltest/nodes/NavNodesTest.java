@@ -18,13 +18,15 @@ package org.fqlsource.fqltest.nodes;
 
 import org.fqlsource.data.*;
 import org.fqlsource.exec.*;
-import org.fqlsource.fqltest.mockdriver.MockDriver;
+import org.fqlsource.fqltest.mockdriver.MockDriverConnection;
 import org.fqlsource.util.NamedIndex;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
@@ -36,19 +38,17 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 public class NavNodesTest extends NodeTestBase
 {
     static RunEnv env;
-    private static MockDriver mockDriver;
-    private static FqlConnection conn;
     public static FqlStreamContainer source;
     public static NamedIndex defaultSourceIndex;
 
     @BeforeClass
-    public static void init() throws FqlDataException
+    public void openConnction() throws FqlDataException
     {
-        Properties p = new Properties();
+        Map<String, String> p = new HashMap<String, String>();
         p.put("driver", "MockDriver");
         p.put("count", "1");
-        mockDriver = new MockDriver();
-        conn = mockDriver.open(p);
+        FqlConnection conn = new MockDriverConnection();
+        conn.init(p);
         env = new RunEnv(1, 1, 0, null);
         defaultSourceIndex = new NamedIndex("e1", 0);
 
@@ -87,14 +87,4 @@ public class NavNodesTest extends NodeTestBase
         }
 
     }
-
-    void clauses(List<FqlStatement> fqlStatements) throws FqlDataException
-    {
-        FqlIterator precedent = null;
-        for (FqlStatement statement : fqlStatements)
-        {
-            precedent = statement.execute(env, precedent);
-        }
-    }
-
 }

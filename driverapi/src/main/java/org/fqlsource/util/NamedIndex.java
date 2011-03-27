@@ -1,4 +1,4 @@
-package org.fqlsource.data;
+package org.fqlsource.util;
 
 /*
  Copyright (C) 2011, Hans Marggraff and other copyright owners as documented in the project's IP log.
@@ -15,23 +15,19 @@ package org.fqlsource.data;
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.fqlsource.util.Named;
-
-import java.util.Map;
-
-/** This class implements the logic to implement a specific datasource
- * Actual data access in provided in the two Container classes.
- */
-public interface FqlConnection extends Named
+public class NamedIndex extends NamedImpl
 {
 
-    void init(Map<String, String> props) throws FqlDataException;
+    public final int index; // key for fast lookup
 
-    void close();
+    public NamedIndex(String name, int index)
+    {
+        super(name);
+        this.index = index;
+    }
 
-    FqlStreamContainer getStream(String streamName) throws FqlDataException;
-
-    FqlMapContainer getMap(String containerName) throws FqlDataException;
-
-
+    public int getIndex()
+    {
+        return index;
+    }
 }

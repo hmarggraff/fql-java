@@ -8,7 +8,7 @@ import org.fqlsource.data.RunEnv;
 public class DotNode extends UnaryNode
 {
     protected String memberName;
-    int entryPointIndex; // the key in the array of open connections
+    int entryPointIndex; // the key in the array of init connections
 
     public DotNode(FqlNodeInterface left, String memberName, int entryPointIndex, int row, int col)
     {

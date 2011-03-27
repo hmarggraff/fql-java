@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011, Hans Marggraff and other copyright owners as documented in the project's IP log.
+ *   Copyright (C) 2011, Hans Marggraff and other copyright owners as documented in the project's IP log.
  * This program and the accompanying materials are made available under the terms of the Eclipse Distribution License v1.0 which accompanies this distribution, is reproduced below, and is available at http://www.eclipse.org/org/documents/edl-v10.php
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -13,38 +13,15 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.fqlsource.fqltest.mockdriver;
+apply plugin:'groovy'
+apply from: "https://github.com/valkolovos/gradle_cobertura/raw/master/ivy/gradle_cobertura/gradle_cobertura/1.0-rc4/coberturainit.gradle"
 
-
-import org.fqlsource.parser.FqlParser
-
-import spock.lang.Shared
-import org.fqlsource.parser.FqlParseException
-
-/**
- */
-class BadQueries extends spock.lang.Specification
-{
-  @Shared conn = makeConn();
-
-  MockDriverConnection makeConn()
-  {
-    Map<String, String> p = new HashMap<String, String>();
-    p.put("driver", "MockDriver");
-    p.put("count", "1");
-    MockDriverConnection tconn = new MockDriverConnection();
-    tconn.init(p);
-    return tconn
-  }
-
-  def "Recognize erroneous queries"()
-  {
-    when: FqlParser.runQuery(query, null, conn)
-    then:
-      FqlParseException x = thrown()
-      println x.messageLong
-    where:
-      query << ['silly', 'from "', 'from "ep1"', 'use "ep2"', 'use b as from a ', 'use b', 'use b as "bla"',
-                'init {}', 'init { driver="bla"}', 'init from', 'init { from="bla"']
-  }
+dependencies {
+  groovy("org.codehaus.groovy:groovy-all:1.7.5")
+  testCompile 'junit:junit:4.8.2'
+  testCompile 'org.yaml:snakeyaml:1.7'
+  testCompile 'org.spockframework:spock-core:0.5-groovy-1.7'
+  testCompile project(':mockdriver')
+  compile project(':driverapi')
 }
+

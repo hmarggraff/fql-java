@@ -15,32 +15,20 @@
 
 package org.fqlsource.fqltest.mockdriver
 
-import org.fqlsource.exec.FqlIterator
-import org.fqlsource.mockdriver.MockDriver
-import org.fqlsource.mockdriver.MockDriverConnection
 import org.fqlsource.parser.FqlParser
 import org.yaml.snakeyaml.Yaml
 import spock.lang.Shared
+import org.fqlsource.parser.FqlParseException
 
 /**
  */
-class SpockQueries extends spock.lang.Specification
+class TestOpenStatement extends spock.lang.Specification
 {
-  @Shared conn = makeConn();
   @Shared yaml = new Yaml();
-
-  MockDriverConnection makeConn()
-  {
-    Properties p = new Properties();
-    p.put("driver", "org.fqlsource.mockdriver.MockDriver");
-    p.put("count", "2");
-    final MockDriver mockDriver = new MockDriver();
-    return mockDriver.open(p);
-  }
 
   def String run(String query)
   {
-    final FqlIterator it = FqlParser.runQuery(query, null, conn)
+    final org.fqlsource.data.FqlIterator it = FqlParser.runQuery(query)
     def result = new ArrayList()
     while (it.hasNext())
     {
@@ -50,7 +38,7 @@ class SpockQueries extends spock.lang.Specification
         result.add(next)
     }
     final String dump;
-    if (result.size == 1)
+    if (result.size() == 1)
       dump = yaml.dump(result[0]) else
       dump = yaml.dump(result);
     System.out.println(dump);
@@ -58,17 +46,29 @@ class SpockQueries extends spock.lang.Specification
     return shortRes
   }
 
-  def "Basic Use And From Clauses"()
+  def "Variations of the open statement"()
   {
     expect:
-    run(query).equals(result)
+      run(query).equals(result)
 
     where:
-    query | result
-    "from e1 select e1" | '1'
-    // "use xy from e1 select xy[a]" | "- [1]"
-    "from e2 select a,b" | "- [1.a, 1.b]\n- [2.a, 2.b]"
-    "from e2 select a" | "[1.a, 2.a]"
-    "from e2" | "[1, 2]"
+      query | result
+      'init {"driver" = "org.fqlsource.fqltest.mockdriver.MockDriver"} from e1' | '1'
+      'init {driver = "org.fqlsource.fqltest.mockdriver.MockDriver"} from e1' | '1'
+      'init {driver = "org.fqlsource.fqltest.mockdriver.MockDriver"} as c from e1' | '1'
+  }
+
+  def "Checking if invalid open statements are reported properly"()
+  {
+    when: FqlParser.runQuery(query)
+    then:
+      FqlParseException x = thrown()
+      println x.messageLong
+    where:
+      query << ['from e1', // this must fail, because no connection is provided from here, nor in the query
+              'init {driver = "non-existing"} from e1',
+              'init {driver = "org.fqlsource.fqltest.mockdriver.MockDriver", noOpen="true"} from e1',
+
+      ]
   }
 }
