@@ -3,6 +3,9 @@ package org.fqlsource.exec;
 import org.fqlsource.data.FqlDataException;
 import org.fqlsource.data.RunEnv;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 /**
  */
 public class NotEqualNode extends BinaryNode
@@ -14,11 +17,6 @@ public class NotEqualNode extends BinaryNode
 
     public Object getValue(RunEnv env, Object from) throws FqlDataException
     {
-        Object leftValue = left.getValue(env, from);
-        Object rightValue = right.getValue(env, from);
-        if (leftValue == null)
-            return rightValue != null;
-        else
-            return !leftValue.equals(rightValue);
+        return !realEqual(env,from);
     }
 }

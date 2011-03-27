@@ -44,7 +44,7 @@ class BadQueries extends spock.lang.Specification
       FqlParseException x = thrown()
       println x.messageLong
     where:
-      query << ['silly', 'from "', 'from "ep1"', 'use "ep2"', 'use b as from a ', 'use b', 'use b as "bla"',
-                'init {}', 'init { driver="bla"}', 'init from', 'init { from="bla"']
+      query << ['silly', '"eofinstring', 'from "', 'from "ep1"', 'use "ep2"', 'use b as from a ', 'use b', 'use b as "bla"',
+                'open {}', 'open { driver="bla"}', 'open from', 'open { from="bla"', 'from e1 where !a']
   }
 }

@@ -40,6 +40,8 @@ class SimpleQueries extends spock.lang.Specification
 
   def String run(String query)
   {
+    print query
+    print ' --> '
     final org.fqlsource.data.FqlIterator it = FqlParser.runQuery(query, null, conn)
     def result = new ArrayList()
     while (it.hasNext())
@@ -55,16 +57,16 @@ class SimpleQueries extends spock.lang.Specification
       dump = yaml.dump(result[0])
     else
       dump = yaml.dump(result);
-    //System.out.println(dump);
     def shortRes = dump.substring(0, dump.length() - 1);
+    System.out.println(shortRes);
+
     return shortRes
   }
 
-  //@IgnoreRest
   def testBasicParsing()
   {
     setup:
-      def query = "from e0"
+      def query = 'from\n\t\r\ne0'
       def p = new FqlParser(query, conn)
     when:
       def clauses = p.parseClauses()
@@ -88,4 +90,27 @@ class SimpleQueries extends spock.lang.Specification
     "from e2 select a" | "[1.a, 2.a]"
     "from e2" | "[1, 2]"
   }
+
+  //@ IgnoreRest
+  def Expressions()
+  {
+    expect:
+      run(query) == result
+
+    where:
+      query | result
+      "from e2 where e2 > 1 select e2" | '2'
+      "from e3 as x where x <\n3 select x" | '[1, 2]'
+      "from e3 as x where x <= 2" | '[1, 2]'
+      "from e3 as x where x >= 2" | '[2, 3]'
+      "from e3 as x where x != 2" | '[1, 3]'
+      "from e3 as x where x = 2" | '2'
+      //"from e3 as x where not x >= 2 select x" | '1'
+      "from e3 where true " | '[1, 2, 3]'
+      "from e3 where false " | '[]'
+      "from e3 as x select x+2" | '[3, 4, 5]'
+      "from e3 as x select x-2" | '[-1, 0, 1]'
+      "from e3 as x select x*x" | '[1, 4, 9]'
+  }
+
 }

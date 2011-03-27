@@ -148,11 +148,6 @@ public class Lexer
         return row;
     }
 
-    public String getText()
-    {
-        return src;
-    }
-
     protected char nextChar() throws FqlParseException
     {
         if (pos >= src.length())

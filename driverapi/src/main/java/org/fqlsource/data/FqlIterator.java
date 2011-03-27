@@ -20,6 +20,6 @@ import org.fqlsource.data.FqlDataException;
 
 public interface FqlIterator
 {
-    boolean hasNext();
+    boolean hasNext() throws FqlDataException;
     Object next() throws FqlDataException;
 }

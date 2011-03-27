@@ -16,6 +16,7 @@ package org.fqlsource.exec;
  */
 
 
+import org.fqlsource.data.FqlDataException;
 import org.fqlsource.data.FqlIterator;
 import org.fqlsource.data.RunEnv;
 
@@ -30,7 +31,7 @@ public abstract class AbstractFqlIterator implements FqlIterator
         this.precedent = precedent;
     }
 
-    public boolean hasNext()
+    public boolean hasNext() throws FqlDataException
     {
         return precedent.hasNext();
     }
