@@ -158,7 +158,6 @@ public class FqlParser
 
     private void parseOpen() throws FqlParseException
     {
-
         check_token(Token.LBrace);
         HashMap<String, String> config = new HashMap<String, String>();
         Token t =  nextToken();

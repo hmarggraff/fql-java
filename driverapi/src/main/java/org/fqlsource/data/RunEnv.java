@@ -15,10 +15,6 @@ package org.fqlsource.data;
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.fqlsource.NotYetImplementedError;
-
-import java.util.HashMap;
-
 public class RunEnv
 {
     public static final String default_provided_connection_name = "provided_connection";
@@ -30,7 +26,7 @@ public class RunEnv
     /**
      * List of secondary data sources with lookup access
      */
-    FqlMapContainer[] lookups;
+    FqlMapContainer[] maps;
     /**
      * Stack of iterator streams, depth is equivalent to the nesting level of the query
      */
@@ -45,7 +41,7 @@ public class RunEnv
     {
         connections = new FqlConnection[connectionCount];
         streams = new FqlStreamContainer[streamDepth];
-        lookups = new FqlMapContainer[secondaries];
+        maps = new FqlMapContainer[secondaries];
         this.parameterValues = parameterValues;
     }
 
@@ -56,13 +52,13 @@ public class RunEnv
 
     public Object getValue(String member, Object from, int index) throws FqlDataException
     {
-        Object object = lookups[index].getObject(this, from, member);
+        Object object = maps[index].getObject(this, from, member);
         return object;
     }
 
-    FqlMapContainer getMapContainer(int entryPointIndex)
+    public FqlMapContainer getMapContainer(int entryPointIndex)
     {
-        return lookups[entryPointIndex];
+        return maps[entryPointIndex];
     }
 
     public FqlConnection getConnection(int connectionIndex)
@@ -72,7 +68,7 @@ public class RunEnv
 
     public void setMapContainer(int index, FqlMapContainer container)
     {
-        lookups[index] = container;
+        maps[index] = container;
     }
 
     public void popStream()

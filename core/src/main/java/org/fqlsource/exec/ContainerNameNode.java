@@ -2,18 +2,17 @@ package org.fqlsource.exec;
 
 import org.fqlsource.NotYetImplementedError;
 import org.fqlsource.data.FqlDataException;
+import org.fqlsource.data.FqlMapContainer;
 import org.fqlsource.data.RunEnv;
 import org.fqlsource.util.NamedIndex;
 
 /**
- * Allows to use the stream name in an expression.
- * getValue returns the current object of the iterator
  */
-public class IteratorNameNode extends FqlNode
+public class ContainerNameNode extends FqlNode
 {
     NamedIndex it;
 
-    public IteratorNameNode(NamedIndex it, int row, int col)
+    public ContainerNameNode(NamedIndex it, int row, int col)
     {
         super(row, col);
         this.it = it;
@@ -21,16 +20,14 @@ public class IteratorNameNode extends FqlNode
 
     public Object getValue(RunEnv env, Object from) throws FqlDataException
     {
-        if (it == null)
-        {
-            throw new NotYetImplementedError();
-        }
-        return from;
+        FqlMapContainer mapContainer = env.getMapContainer(it.index);
+        return mapContainer;
     }
 
     public void dump(StringBuffer sb)
     {
         lispify(sb, it.getName());
     }
+
 
 }

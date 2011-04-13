@@ -91,7 +91,7 @@ class SimpleQueries extends spock.lang.Specification
     "from e2" | "[1, 2]"
   }
 
-  //@ IgnoreRest
+  @IgnoreRest
   def Expressions()
   {
     expect:
@@ -99,18 +99,25 @@ class SimpleQueries extends spock.lang.Specification
 
     where:
       query | result
-      "from e2 where e2 > 1 select e2" | '2'
-      "from e3 as x where x <\n3 select x" | '[1, 2]'
-      "from e3 as x where x <= 2" | '[1, 2]'
-      "from e3 as x where x >= 2" | '[2, 3]'
-      "from e3 as x where x != 2" | '[1, 3]'
-      "from e3 as x where x = 2" | '2'
-      //"from e3 as x where not x >= 2 select x" | '1'
-      "from e3 where true " | '[1, 2, 3]'
+    //"from e3 as x where not x >= 2 select x" | '1'
+    //'from e1 select 3+5, 3.0 + 1, 3.0 = 3' | '[8, 4.0, true]'
+    //'from e1 select true and false' | 'false'
+    //'from e1 select true and true' | 'true'
+    //'from e1 select not true' | 'false'
+    'from e1 select  3> 5 = false' | 'true'
+    /*
+    "from e2 where e2 > 1 select e2" | '2'
+    "from e3 as x where x <\n3 select x" | '[1, 2]'
+    "from e3 as x where x <= 2" | '[1, 2]'
+    "from e3 as x where x >= 2" | '[2, 3]'
+    "from e3 as x where x != 2" | '[1, 3]'
+    "from e3 as x where x = 2" | '2'
+    "from e3 where true " | '[1, 2, 3]'
       "from e3 where false " | '[]'
       "from e3 as x select x+2" | '[3, 4, 5]'
       "from e3 as x select x-2" | '[-1, 0, 1]'
       "from e3 as x select x*x" | '[1, 4, 9]'
+      */
   }
 
 }

@@ -98,19 +98,19 @@ public class FqlExpressionParser
         source = p.sources.get(symName);
         if (source != null)
         {
-            left = new IteratorNameNode(source, p.lex.getRow(), p.lex.getCol());
+            left = new ContainerNameNode(source, p.lex.getRow(), p.lex.getCol());
         }
         else
         {
             source = p.getIteratingSource();
-            left = new AccessNode(source, symName, p.lex.getRow(), p.lex.getCol());
+            left = new MemberNode(source, symName, p.lex.getRow(), p.lex.getCol());
         }
         left = parseBracket(tok, left);
 
         while (tok == Token.Dot)
         {
             symName = p.lex.nameVal;
-            left = new DotNode(left, symName, p.lex.getRow(), source.index, p.lex.getCol());
+            left = new DotNode(left, symName, source.index, p.lex.getRow(), p.lex.getCol());
             left = parseBracket(next(), left);
             tok = next();
         }
@@ -183,36 +183,42 @@ public class FqlExpressionParser
 
     FqlNodeInterface parseAnd() throws FqlParseException
     {
-        FqlNodeInterface l = parseCompare();
+        FqlNodeInterface l = parseNot();
         Token atToken = next();
         if (atToken != Token.And)
         {
             return pushBack(l);
         }
-        FqlNodeInterface r = parseCompare();
+        FqlNodeInterface r = parseNot();
         return new AndNode(l, r, p.lex.getRow(), p.lex.getCol());
     }
 
+
+    FqlNodeInterface parseUnaryMinus() throws FqlParseException
+    {
+        Token atToken = next();
+        if (atToken == Token.Minus)
+        {
+            return new UnaryMinusNode(parseIs(), p.lex.getRow(), p.lex.getCol());
+        }
+        else
+        {
+            p.lex.pushBack();
+            return parseAtom();
+        }
+    }
 
     FqlNodeInterface parseNot() throws FqlParseException
     {
         Token atToken = next();
         if (atToken == Token.Not)
         {
-            return new NotNode(parseIs(), p.lex.getRow(), p.lex.getCol());
-        }
-        else if (atToken == Token.Minus)
-        {
-            return new UnaryMinusNode(parseIs(), p.lex.getRow(), p.lex.getCol());
-        }
-        else if (atToken == Token.Plus) // unary plus
-        {
-            return parseIs();
+            return new NotNode(parseCompare(), p.lex.getRow(), p.lex.getCol());
         }
         else
         {
             p.lex.pushBack();
-            return parseAtom();
+            return parseCompare();
         }
     }
 
@@ -282,7 +288,7 @@ public class FqlExpressionParser
 
     FqlNodeInterface parseMultiply() throws FqlParseException
     {
-        FqlNodeInterface l = parseNot();
+        FqlNodeInterface l = parseUnaryMinus();
         for (; ;)
         {
             Token t = next();
@@ -292,7 +298,7 @@ public class FqlExpressionParser
             }
             final int row = p.lex.getRow();
             final int col = p.lex.getCol();
-            FqlNodeInterface r = parseNot();
+            FqlNodeInterface r = parseUnaryMinus();
             if (t == Token.Mod)
             {
                 l = new ModuloNode(l, r, row, col);
@@ -393,20 +399,15 @@ public class FqlExpressionParser
         FqlNodeInterface left = parseQuestion();
         final Lexer.Token t = next();
 
-        if (t == Lexer.Token.As)
-        {
-            final String className = p.lex.nameVal;
-            return new TypeCastNode(left, className, p.lex.getRow(), p.lex.getCol());
-        }
-        else
-        {
-            p.lex.pushBack();
-            return left;
-        }
+        if (t != Token.As)
+            return pushBack(left);
+        final String className = p.lex.nameVal;
+        return new TypeCastNode(left, className, p.lex.getRow(), p.lex.getCol());
     }
 
     FqlNodeInterface parseAssign() throws FqlParseException
     {
+        // parse expression
         FqlNodeInterface left = parseAs();
 
         Lexer.Token t = next();
@@ -414,11 +415,11 @@ public class FqlExpressionParser
         {
             return pushBack(left);
         }
-        if (!(left instanceof AccessNode))
+        if (!(left instanceof MemberNode))
         {
             throw new FqlParseException("left of assignment is not a name but a " + left.getClass().getName(), p);
         }
-        AccessNode an = (AccessNode) left;
+        MemberNode an = (MemberNode) left;
         String targetName = an.getMemberName();
 
 

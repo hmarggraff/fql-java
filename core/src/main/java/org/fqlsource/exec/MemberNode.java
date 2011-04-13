@@ -1,17 +1,20 @@
 package org.fqlsource.exec;
 
+import org.fqlsource.NotYetImplementedError;
 import org.fqlsource.data.FqlDataException;
 import org.fqlsource.data.RunEnv;
 import org.fqlsource.util.NamedIndex;
 
 /**
+ * Allows to use the stream name in an expression.
+ * getValue returns the current object of the iterator
  */
-public class AccessNode extends FqlNode
+public class MemberNode extends FqlNode
 {
     private final NamedIndex source;
     private final String memberName;
 
-    public AccessNode(NamedIndex source, String memberName, int row, int col)
+    public MemberNode(NamedIndex source, String memberName, int row, int col)
     {
         super(row, col);
         this.source = source;
@@ -25,9 +28,8 @@ public class AccessNode extends FqlNode
 
     public void dump(StringBuffer sb)
     {
-        lispify(sb, "memberName");
+        lispify(sb, "memberName", "source");
     }
-
 
     public String getMemberName()
     {

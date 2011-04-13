@@ -25,9 +25,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 
@@ -60,7 +58,7 @@ public class NavNodesTest extends NodeTestBase
     @Test
     public void testAccessNode() throws FqlDataException
     {
-        AccessNode an = new AccessNode(defaultSourceIndex, "s1", 1, 1);
+        MemberNode an = new MemberNode(defaultSourceIndex, "s1", 1, 1);
         while (source.hasNext())
         {
             Object o = source.next();
@@ -75,7 +73,7 @@ public class NavNodesTest extends NodeTestBase
     @Test
     public void testDotNode() throws FqlDataException
     {
-        AccessNode an = new AccessNode(defaultSourceIndex, "s1", 1, 1);
+        MemberNode an = new MemberNode(defaultSourceIndex, "s1", 1, 1);
         DotNode dn = new DotNode(an, "d1", 0, 1, 1);
         while (source.hasNext())
         {

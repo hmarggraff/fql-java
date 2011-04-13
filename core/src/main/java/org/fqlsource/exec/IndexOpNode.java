@@ -2,6 +2,7 @@ package org.fqlsource.exec;
 
 import org.fqlsource.NotYetImplementedError;
 import org.fqlsource.data.FqlDataException;
+import org.fqlsource.data.FqlMapContainer;
 import org.fqlsource.data.RunEnv;
 
 /**
@@ -15,6 +16,9 @@ public class IndexOpNode extends BinaryNode
 
     public Object getValue(RunEnv env, Object from) throws FqlDataException
     {
-        throw new NotYetImplementedError();
+        FqlMapContainer mapContainer = (FqlMapContainer) left.getValue(env, from);
+        Object key = right.getValue(env, from);
+        Object ret = mapContainer.lookup(env, key);
+        return ret;
     }
 }
