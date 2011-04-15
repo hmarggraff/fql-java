@@ -15,14 +15,14 @@
 
 package org.fqlsource.fqltest.mockdriver
 
-import spock.lang.Shared
 import org.fqlsource.data.FqlMapContainer
-
-import org.fqlsource.exec.ContainerNameNode
 import org.fqlsource.data.RunEnv
-import org.fqlsource.util.NamedIndex
 import org.fqlsource.exec.ConstStringNode
+import org.fqlsource.exec.ContainerNameNode
 import org.fqlsource.exec.IndexOpNode
+import org.fqlsource.util.NamedIndex
+import spock.lang.IgnoreRest
+import spock.lang.Shared
 
 /**
  */
@@ -40,19 +40,50 @@ class TestLookup extends spock.lang.Specification
     return tconn
   }
 
+  def Object node(String key)
+  {
+    FqlMapContainer map = conn.getMap("map")
+    RunEnv env = new RunEnv(1, 1, 1, null)
+    env.setMapContainer(0, map)
+    ContainerNameNode lookup = new ContainerNameNode(new NamedIndex("map", 0), 0, 1)
+    ConstStringNode csn = new ConstStringNode(key, 0, 2)
+    IndexOpNode ion = new IndexOpNode(lookup, csn, 0, 1)
+    def value = ion.getValue(env, null)
+    return value;
+  }
+
   def CheckLookup()
   {
     setup:
     FqlMapContainer map = conn.getMap("map")
-    RunEnv env = new RunEnv(1,1,1,null);
-    env.setMapContainer(0, map);
-    ContainerNameNode lookup = new ContainerNameNode(new NamedIndex("map", 0), 0,1);
-    ConstStringNode csn = new ConstStringNode("lookup", 0,2);
-    IndexOpNode ion = new IndexOpNode(lookup,  csn, 0,1);
+    RunEnv env = new RunEnv(1, 1, 1, null)
+    env.setMapContainer(0, map)
+    ContainerNameNode lookup = new ContainerNameNode(new NamedIndex("map", 0), 0, 1)
+    ConstStringNode csn = new ConstStringNode("lookup", 0, 2)
+    IndexOpNode ion = new IndexOpNode(lookup, csn, 0, 1)
     when:
     def value = ion.getValue(env, null)
     then:
-      value instanceof String
-      value == "Llookup"
+    value instanceof String
+    value == "Mlookup"
   }
+
+  @IgnoreRest
+  def LookupTypes()
+  {
+    setup:
+    final millis = System.currentTimeMillis()
+    expect:
+    final value = node(key)
+    ((Class) resultClass).isInstance(value)
+    value == result
+
+    where:
+    key | resultClass | result
+    'T' + millis | Date.class | new Date(millis)
+    'L42' | Long.class | 42
+    'D1_4142' | Double.class | 1.4142
+    'lookup' | String.class | 'Mlookup'
+  }
+
 }

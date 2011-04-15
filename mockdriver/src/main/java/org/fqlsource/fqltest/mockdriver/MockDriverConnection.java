@@ -33,7 +33,9 @@ public class MockDriverConnection extends NamedImpl implements FqlConnection
     public void init(Map<String, String> props) throws FqlDataException
     {
         if (props.containsKey("testExceptionHandling")) // used to test error handling
+        {
             throw new FqlDataException("Testing exception handling");
+        }
     }
 
     public FqlStreamContainer getStream(String streamName) throws FqlDataException
@@ -55,17 +57,29 @@ public class MockDriverConnection extends NamedImpl implements FqlConnection
     public Object getObject(Object parent, String fieldName, FqlContainer container) throws FqlDataException
     {
         if (fieldName.startsWith("L"))
+        {
             return letterNum(fieldName);
+        }
         else if (fieldName.startsWith("D"))
+        {
             return getDouble(fieldName);
+        }
         else if (fieldName.startsWith("T"))
+        {
             return getTime(fieldName);
+        }
         else if ("yes".equalsIgnoreCase(fieldName))
+        {
             return true;
+        }
         else if ("no".equalsIgnoreCase(fieldName))
+        {
             return false;
+        }
         else
+        {
             return parent.toString() + '.' + fieldName;
+        }
     }
 
     long letterNum(String fieldName) throws FqlDataException
@@ -88,12 +102,12 @@ public class MockDriverConnection extends NamedImpl implements FqlConnection
         vTxt = vTxt.replace('_', '.');
         try
         {
-            final long ret = Long.parseLong(vTxt);
+            final double ret = Double.parseDouble(vTxt);
             return ret;
         }
         catch (NumberFormatException fex)
         {
-            throw new FqlDataException("Mockdriver failed to parse long from fieldname. Should be 'C'+ value_decimal", fex);
+            throw new FqlDataException("Mockdriver failed to parse long from fieldname. Should be 'D'+ value_decimal", fex);
         }
     }
 
