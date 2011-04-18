@@ -23,12 +23,14 @@ import org.fqlsource.exec.IndexOpNode
 import org.fqlsource.util.NamedIndex
 import spock.lang.IgnoreRest
 import spock.lang.Shared
+import org.fqlsource.exec.DotNode
 
 /**
  */
 class TestLookup extends spock.lang.Specification
 {
-  @Shared conn = makeConn();
+  @Shared conn = makeConn()
+  @Shared long millis = System.currentTimeMillis()
 
   MockDriverConnection makeConn()
   {
@@ -67,12 +69,25 @@ class TestLookup extends spock.lang.Specification
     value instanceof String
     value == "Mlookup"
   }
-
-  @IgnoreRest
-  def LookupTypes()
+  def CheckLookupNav()
   {
     setup:
-    final millis = System.currentTimeMillis()
+    FqlMapContainer map = conn.getMap("map")
+    RunEnv env = new RunEnv(1, 1, 1, null)
+    env.setMapContainer(0, map)
+    ContainerNameNode lookup = new ContainerNameNode(new NamedIndex("map", 0), 0, 1)
+    ConstStringNode csn = new ConstStringNode("lookup", 0, 2)
+    IndexOpNode ion = new IndexOpNode(lookup, csn, 0, 1)
+    DotNode dn = new DotNode(ion, "nav", 0,0,1)
+    when:
+    def value = dn.getValue(env, null)
+    then:
+    value instanceof String
+    value == "Mlookup.nav"
+  }
+
+  def LookupTypes(String key, Class resultClass, Object result)
+  {
     expect:
     final value = node(key)
     ((Class) resultClass).isInstance(value)
@@ -80,10 +95,12 @@ class TestLookup extends spock.lang.Specification
 
     where:
     key | resultClass | result
-    'T' + millis | Date.class | new Date(millis)
-    'L42' | Long.class | 42
-    'D1_4142' | Double.class | 1.4142
-    'lookup' | String.class | 'Mlookup'
+    'T' + millis | Date.class   | new Date(millis)
+    'L42'        | Long.class   | 42
+    'D1_4142'    | Double.class | 1.4142
+    'lookup'     | String.class | 'Mlookup'
+    'yes'        | Boolean.class | true
+    'no'         | Boolean.class | false
   }
 
 }

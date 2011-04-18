@@ -15,12 +15,10 @@
 
 package org.fqlsource.fqltest.mockdriver
 
-import org.fqlsource.data.FqlIterator
 
 import org.fqlsource.parser.FqlParser
 import org.yaml.snakeyaml.Yaml
 import spock.lang.Shared
-import org.fqlsource.parser.FqlParseException
 import spock.lang.IgnoreRest
 
 /**

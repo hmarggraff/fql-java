@@ -55,7 +55,6 @@ public class MockMapContainer extends NamedImpl implements FqlMapContainer<MockD
             return true;
         else if ("no".equalsIgnoreCase(fieldName))
             return false;
-
         return "M" + key.toString();
     }
 }
