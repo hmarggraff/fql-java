@@ -218,16 +218,38 @@ public class FqlExpressionParser
         else
         {
             p.lex.pushBack();
-            return parseCompare();
+            return parseEquality();
         }
     }
 
+
+    FqlNodeInterface parseEquality() throws FqlParseException
+    {
+        FqlNodeInterface l = parseCompare();
+        Token t = next();
+        if (t != Token.Equal && t != Token.Unequal)
+        {
+            return pushBack(l);
+        }
+        final int row = p.lex.getRow();
+        final int col = p.lex.getCol();
+        FqlNodeInterface r = parseCompare();
+
+        if (t == Token.Equal)
+        {
+            return new EqualsNode(l, r, row, col);
+        }
+        else // if (t == Token.Unequal)
+        {
+            return new NotEqualNode(l, r, row, col);
+        }
+    }
 
     FqlNodeInterface parseCompare() throws FqlParseException
     {
         FqlNodeInterface l = parsePlus();
         Token t = next();
-        if (t != Token.Less && t != Token.LessOrEqual && t != Token.Greater && t != Token.GreaterOrEqual && t != Token.Equal && t != Token.Unequal && t != Token.Like && t != Token.Matches)
+        if (t != Token.Less && t != Token.LessOrEqual && t != Token.Greater && t != Token.GreaterOrEqual && t != Token.Like && t != Token.Matches)
         {
             return pushBack(l);
         }
@@ -250,14 +272,6 @@ public class FqlExpressionParser
         else if (t == Token.GreaterOrEqual)
         {
             return new GreaterOrEqualNode(l, r, row, col);
-        }
-        else if (t == Token.Equal)
-        {
-            return new EqualsNode(l, r, row, col);
-        }
-        else if (t == Token.Unequal)
-        {
-            return new NotEqualNode(l, r, row, col);
         }
         else if (t == Token.Like)
         {

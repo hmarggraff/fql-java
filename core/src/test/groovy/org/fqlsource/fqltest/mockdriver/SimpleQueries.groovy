@@ -58,6 +58,7 @@ class SimpleQueries extends spock.lang.Specification
     def shortRes = dump.substring(0, dump.length() - 1);
     System.out.println(shortRes);
 
+
     return shortRes
   }
 
