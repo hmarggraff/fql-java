@@ -1,0 +1,15 @@
+// apply from: 'https://github.com/valkolovos/gradle_cobertura/raw/master/repo/gradle_cobertura/gradle_cobertura/1.2/coberturainit.gradle'
+
+apply plugin: 'kotlin'
+
+dependencies {
+    compile project(':riutil')
+    compile project(':driverapi')
+    compile project(':core')
+    testCompile junitVersion
+    testCompile snakeYamlVersion
+    //testCompile spockVersion
+    testCompile testNG
+    compile kotlinlib
+    testRuntime kotlinruntime
+}
