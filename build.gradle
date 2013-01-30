@@ -4,11 +4,11 @@ subprojects {
     apply plugin: 'java'
     sourceCompatibility = 1.7
     targetCompatibility = 1.7
-    apply plugin: 'idea'
+    //apply plugin: 'idea'
     repositories {
         mavenCentral()
         mavenRepo url: 'http://repository.jetbrains.com/kotlin/'
-        flatDir(dirs:'kotlinc')
+        //flatDir(dirs:'kotlinc')
     }
 
     buildscript {
@@ -16,7 +16,5 @@ subprojects {
         dependencies { classpath      'com.github.goldin.plugins.gradle:kotlin:+'    }
         //com/github/goldin/plugins/gradle/kotlin/
     }
-
-
 }
 

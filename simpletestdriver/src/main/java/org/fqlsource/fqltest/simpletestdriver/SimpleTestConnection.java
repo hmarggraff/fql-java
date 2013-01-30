@@ -16,7 +16,6 @@ package org.fqlsource.fqltest.simpletestdriver;
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.sun.deploy.util.StringUtils;
 import org.funql.ri.data.*;
 import org.funql.ri.util.NamedImpl;
 

@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2011, Hans Marggraff and other copyright owners as documented in the project's IP log.
+ * Copyright (C) 2011, Hans Marggraff and other copyright owners as documented in the project's IP log.
  * This program and the accompanying materials are made available under the terms of the Eclipse Distribution License v1.0 which accompanies this distribution, is reproduced below, and is available at http://www.eclipse.org/org/documents/edl-v10.php
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -13,4 +13,21 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-include 'driverapi', 'core', 'simpletestdriver', 'jsondriver', 'riutil', 'mongodriver:bsonwrapper', 'mongodriver'
+package org.funql.ri.jsondriver
+
+import org.funql.ri.data.FqlIterator
+import org.funql.ri.util.NamedImpl
+import java.util
+import java.util.ArrayList
+import org.funql.ri.util.Named
+
+public class JsonArrayIterator(name: String, val data: List<Any?>): KNamedImpl(name), FqlIterator
+{
+    var pos = -1
+
+    override fun hasNext(): Boolean = pos < data.size() - 1
+
+    override fun next(): Any? { pos = pos + 1; return data.get(pos) }
+
+    override fun current() = data.get(pos)
+}
