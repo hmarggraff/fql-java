@@ -9,7 +9,8 @@ import org.funql.ri.data.FqlConnection
 
 class JsonDriver: FunqlDriver
 {
-    public override fun openConnection(p0: String?, p1: Map<String?, String?>?): FqlConnection?  = JsonConnection(name = p0!!, propsArg = p1)
+
+    public override fun openConnection(name: String?, props: Map<String, String>?): FqlConnection? = JsonConnection(name!!, props)
 
     override fun supportsRanges() = true
 

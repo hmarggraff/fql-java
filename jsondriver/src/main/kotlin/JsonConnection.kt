@@ -17,9 +17,9 @@ import org.yaml.snakeyaml.Yaml
 import org.funql.ri.data.FqlMultiMapContainer
 
 
-public open class JsonConnection(name: String, propsArg: Map<String?, String?>?): KNamedImpl(name), FqlConnectionWithRange
+public open class JsonConnection(name: String, propsArg: Map<String, String>?): KNamedImpl(name), FqlConnectionWithRange
 {
-    val props: Map<String?, String?> = propsArg!!
+    val props: Map<String, String> = propsArg!!
 
     fun open(): InputStream {
         if (props containsKey "file")
@@ -47,17 +47,14 @@ public open class JsonConnection(name: String, propsArg: Map<String?, String?>?)
     val data: Any? = if (props.get("allYamlParts") == "true") Yaml().loadAll(input) else Yaml().load(input)
 
 
-    public override fun useIterator(p0: String?): FqlIterator? = useIteratorK(p0!!)
-    public fun useIteratorK(streamName: String): FqlIterator? {
-        if (streamName != "top")
-            throw FqlDataException("Entry point for list must be named top not: " + streamName)
-        else if (!(data is ArrayList<*>))
-            throw FqlDataException("Entry point for list is not a list: " + streamName)
+
+    public override fun useIterator(streamName: String?): FqlIterator? {
+        if (streamName != "top") throw FqlDataException("Entry point for list must be named top not: " + streamName)
+        else if (!(data is ArrayList<*>)) throw FqlDataException("Entry point for list is not a list: " + streamName)
         return JsonArrayIterator(streamName, data as ArrayList<*>)
     }
 
-
-    public override fun range(p0: String?, p1: String?, p2: String?, p3: Boolean): FqlIterator? = range1(name = p0!!, startKey= p1!!, endKey = p2!!, includeEnd = p3)
+    public override fun range(name: String?, startKey: String?, endKey: String?, includeEnd: Boolean): FqlIterator?  = range1(name!!, startKey!!, endKey!!, includeEnd)
     fun range1(name: String, startKey: String, endKey: String, includeEnd: Boolean): FqlIterator
     {
         if (data is List<*>)
@@ -65,7 +62,7 @@ public open class JsonConnection(name: String, propsArg: Map<String?, String?>?)
             val start = startKey.toInt()
             val end = endKey.toInt()
             val subList = (data as List<*>).subList(start, end)
-            return ListFqlIterator(subList)
+            return ListFqlIterator(subList, name)
         }
         else if (data is LinkedHashMap<*, *>)
         {
@@ -96,44 +93,40 @@ public open class JsonConnection(name: String, propsArg: Map<String?, String?>?)
                         }
                     }
             }
-            return ListFqlIterator(ret)
+            return ListFqlIterator(ret, name)
         }
         else
             throw FqlDataException("Connection '" + getName() + "' is not a range.")
     }
 
-    public override fun useMap(p0: List<String?>?): FqlMapContainer? = useMapK(path = p0!!)
-    public fun useMapK(path: List<String?>): FqlMapContainer =
-            if (data is Map<*, *>) JsonMapAccess(path[0]!!, data)
+    public override fun useMap(fieldpath: List<String>?): FqlMapContainer? =
+            if (fieldpath == null) throw NullPointerException("field path $fieldpath may not be null.")
+            else if (data is Map<*, *>) JsonMapAccess(fieldpath[0], data)
             else throw FqlDataException("Connection '" + getName() + "' is not a map.")
 
 
-    public override fun useMultiMap(p0: List<String?>?): FqlMultiMapContainer? = useMultiMapK(fieldpath = p0!!)
-    public fun useMultiMapK(fieldpath: List<String?>): FqlMultiMapContainer =
-            if (data is Map<*, *>) JsonMultiMapAccess(fieldpath.get(0)!!, data)
+    public override fun useMultiMap(fieldpath: List<String>?): FqlMultiMapContainer? =
+            if (fieldpath == null) throw NullPointerException("field path $fieldpath may not be null.")
+            else if (data is Map<*, *>) JsonMultiMapAccess(fieldpath.get(0), data)
             else throw FqlDataException("Connection '" + getName() + "' is not a map.")
 
     public override fun close()
     {
         input.close()
     }
-
-    public override fun getMember(p0: Any?, p1: String?): Any? = getMemberK(from = p0!!, member = p1!!)
-    public fun getMemberK(from: Any, member: String): Any? =
-            if (from is Map<*, *>) from.get(member)
-            else null
+    public override fun getMember(from: Any?, member: String?): Any?  = if (from is Map<*, *>) from.get(member) else null
 }
 
 
 class JsonMapAccess(name: String, val data: Map<*, *>): KNamedImpl(name), FqlMapContainer
 {
-    public override fun lookup(p0: Any?): Any? = data.get(p0)
+    public override fun lookup(key: Any?): Any? = data.get(key)
 }
 
 class JsonMultiMapAccess(name: String, val data: Map<*, *>): KNamedImpl(name), FqlMultiMapContainer
 {
-    public override fun lookup(p0: Any?): JsonArrayIterator? {
-        val ret = data.get(p0)
+    public override fun lookup(key: Any?): FqlIterator? {
+        val ret = data[key]
         if (ret is List<*>)
             return JsonArrayIterator(getName(), ret)
         throw FqlDataException("Entry of multi-map " + getName() + " is not a list. but a " + ret.javaClass)

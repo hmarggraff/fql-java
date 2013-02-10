@@ -30,17 +30,23 @@ public inline fun <K,V> javaHashMap(vararg values: Pair<K, V>): HashMap<K,V> {
     return answer
 }
 
-fun Map<String?, String?>?.check(): Map<String, String> {
-    if (this == null) throw AssertionError("The map may not be null")
-    val ret = HashMap<String, String>()
-    this.entrySet().forEach { ret.put(it.getKey()!!, it.getValue()!!) }
+fun Map<String?, String?>?.check(): Map<String, String?> {
+    if (this == null) throw AssertionError("The checked map may not be null")
+    val ret = HashMap<String, String?>()
+    this.entrySet().forEach { ret.put(it.getKey()!!, it.getValue()) }
     return ret;
 }
 
 fun List<String?>?.check(): List<String> {
     if (this == null) throw AssertionError("The map may not be null")
+    val ret = ArrayList<String>(this.size)
+    this.forEach { if (it == null) throw AssertionError("The checked list may not contain null elements"); ret.add(it) }
+    return ret;
+
+}fun List<String?>?.check(name: String): List<String> {
+    if (this == null) throw AssertionError("The list $name may not be null")
     val ret = ArrayList<String>()
-    this.forEach { ret.add(it!!) }
+    this.forEach { if (it == null) throw AssertionError("The list $name may not contain null elements"); ret.add(it) }
     return ret;
 }
 

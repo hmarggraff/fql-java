@@ -1,4 +1,4 @@
-package org.fqlsource.fqltest.mongodriver
+package org.funql.ri.mongodriver
 
 import org.funql.ri.data.FunqlDriver
 import org.funql.ri.data.FqlConnection
@@ -13,18 +13,17 @@ import com.mongodb.DB
 import com.mongodb.DBCollection
 import com.mongodb.DBCursor
 import com.mongodb.DBObject
-//import com.mongodb.BasicDBObject
 import org.bson.types.ObjectId
 import org.funql.ri.util.Named
 import org.funql.ri.data.FqlMultiMapContainer
 import org.funql.ri.kotlinutil.check
-import org.fqlsource.fqltest.mongodriver.workaround.BasicDBObjectWrapper
+import org.funql.ri.mongodriver.workaround.BasicDBObjectWrapper
 
 
 class MongoDriverKt: FunqlDriver {
 
 
-    public override fun openConnection(name: String?, props: Map<String?, String?>?): FqlConnection? = FqlMongoConnectionKt(name!!, props.check())
+    public override fun openConnection(name: String?, props: Map<String, String>?): FqlConnection?  = FqlMongoConnectionKt(name!!, props!!)
 
     public override fun supportsRanges() = true
 
@@ -50,7 +49,7 @@ class FqlMongoConnectionKt(name: String, val props: Map<String, String?>?): Name
     public override fun close() = mongoConn.close()
 
 
-    public override fun useMap(p0: List<String?>?): FqlMapContainer? = useMapK(fieldpath = p0.check())
+    public override fun useMap(fieldpath: List<String>?): FqlMapContainer? = useMapK(fieldpath = fieldpath.check())
     public fun useMapK(fieldpath: List<String>): FqlMapContainer?  {
 
         if (fieldpath.size() > 1) throw ImplementationLimitation("MongoDB only supports top level Collections");
@@ -61,13 +60,14 @@ class FqlMongoConnectionKt(name: String, val props: Map<String, String?>?): Name
     }
 
 
-    public override fun useMultiMap(p0: List<String?>?): FqlMultiMapContainer? = useMultiMapK(fieldpath = p0.check())
-    public fun useMultiMapK(fieldpath: List<String>): FqlMultiMapContainer? {
-        if (fieldpath.size() > 1) throw ImplementationLimitation("MongoDB only supports top level Collections");
-        if (fieldpath.size() == 0) throw java.lang.AssertionError("The path to open a map in $dbname is empty");
-        val streamName = fieldpath[0]
+    //public override fun useMultiMap(fieldpath: List<String>?): FqlMultiMapContainer? = useMultiMapK(fieldpath = fieldpath.check())
+    public override fun useMultiMap(fieldpath: List<String>?): FqlMultiMapContainer? {
+        val fpath = fieldpath.check("fieldpath")
+        if (fpath.size() > 1) throw ImplementationLimitation("MongoDB only supports top level Collections");
+        if (fpath.size() == 0) throw java.lang.AssertionError("The path to open a map in $dbname is empty");
+        val streamName = fpath[0]
         val coll: DBCollection = mongoDB.getCollection(streamName)?:throw SomethingMissingError("Collection with name " + streamName + " not Found")
-        return  FqlMongoLookupSomeKt(fieldpath[0], coll)
+        return  FqlMongoLookupSomeKt(fpath[0], coll)
     }
 
 

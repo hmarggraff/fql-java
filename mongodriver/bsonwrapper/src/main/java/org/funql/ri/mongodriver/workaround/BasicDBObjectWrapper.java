@@ -1,4 +1,4 @@
-package org.fqlsource.fqltest.mongodriver.workaround;
+package org.funql.ri.mongodriver.workaround;
 
 import com.mongodb.BasicDBObject;
 
