@@ -4,3 +4,4 @@ quarry/
 .gradle/
 build/
 lib
+out/
