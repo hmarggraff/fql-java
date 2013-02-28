@@ -3,6 +3,10 @@ allprojects {
     sourceCompatibility = 1.7
     targetCompatibility = 1.7
 }
+
+ext {
+    home = "$projectDir"
+}
 subprojects {
     group = 'org.funql.ri'
     version = 1.0
@@ -13,8 +17,14 @@ subprojects {
 
     buildscript {
         repositories { mavenRepo url: 'http://evgenyg.artifactoryonline.com/evgenyg/repo/' }
-        dependencies { classpath      'com.github.goldin.plugins.gradle:kotlin:+'    }
+        dependencies { classpath 'com.github.goldin.plugins.gradle:kotlin:+' }
     }
+
+    task copylibs(type: Copy) {
+        into "$home/libij"
+        from configurations.testRuntime
+    }
+
 }
 
 task wrapper(type: Wrapper) {

@@ -5,14 +5,14 @@ enum class Types {string; int; float; bool; date; ref; obj; array}
 class FieldDef(val name: String, val typ: Types)
 {
     class object {
-        fun str(val name: String) = FieldDef(name, Types.string)
-        fun int(val name: String) = FieldDef(name, Types.int)
-        fun float(val name: String) = FieldDef(name, Types.float)
-        fun bool(val name: String) = FieldDef(name, Types.bool)
-        fun date(val name: String) = FieldDef(name, Types.date)
-        fun ref(val name: String) = FieldDef(name, Types.ref)
-        fun obj(val name: String) = FieldDef(name, Types.obj)
-        fun arr(val name: String) = FieldDef(name, Types.array)
+        fun str(name: String) = FieldDef(name, Types.string)
+        fun int(name: String) = FieldDef(name, Types.int)
+        fun float(name: String) = FieldDef(name, Types.float)
+        fun bool(name: String) = FieldDef(name, Types.bool)
+        fun date(name: String) = FieldDef(name, Types.date)
+        fun ref(name: String) = FieldDef(name, Types.ref)
+        fun obj(name: String) = FieldDef(name, Types.obj)
+        fun arr(name: String) = FieldDef(name, Types.array)
     }
 }
 
