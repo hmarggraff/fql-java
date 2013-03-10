@@ -34,7 +34,7 @@ class JsonDriverTest
 
     fun openConnction(txt: String): JsonConnection
     {
-        val p = HashMap<String?, String?>()
+        val p = HashMap<String, String>()
         p.put("driver", "JsonDriver")
         p.put("text", txt)
         //throw Exception("bal")

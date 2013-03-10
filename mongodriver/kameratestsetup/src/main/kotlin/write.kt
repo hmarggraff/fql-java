@@ -26,22 +26,27 @@ class TestCameraWrite
 
 
     public fun testStoreCameras(): Unit {
-        println("testStorecameras")
-        fun coll(name: String) = db.getCollection(name)!!
+        println("testStorecameras into funql_test")
 
-        val homeOrg = coll("homeOrg")
-        homeOrg.insert(toDBObject(org.funql.ri.test.cameradata.CameraData.homeOrg))
-        addToDB(coll(productNamespace), org.funql.ri.test.cameradata.CameraData.products)
-        addToDB(coll(organisationsNamespace), org.funql.ri.test.cameradata.CameraData.orgs)
-        addToDB(coll("orders"), org.funql.ri.test.cameradata.CameraData.orders())
+        println("adding 1 ${CameraData.homeOrg.typ.name} to collection homeOrg")
+
+        val homeOrg = db.getCollection("homeOrg")!!
+        homeOrg.drop()
+        homeOrg.insert(toDBObject(CameraData.homeOrg))
+        rewriteCollection(productNamespace, org.funql.ri.test.cameradata.CameraData.products)
+        rewriteCollection(organisationsNamespace, org.funql.ri.test.cameradata.CameraData.orgs)
+        rewriteCollection("orders", org.funql.ri.test.cameradata.CameraData.orders())
         mongoConn.close()
     }
-    fun addToDB(coll: DBCollection, data: Array<TestObject>) {
+    fun rewriteCollection(name: String, data: Array<TestObject>) {
+        println("adding ${data.size} ${data[0].typ.name} to collection $name")
+        val coll = db.getCollection(name)!!
+        coll.drop()
         data.forEach { coll.insert(toDBObject(it)) }
     }
     fun toDBObject(data: TestObject): DBObject {
         val doc = BasicDBObjectWrapper()
-
+        doc.put("_id", data.oid)
         for (i in 0..data.values.size-1) {
             val v = data.values[i]
             val k = data.typ.fields[i].name
@@ -54,7 +59,10 @@ class TestCameraWrite
                     doc.put(k, list)
                 }
                 is Ref ->
-                    doc.put(k, DBRef(db, v.container, (v.target as TestObject).oid))
+                    {
+                        val l: Long = (v.target as TestObject).oid
+                        doc.put(k, DBRef(db, v.container, l))
+                    }
                 else -> doc.put(k, v)
             }
         }

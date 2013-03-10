@@ -18,6 +18,7 @@ import org.funql.ri.util.Named
 import org.funql.ri.data.FqlMultiMapContainer
 import org.funql.ri.kotlinutil.check
 import org.funql.ri.mongodriver.workaround.BasicDBObjectWrapper
+import com.mongodb.DBRef
 
 
 class MongoDriverKt: FunqlDriver {
@@ -72,8 +73,14 @@ class FqlMongoConnectionKt(name: String, val props: Map<String, String?>?): Name
 
 
     public override fun getMember(from: Any?, member: String?): Any? {
-        if (from is Map<*,*>) return from[member!!]
-        else throw AssertionError("Mongo member access needs a map, but found a " + from.javaClass)
+        if (from == null) return null;
+        else if (from is Map<*,*>) return from[member!!]
+        else if (from is DBRef){
+            val fetch = from.fetch()
+            val value = fetch?.get(member!!)
+            return value;
+        }
+        throw AssertionError("Mongo member access needs a map, but found a " + from.javaClass)
     }
 
 
@@ -100,6 +107,8 @@ class FqlMongoLookupSingleKt(val fieldPath: String, val data: DBCollection): Fql
 
         if (isId && key is ByteArray && key.size == 12)
             query.put(fieldPath, ObjectId(key as ByteArray))
+        else if (key is DBRef)
+            return key.fetch()
         else
             query.put(fieldPath, key)
 

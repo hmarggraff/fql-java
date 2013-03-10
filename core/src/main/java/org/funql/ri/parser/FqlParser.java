@@ -99,8 +99,8 @@ public class FqlParser {
             lex.pushBack();
         }
         t = nextToken();
-        while (t == Token.Access) {
-            parseEntryPoint();
+        while (t == Token.Link) {
+            parseLink();
             t = nextToken();
         }
 
@@ -182,7 +182,7 @@ public class FqlParser {
 
     }
 
-    protected void parseEntryPoint() throws FqlParseException {
+    protected void parseLink() throws FqlParseException {
         Token t;
         boolean hasString;
         ArrayList<String> path = new ArrayList<>();

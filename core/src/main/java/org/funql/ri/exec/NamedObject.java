@@ -1,4 +1,4 @@
-package org.funql.ri.exec.node;
+package org.funql.ri.exec;
 
 /*
    Copyright (C) 2011, Hans Marggraff and other copyright owners as documented in the project's IP log.
@@ -15,25 +15,21 @@ package org.funql.ri.exec.node;
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.funql.ri.data.FqlDataException;
-import org.funql.ri.exec.NamedObject;
-import org.funql.ri.exec.RunEnv;
-
 /**
  */
-public class AssignNode extends UnaryNode
-{
-    private final String var;
+public class NamedObject extends NamedValue {
 
-    public AssignNode(String var, FqlNodeInterface right, int row, int col)
+    protected final Object val;
+
+    public NamedObject(String var, Object rightValue)
     {
-        super(right, row, col);
-        this.var = var;
+        super(var);
+        val = rightValue;
     }
 
-    public Object getValue(RunEnv env, Object from) throws FqlDataException
+    @Override
+    public Object getVal()
     {
-        final Object rightValue = operand.getValue(env, from);
-        return new NamedObject(var,rightValue);
+        return val;
     }
 }

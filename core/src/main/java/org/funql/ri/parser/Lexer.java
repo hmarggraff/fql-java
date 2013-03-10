@@ -85,7 +85,7 @@ public class Lexer
         As,
         Connect,
         Open,
-        Matches, Is, Access, Select, RBrace, LBrace, Assign, By, One
+        Matches, Is, Select, Link, RBrace, LBrace, Assign, By, One
     }
     protected static Hashtable<String, Token> keywords = new Hashtable<String, Token>();
 
@@ -105,7 +105,7 @@ public class Lexer
 
     static
     {
-	keywords.put("access", Token.Access);
+	keywords.put("link", Token.Link);
 	keywords.put("all", Token.All);
         keywords.put("and", Token.And);
         keywords.put("any", Token.Any);

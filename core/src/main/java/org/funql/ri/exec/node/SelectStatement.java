@@ -17,8 +17,7 @@ package org.funql.ri.exec.node;
 
 import org.funql.ri.data.FqlDataException;
 import org.funql.ri.data.FqlIterator;
-import org.funql.ri.exec.RunEnv;
-import org.funql.ri.exec.FqlStatement;
+import org.funql.ri.exec.*;
 
 import java.util.ArrayList;
 
@@ -57,7 +56,21 @@ public class SelectStatement implements FqlStatement
 		for (int i = 0; i < fieldList.size(); i++)
 		{
 		    FqlNodeInterface node = fieldList.get(i);
-		    fields[i] = node.getValue(env, parent);
+            Object value = node.getValue(env, parent);
+            if (value instanceof Integer)
+                fields[i] = new NamedLong("f" + (i+1), ((Integer) value).longValue());
+            else if (value instanceof Long)
+                fields[i] = new NamedLong("f" + (i+1), ((Long) value).longValue());
+            else if (value instanceof Float)
+                fields[i] = new NamedDouble("f" + (i+1), ((Float) value).doubleValue());
+            else if (value instanceof Double)
+                fields[i] = new NamedDouble("f" + (i+1), ((Float) value).doubleValue());
+            else if (value instanceof Boolean)
+                fields[i] = new NamedBoolean("f" + (i+1), ((Boolean) value).booleanValue());
+            else if (value instanceof NamedValue)
+                fields[i] = value;
+            else
+                fields[i] = new NamedObject("f" + (i+1), value);
 
 		}
 		return fields;

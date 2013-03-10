@@ -5,6 +5,7 @@ import kotlin.test.assertEquals
 import org.fqlsource.fqltest.simpletestdriver.SimpleTestConnection
 import org.funql.ri.parser.FqlParser
 import org.yaml.snakeyaml.Yaml
+import java.util.HashMap
 
 public open class SimpleTestDriverBase {
 
@@ -13,7 +14,7 @@ public open class SimpleTestDriverBase {
 
 
     fun callInit(): SimpleTestConnection {
-        val p = hashMap<String?, String?>();
+        val p = HashMap<String, String>();
         val tconn = SimpleTestConnection("SimpleTest", p);
         return tconn
     }

@@ -25,6 +25,10 @@ subprojects {
         from configurations.testRuntime
     }
 
+    test {
+        jvmArgs "-XX:MaxPermSize=512m"
+    }
+
 }
 
 task wrapper(type: Wrapper) {

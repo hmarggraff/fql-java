@@ -23,455 +23,351 @@ import org.funql.ri.util.NamedIndex;
 
 import java.util.ArrayList;
 
-public class FqlExpressionParser
-{
+public class FqlExpressionParser {
     FqlParser p; // the parser state
 
-    public FqlExpressionParser(FqlParser p)
-    {
+    public FqlExpressionParser(FqlParser p) {
 
-	this.p = p;
+        this.p = p;
     }
 
 
-    protected FqlNode parseParam() throws FqlParseException
-    {
-	String paramName = p.lex.nameVal;
-	if (paramName.length() == 0)
-	{
-	    throw new FqlParseException(Res.str("Parameters must have a name"), p);
-	}
-	NamedIndex parameter = p.getParameter(paramName);
-	return new QueryParameterNode(parameter, p.lex.getRow(), p.lex.getCol());
-
-
-    }
-
-
-    FqlNodeInterface parseNav() throws FqlParseException
-    {
-	String symName = p.lex.nameVal;
-	Lexer.Token tok = next();
-	if (tok == Lexer.Token.LParen)// function: start parsing argList
-	{
-	    return parseFunctionCall(symName);
-	}
-	EntryPointSlot currentSource = p.iteratorStack.peek();
-
-	FqlNodeInterface left;
-	EntryPointSlot source = p.entryPoints.get(symName);
-	if (source == null || source.getEntryPointName().equals(currentSource.getEntryPointName()))
-	{
-	    source = currentSource;
-	    left = new MemberNode(symName, currentSource, p.lex.getRow(), p.lex.getCol());
-	}
-	else
-	{
-	    left = new ContainerNameNode(source, p.lex.getRow(), p.lex.getCol());
-	}
-	left = parseBracket(tok, left);
-
-	while (tok == Token.Dot)
-	{
-	    symName = p.lex.nameVal;
-	    left = new DotNode(left, symName, source, p.lex.getRow(), p.lex.getCol());
-	    left = parseBracket(next(), left);
-	    tok = next();
-	}
-	p.lex.pushBack();
-	return left;
-    }
-
-    private FqlNodeInterface parseFunctionCall(String symName) throws FqlParseException
-    {
-	FqlBuiltinFunction builtin = p.functions.get(symName);
-	if (builtin == null)
-	{
-	    throw new FqlParseException("Built-in function not found: " + symName, p);
-	}
-
-	ArrayList<FqlNodeInterface> argList = new ArrayList<FqlNodeInterface>();
-	Token t1 = next();
-	while (t1 != Token.RParen)
-	{
-	    p.lex.pushBack();
-	    FqlNodeInterface arg = parseAs();
-	    argList.add(arg);
-	    t1 = next();
-	    if (t1 == Token.RParen)
-	    {
-		break;
-	    }
-	    else if (t1 == Token.Comma)
-	    {
-		t1 = next();
-	    }
-	    else
-	    {
-		throw new FqlParseException("expected right brace or comma", p);
-	    }
-	}
-	final FqlNodeInterface[] argNodes;
-	if (argList.size() > 0)
-	{
-	    argNodes = new FqlNodeInterface[argList.size()];
-	    argList.toArray(argNodes);
-	}
-	else
-	{
-	    argNodes = null;
-	}
-	return new FunctionNode(builtin, argNodes, p.lex.getRow(), p.lex.getCol());
-    }
-
-    private FqlNodeInterface parseBracket(Token tok, FqlNodeInterface left) throws FqlParseException
-    {
-	if (tok == Token.LBracket)
-	{
-	    if (!(left instanceof ContainerNameNode))
-		throw new FqlParseException("Name to left of bracket, does not refer to an entry point. (use clause)", p);
-	    FqlNodeInterface indexNode = parseAs();
-	    tok = next();
-	    if (tok == Token.RBracket)
-	    {
-		left = new IndexOpNode(left, indexNode, p.lex.getRow(), p.lex.getCol());
-	    }
-	    else if (tok == Token.Elipses)
-	    {
-		tok = next();
-		if (tok == Token.RBracket)
-		{
-		    left = new CollectionSliceNode(left, indexNode, null, p.lex.getRow(), p.lex.getCol());
-		}
-		else
-		{
-		    FqlNodeInterface upperBound = parseAs();
-		    left = new CollectionSliceNode(left, indexNode, upperBound, p.lex.getRow(), p.lex.getCol());
-		    p.expect_next(Token.RBracket);
-		}
-	    }
-	    return left;
-	}
-	else
-	{
-	    return pushBack(left);
-	}
-    }
-
-    FqlNodeInterface parseQuestion() throws FqlParseException
-    {
-	FqlNodeInterface conditionNode = parseOr();
-	Token atToken = next();
-	if (atToken != Token.Question)
-	{
-	    return pushBack(conditionNode);
-	}
-	FqlNodeInterface trueBranchNode = parseOr();
-	atToken = next();
-	if (atToken != Token.Colon)
-	{
-	    throw new FqlParseException("Colon expected", p);
-	}
-	FqlNodeInterface falseBranchNode = parseOr();
-
-	return new QuestionNode(conditionNode, trueBranchNode, falseBranchNode, conditionNode.getRow(), conditionNode.getCol());
-    }
-
-    FqlNodeInterface parseOr() throws FqlParseException
-    {
-	FqlNodeInterface l = parseAnd();
-	Token atToken = next();
-	if (atToken != Token.Or)
-	{
-	    return pushBack(l);
-	}
-	FqlNodeInterface r = parseAnd();
-	return new OrNode(l, r, l.getRow(), l.getCol());
-    }
-
-    FqlNodeInterface parseAnd() throws FqlParseException
-    {
-	FqlNodeInterface l = parseNot();
-	Token atToken = next();
-	if (atToken != Token.And)
-	{
-	    return pushBack(l);
-	}
-	FqlNodeInterface r = parseNot();
-	return new AndNode(l, r, p.lex.getRow(), p.lex.getCol());
-    }
-
-
-    FqlNodeInterface parseUnaryMinus() throws FqlParseException
-    {
-	Token atToken = next();
-	if (atToken == Token.Minus)
-	{
-	    return new UnaryMinusNode(parseIs(), p.lex.getRow(), p.lex.getCol());
-	}
-	else
-	{
-	    p.lex.pushBack();
-	    return parseAtom();
-	}
-    }
-
-    FqlNodeInterface parseNot() throws FqlParseException
-    {
-	Token atToken = next();
-	if (atToken == Token.Not)
-	{
-	    return new NotNode(parseEquals(), p.lex.getRow(), p.lex.getCol());
-	}
-	else
-	{
-	    p.lex.pushBack();
-	    return parseEquals();
-	}
-    }
-
-
-    FqlNodeInterface parseEquals() throws FqlParseException
-    {
-	FqlNodeInterface l = parseCompare();
-	for (; ; )
-	{
-	    Token t = next();
-
-	    if (t != Token.Equal && t != Token.Unequal && t != Token.Like && t != Token.Matches)
-	    {
-		return pushBack(l);
-	    }
-	    final int row = p.lex.getRow();
-	    final int col = p.lex.getCol();
-
-	    FqlNodeInterface r = parseCompare();
-	    if (t == Token.Equal)
-	    {
-		l = new EqualsNode(l, r, row, col);
-	    }
-	    else if (t == Token.Unequal)
-	    {
-		l = new NotEqualNode(l, r, row, col);
-	    }
-	    else if (t == Token.Like)
-	    {
-		l = new LikeNode(l, r, row, col);
-	    }
-	    else // if (t == Token.Matches)
-	    {
-		l = new MatchesNode(l, r, row, col);
-	    }
-	}
+    protected FqlNode parseParam() throws FqlParseException {
+        String paramName = p.lex.nameVal;
+        if (paramName.length() == 0) {
+            throw new FqlParseException(Res.str("Parameters must have a name"), p);
+        }
+        NamedIndex parameter = p.getParameter(paramName);
+        return new QueryParameterNode(parameter, p.lex.getRow(), p.lex.getCol());
 
 
     }
 
-    FqlNodeInterface parseCompare() throws FqlParseException
-    {
-	FqlNodeInterface l = parsePlus();
-	Token t = next();
-	if (t != Token.Less && t != Token.LessOrEqual && t != Token.Greater && t != Token.GreaterOrEqual)
-	{
-	    return pushBack(l);
-	}
-	final int row = p.lex.getRow();
-	final int col = p.lex.getCol();
-	FqlNodeInterface r = parsePlus();
 
-	if (t == Token.Less)
-	{
-	    return new LessNode(l, r, row, col);
-	}
-	else if (t == Token.LessOrEqual)
-	{
-	    return new LessOrEqualNode(l, r, row, col);
-	}
-	else if (t == Token.Greater)
-	{
-	    return new GreaterNode(l, r, row, col);
-	}
-	else //if (t == Token.GreaterOrEqual)
-	{
-	    return new GreaterOrEqualNode(l, r, row, col);
-	}
+    FqlNodeInterface parseNav() throws FqlParseException {
+        String symName = p.lex.nameVal;
+        Lexer.Token tok = next();
+        if (tok == Lexer.Token.LParen)// function: start parsing argList
+        {
+            return parseFunctionCall(symName);
+        }
+        EntryPointSlot currentSource = p.iteratorStack.peek();
+
+        FqlNodeInterface left;
+        EntryPointSlot source = p.entryPoints.get(symName);
+        if (source == null || source.getEntryPointName().equals(currentSource.getEntryPointName())) {
+            source = currentSource;
+            left = new MemberNode(symName, currentSource, p.lex.getRow(), p.lex.getCol());
+        } else {
+            left = new ContainerNameNode(source, p.lex.getRow(), p.lex.getCol());
+        }
+        left = parseBracket(tok, left);
+
+        while (tok == Token.Dot) {
+            if (next() != Token.Name)
+                throw new FqlParseException(Res.str("Name expected after dot"), p);
+
+            symName = p.lex.nameVal;
+            left = new DotNode(left, symName, source, p.lex.getRow(), p.lex.getCol());
+            left = parseBracket(next(), left);
+            tok = next();
+        }
+        p.lex.pushBack();
+        return left;
     }
 
-    private FqlNodeInterface parseIs() throws FqlParseException
-    {
-	FqlNodeInterface left = parseAtom();
-	final Lexer.Token t = next();
+    private FqlNodeInterface parseFunctionCall(String symName) throws FqlParseException {
+        FqlBuiltinFunction builtin = p.functions.get(symName);
+        if (builtin == null) {
+            throw new FqlParseException("Built-in function not found: " + symName, p);
+        }
 
-	if (t == Lexer.Token.Is)
-	{
-	    final String className = p.lex.nameVal;
-	    return new InstanceofNode(left, className, p.lex.getRow(), p.lex.getCol());
-	}
-	else
-	{
-	    p.lex.pushBack();
-	    return left;
-	}
+        ArrayList<FqlNodeInterface> argList = new ArrayList<FqlNodeInterface>();
+        Token t1 = next();
+        while (t1 != Token.RParen) {
+            p.lex.pushBack();
+            FqlNodeInterface arg = parseAs();
+            argList.add(arg);
+            t1 = next();
+            if (t1 == Token.RParen) {
+                break;
+            } else if (t1 == Token.Comma) {
+                t1 = next();
+            } else {
+                throw new FqlParseException("expected right brace or comma", p);
+            }
+        }
+        final FqlNodeInterface[] argNodes;
+        if (argList.size() > 0) {
+            argNodes = new FqlNodeInterface[argList.size()];
+            argList.toArray(argNodes);
+        } else {
+            argNodes = null;
+        }
+        return new FunctionNode(builtin, argNodes, p.lex.getRow(), p.lex.getCol());
     }
 
-    FqlNodeInterface parseMultiply() throws FqlParseException
-    {
-	FqlNodeInterface l = parseUnaryMinus();
-	for (; ; )
-	{
-	    Token t = next();
-	    if (t != Token.Mod && t != Token.Star && t != Token.Slash)
-	    {
-		return pushBack(l);
-	    }
-	    final int row = p.lex.getRow();
-	    final int col = p.lex.getCol();
-	    FqlNodeInterface r = parseUnaryMinus();
-	    if (t == Token.Mod)
-	    {
-		l = new ModuloNode(l, r, row, col);
-	    }
-	    else if (t == Token.Star)
-	    {
-		l = new MultiplyNode(l, r, row, col);
-	    }
-	    else
-	    {
-		l = new DivideNode(l, r, row, col);
-	    }
-	}
+    private FqlNodeInterface parseBracket(Token tok, FqlNodeInterface left) throws FqlParseException {
+        if (tok != Token.LBracket)
+            return left;
+        if (!(left instanceof ContainerNameNode))
+            throw new FqlParseException("Name to left of bracket, does not refer to an entry point. (use clause)", p);
+        FqlNodeInterface indexNode = parseAs();
+        tok = next();
+        final FqlNodeInterface ret;
+        if (tok == Token.RBracket) {
+            ret = new IndexOpNode(left, indexNode, p.lex.getRow(), p.lex.getCol());
+        } else if (tok == Token.Elipses) {
+            tok = next();
+            if (tok == Token.RBracket) {
+                ret = new CollectionSliceNode(left, indexNode, null, p.lex.getRow(), p.lex.getCol());
+            } else {
+                FqlNodeInterface upperBound = parseAs();
+                ret = new CollectionSliceNode(left, indexNode, upperBound, p.lex.getRow(), p.lex.getCol());
+                p.expect_next(Token.RBracket);
+            }
+        }
+        else
+            throw new FqlParseException("Expected right bracket ']' or ellipses '..'", p);
+
+        return ret;
     }
 
+    FqlNodeInterface parseQuestion() throws FqlParseException {
+        FqlNodeInterface conditionNode = parseOr();
+        Token atToken = next();
+        if (atToken != Token.Question) {
+            return pushBack(conditionNode);
+        }
+        FqlNodeInterface trueBranchNode = parseOr();
+        atToken = next();
+        if (atToken != Token.Colon) {
+            throw new FqlParseException("Colon expected", p);
+        }
+        FqlNodeInterface falseBranchNode = parseOr();
 
-    FqlNodeInterface parsePlus() throws FqlParseException
-    {
-	FqlNodeInterface l = parseMultiply();
-	for (; ; )
-	{
-	    Token t = next();
-	    if (t != Token.Plus && t != Token.Minus)
-	    {
-		return pushBack(l);
-	    }
-	    FqlNodeInterface r = parseMultiply();
-	    if (t == Token.Plus)
-	    {
-		l = new PlusNode(l, r, p.lex.row, p.lex.col);
-	    }
-	    else
-	    {
-		l = new MinusNode(l, r, p.lex.row, p.lex.col);
-	    }
-	}
+        return new QuestionNode(conditionNode, trueBranchNode, falseBranchNode, conditionNode.getRow(), conditionNode.getCol());
     }
 
-    private FqlNodeInterface pushBack(FqlNodeInterface l)
-    {
-	p.lex.pushBack();
-	return l;
+    FqlNodeInterface parseOr() throws FqlParseException {
+        FqlNodeInterface l = parseAnd();
+        Token atToken = next();
+        if (atToken != Token.Or) {
+            return pushBack(l);
+        }
+        FqlNodeInterface r = parseAnd();
+        return new OrNode(l, r, l.getRow(), l.getCol());
     }
 
-    protected FqlNodeInterface parseAtom() throws FqlParseException
-    {
-	Token t = next();
-	if (t == Lexer.Token.ConstInteger)
-	{
-	    return new ConstIntNode(p.lex.intVal, p.lex.getRow(), p.lex.getCol());
-	}
-	else if (t == Lexer.Token.ConstFloat)
-	{
-	    return new ConstFloatNode(p.lex.floatVal, p.lex.getRow(), p.lex.getCol());
-	}
-	else if (t == Lexer.Token.String)
-	{
-	    return new ConstStringNode(p.lex.stringVal, p.lex.getRow(), p.lex.getCol());
-	}
-	else if (t == Lexer.Token.True)
-	{
-	    return new ConstBooleanNode(true, p.lex.getRow(), p.lex.getCol());
-	}
-	else if (t == Lexer.Token.False)
-	{
-	    return new ConstBooleanNode(false, p.lex.getRow(), p.lex.getCol());
-	}
-	else if (t == Lexer.Token.Nil)
-	{
-	    return new NilNode(p.lex.getRow(), p.lex.getCol());
-	}
-	else if (t == Lexer.Token.LParen)
-	{
-	    final FqlNodeInterface node = parseAs();
-	    if (next() != Token.RParen)
-	    {
-		throw new FqlParseException("Missing )", p);
-	    }
-	    return node;
-	}
-	else if (t == Lexer.Token.Name)
-	{
-	    return parseNav();
-	}
-	else if (t == Lexer.Token.Param)
-	{
-	    return parseParam();
-	}
-	else if (t == Lexer.Token.EOFComment || t == Lexer.Token.EOF)
-	{
-	    throw new FqlParseException(Res.str("Missing expression"), p);
-	}
-	throw new FqlParseException(Res.str("Unexpected token: The character at this position cannot be understood"), p);
-    }
-
-    FqlNodeInterface parseAs() throws FqlParseException
-    {
-	FqlNodeInterface left = parseQuestion();
-	final Lexer.Token t = next();
-
-	if (t != Token.As)
-	    return pushBack(left);
-	final String className = p.lex.nameVal;
-	return new TypeCastNode(left, className, p.lex.getRow(), p.lex.getCol());
-    }
-
-    FqlNodeInterface parseAssign() throws FqlParseException
-    {
-	// parse expression
-	FqlNodeInterface left = parseAs();
-
-	Lexer.Token t = next();
-	if (t != Token.Assign)
-	{
-	    return pushBack(left);
-	}
-	if (!(left instanceof MemberNode))
-	{
-	    throw new FqlParseException("left of assignment is not a name but a " + left.getClass().getName(), p);
-	}
-	MemberNode an = (MemberNode) left;
-	String targetName = an.getMemberName();
-
-
-	final FqlNodeInterface right = parseAs();
-	return pushBack(new AssignNode(targetName, right, p.lex.getRow(), p.lex.getCol()));
+    FqlNodeInterface parseAnd() throws FqlParseException {
+        FqlNodeInterface l = parseNot();
+        Token atToken = next();
+        if (atToken != Token.And) {
+            return pushBack(l);
+        }
+        FqlNodeInterface r = parseNot();
+        return new AndNode(l, r, p.lex.getRow(), p.lex.getCol());
     }
 
 
-    protected Lexer.Token next() throws FqlParseException
-    {
-	return p.lex.nextToken();
+    FqlNodeInterface parseUnaryMinus() throws FqlParseException {
+        Token atToken = next();
+        if (atToken == Token.Minus) {
+            return new UnaryMinusNode(parseIs(), p.lex.getRow(), p.lex.getCol());
+        } else {
+            p.lex.pushBack();
+            return parseAtom();
+        }
+    }
+
+    FqlNodeInterface parseNot() throws FqlParseException {
+        Token atToken = next();
+        if (atToken == Token.Not) {
+            return new NotNode(parseEquals(), p.lex.getRow(), p.lex.getCol());
+        } else {
+            p.lex.pushBack();
+            return parseEquals();
+        }
     }
 
 
-    static FqlNodeInterface parseExpression(FqlParser p) throws FqlParseException
-    {
-	FqlExpressionParser fqlExpressionParser = new FqlExpressionParser(p);
-	return fqlExpressionParser.parseAs();
+    FqlNodeInterface parseEquals() throws FqlParseException {
+        FqlNodeInterface l = parseCompare();
+        for (; ; ) {
+            Token t = next();
+
+            if (t != Token.Equal && t != Token.Unequal && t != Token.Like && t != Token.Matches) {
+                return pushBack(l);
+            }
+            final int row = p.lex.getRow();
+            final int col = p.lex.getCol();
+
+            FqlNodeInterface r = parseCompare();
+            if (t == Token.Equal) {
+                l = new EqualsNode(l, r, row, col);
+            } else if (t == Token.Unequal) {
+                l = new NotEqualNode(l, r, row, col);
+            } else if (t == Token.Like) {
+                l = new LikeNode(l, r, row, col);
+            } else // if (t == Token.Matches)
+            {
+                l = new MatchesNode(l, r, row, col);
+            }
+        }
+
 
     }
 
-    public static FqlNodeInterface parseAssignedValue(FqlParser parser) throws FqlParseException
-    {
-	FqlExpressionParser fqlExpressionParser = new FqlExpressionParser(parser);
-	return fqlExpressionParser.parseAssign();
+    FqlNodeInterface parseCompare() throws FqlParseException {
+        FqlNodeInterface l = parsePlus();
+        Token t = next();
+        if (t != Token.Less && t != Token.LessOrEqual && t != Token.Greater && t != Token.GreaterOrEqual) {
+            return pushBack(l);
+        }
+        final int row = p.lex.getRow();
+        final int col = p.lex.getCol();
+        FqlNodeInterface r = parsePlus();
+
+        if (t == Token.Less) {
+            return new LessNode(l, r, row, col);
+        } else if (t == Token.LessOrEqual) {
+            return new LessOrEqualNode(l, r, row, col);
+        } else if (t == Token.Greater) {
+            return new GreaterNode(l, r, row, col);
+        } else //if (t == Token.GreaterOrEqual)
+        {
+            return new GreaterOrEqualNode(l, r, row, col);
+        }
+    }
+
+    private FqlNodeInterface parseIs() throws FqlParseException {
+        FqlNodeInterface left = parseAtom();
+        final Lexer.Token t = next();
+
+        if (t == Lexer.Token.Is) {
+            final String className = p.lex.nameVal;
+            return new InstanceofNode(left, className, p.lex.getRow(), p.lex.getCol());
+        } else {
+            p.lex.pushBack();
+            return left;
+        }
+    }
+
+    FqlNodeInterface parseMultiply() throws FqlParseException {
+        FqlNodeInterface l = parseUnaryMinus();
+        for (; ; ) {
+            Token t = next();
+            if (t != Token.Mod && t != Token.Star && t != Token.Slash) {
+                return pushBack(l);
+            }
+            final int row = p.lex.getRow();
+            final int col = p.lex.getCol();
+            FqlNodeInterface r = parseUnaryMinus();
+            if (t == Token.Mod) {
+                l = new ModuloNode(l, r, row, col);
+            } else if (t == Token.Star) {
+                l = new MultiplyNode(l, r, row, col);
+            } else {
+                l = new DivideNode(l, r, row, col);
+            }
+        }
+    }
+
+
+    FqlNodeInterface parsePlus() throws FqlParseException {
+        FqlNodeInterface l = parseMultiply();
+        for (; ; ) {
+            Token t = next();
+            if (t != Token.Plus && t != Token.Minus) {
+                return pushBack(l);
+            }
+            FqlNodeInterface r = parseMultiply();
+            if (t == Token.Plus) {
+                l = new PlusNode(l, r, p.lex.row, p.lex.col);
+            } else {
+                l = new MinusNode(l, r, p.lex.row, p.lex.col);
+            }
+        }
+    }
+
+    private FqlNodeInterface pushBack(FqlNodeInterface l) {
+        p.lex.pushBack();
+        return l;
+    }
+
+    protected FqlNodeInterface parseAtom() throws FqlParseException {
+        Token t = next();
+        if (t == Lexer.Token.ConstInteger) {
+            return new ConstIntNode(p.lex.intVal, p.lex.getRow(), p.lex.getCol());
+        } else if (t == Lexer.Token.ConstFloat) {
+            return new ConstFloatNode(p.lex.floatVal, p.lex.getRow(), p.lex.getCol());
+        } else if (t == Lexer.Token.String) {
+            return new ConstStringNode(p.lex.stringVal, p.lex.getRow(), p.lex.getCol());
+        } else if (t == Lexer.Token.True) {
+            return new ConstBooleanNode(true, p.lex.getRow(), p.lex.getCol());
+        } else if (t == Lexer.Token.False) {
+            return new ConstBooleanNode(false, p.lex.getRow(), p.lex.getCol());
+        } else if (t == Lexer.Token.Nil) {
+            return new NilNode(p.lex.getRow(), p.lex.getCol());
+        } else if (t == Lexer.Token.LParen) {
+            final FqlNodeInterface node = parseAs();
+            if (next() != Token.RParen) {
+                throw new FqlParseException("Missing )", p);
+            }
+            return node;
+        } else if (t == Lexer.Token.Name) {
+            return parseNav();
+        } else if (t == Lexer.Token.Param) {
+            return parseParam();
+        } else if (t == Lexer.Token.EOFComment || t == Lexer.Token.EOF) {
+            throw new FqlParseException(Res.str("Missing expression"), p);
+        }
+        throw new FqlParseException(Res.str("Unexpected token: The character at this position cannot be understood"), p);
+    }
+
+    FqlNodeInterface parseAs() throws FqlParseException {
+        FqlNodeInterface left = parseQuestion();
+        final Lexer.Token t = next();
+
+        if (t != Token.As)
+            return pushBack(left);
+        final String className = p.lex.nameVal;
+        return new TypeCastNode(left, className, p.lex.getRow(), p.lex.getCol());
+    }
+
+    FqlNodeInterface parseAssign() throws FqlParseException {
+        // parse expression
+        FqlNodeInterface left = parseAs();
+
+        Lexer.Token t = next();
+        if (t != Token.Assign) {
+            return pushBack(left);
+        }
+        if (!(left instanceof MemberNode)) {
+            throw new FqlParseException("left of assignment is not a name but a " + left.getClass().getName(), p);
+        }
+        MemberNode an = (MemberNode) left;
+        String targetName = an.getMemberName();
+
+
+        final FqlNodeInterface right = parseAs();
+        return pushBack(new AssignNode(targetName, right, p.lex.getRow(), p.lex.getCol()));
+    }
+
+
+    protected Lexer.Token next() throws FqlParseException {
+        return p.lex.nextToken();
+    }
+
+
+    static FqlNodeInterface parseExpression(FqlParser p) throws FqlParseException {
+        FqlExpressionParser fqlExpressionParser = new FqlExpressionParser(p);
+        return fqlExpressionParser.parseAs();
+
+    }
+
+    public static FqlNodeInterface parseAssignedValue(FqlParser parser) throws FqlParseException {
+        FqlExpressionParser fqlExpressionParser = new FqlExpressionParser(parser);
+        return fqlExpressionParser.parseAssign();
     }
 }
