@@ -29,7 +29,7 @@ public class ConnectClause extends NamedIndex implements FqlStatement
         try
         {
 	    FunqlDriver driver = env.newDriver(index, driverClassName);
-            final FqlConnection conn = driver.openConnection(name, config);
+            final FunqlConnection conn = driver.openConnection(name, config);
             env.setConnectionAt(index, conn);
         }
         catch (Exception e)

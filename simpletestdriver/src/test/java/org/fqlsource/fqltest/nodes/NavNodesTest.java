@@ -47,7 +47,7 @@ public class NavNodesTest extends NodeTestBase
 	Map<String, String> p = new HashMap<String, String>();
 	p.put("driver", "SimpleTestDriver");
 	p.put("count", "1");
-	FqlConnection conn = new SimpleTestConnection("simpleTest", p);
+	FunqlConnection conn = new SimpleTestConnection("simpleTest", p);
 
 	env = new RunEnv(1,1,1,null);
 	env.setConnectionAt(0,conn);

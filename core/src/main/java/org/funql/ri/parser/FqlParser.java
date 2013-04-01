@@ -46,19 +46,19 @@ public class FqlParser {
         lex = new Lexer(txt);
     }
 
-    public FqlParser(String queryText, FqlConnection[] conn) {
+    public FqlParser(String queryText, FunqlConnection[] conn) {
         this(queryText);
-        for (FqlConnection fqlConnection : conn) {
-            connections.put(fqlConnection.getName(), new ProvidedConnection(connectionCount++, fqlConnection));
+        for (FunqlConnection funqlConnection : conn) {
+            connections.put(funqlConnection.getName(), new ProvidedConnection(connectionCount++, funqlConnection));
         }
     }
 
-    public FqlParser(String queryText, FqlConnection conn) {
+    public FqlParser(String queryText, FunqlConnection conn) {
         this(queryText);
         connections.put(conn.getName(), new ProvidedConnection(connectionCount++, conn));
     }
 
-    public static FqlIterator runQuery(String queryText, Object[] parameterValues, FqlConnection... conn) throws FqlParseException, FqlDataException {
+    public static FqlIterator runQuery(String queryText, Object[] parameterValues, FunqlConnection... conn) throws FqlParseException, FqlDataException {
         final FqlParser parser = new FqlParser(queryText, conn);
         final List<FqlStatement> fqlStatements = parser.parseClauses();
         final RunEnv runEnv = new RunEnv(parser.connectionCount, parser.iteratorCount, parser.entryPointCount, parameterValues);

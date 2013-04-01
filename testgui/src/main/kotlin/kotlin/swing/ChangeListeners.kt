@@ -17,9 +17,7 @@ inline fun changeListener(fn: (ChangeEvent) -> Unit): ChangeListener = FunctionC
 
 private class FunctionChangeListener(val fn: (ChangeEvent) -> Unit) : ChangeListener {
     public override fun stateChanged(e: ChangeEvent) {
-        if (e != null) {
-            (fn)(e)
-        }
+            fn(e)
     }
 }
 

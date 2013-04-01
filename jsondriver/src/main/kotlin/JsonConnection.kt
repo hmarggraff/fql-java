@@ -7,7 +7,7 @@ import java.io.InputStream
 import java.util.ArrayList
 import java.util.LinkedHashMap
 import org.fqlsource.ri.util.ListFqlIterator
-import org.funql.ri.data.FqlConnectionWithRange
+import org.funql.ri.data.FunqlConnectionWithRange
 import org.funql.ri.data.FqlDataException
 import org.funql.ri.data.FqlIterator
 import org.funql.ri.data.FqlMapContainer
@@ -17,7 +17,7 @@ import org.yaml.snakeyaml.Yaml
 import org.funql.ri.data.FqlMultiMapContainer
 
 
-public open class JsonConnection(name: String, propsArg: Map<String, String>?): KNamedImpl(name), FqlConnectionWithRange
+public open class JsonConnection(name: String, propsArg: Map<String, String>?): KNamedImpl(name), FunqlConnectionWithRange
 {
     val props: Map<String, String> = propsArg!!
 

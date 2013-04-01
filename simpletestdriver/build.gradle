@@ -2,6 +2,13 @@
 
 apply plugin: 'kotlin'
 
+jar {
+    manifest {
+        attributes "Funql-Driver-Name": "JSON-Yaml", 'Funql-Driver-Class': 'org.fqlsource.fqltest.simpletestdriver.SimpleTestDriver'
+    }
+}
+
+
 dependencies {
     compile project(':riutil')
     compile project(':driverapi')

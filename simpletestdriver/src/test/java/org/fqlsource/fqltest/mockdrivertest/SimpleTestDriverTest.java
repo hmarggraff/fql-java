@@ -16,7 +16,7 @@ package org.fqlsource.fqltest.mockdrivertest;
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.funql.ri.data.FqlConnection;
+import org.funql.ri.data.FunqlConnection;
 import org.funql.ri.data.FqlDataException;
 import org.fqlsource.fqltest.simpletestdriver.SimpleTestDriver;
 import org.fqlsource.fqltest.simpletestdriver.SimpleTestIterator;
@@ -35,7 +35,7 @@ import java.util.Map;
 
 public class SimpleTestDriverTest
 {
-    FqlConnection conn;
+    FunqlConnection conn;
 
     @Before
     public void openConnction() throws FqlDataException

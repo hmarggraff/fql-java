@@ -15,25 +15,11 @@ package org.funql.ri.data;
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.funql.ri.util.Named;
-
-import java.util.List;
-
 /**
  * This class implements the logic to implement a specific datasource
  * Actual data access in provided in the two Container classes.
  */
-public interface FqlConnection extends Named
+public interface FunqlConnectionWithRange extends FunqlConnection
 {
-
-    //void init(Map<String, String> props) throws FqlDataException;
-
-    void close();
-
-    FqlIterator useIterator(String streamName) throws FqlDataException;
-
-    Object getMember(Object from, String member);
-
-    FqlMapContainer useMap(List<String> fieldpath);
-    FqlMultiMapContainer useMultiMap(List<String> fieldpath);
+    FqlIterator range(String name, String startKey, String endKey, boolean includeEnd);
 }

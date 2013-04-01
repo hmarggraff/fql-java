@@ -1,7 +1,7 @@
 package org.funql.ri.mongodriver
 
 import org.funql.ri.data.FunqlDriver
-import org.funql.ri.data.FqlConnection
+import org.funql.ri.data.FunqlConnection
 import org.funql.ri.util.NamedImpl
 import org.funql.ri.util.SomethingMissingError
 import org.funql.ri.data.FqlIterator
@@ -24,14 +24,14 @@ import com.mongodb.DBRef
 class MongoDriverKt: FunqlDriver {
 
 
-    public override fun openConnection(name: String?, props: Map<String, String>?): FqlConnection?  = FqlMongoConnectionKt(name!!, props!!)
+    public override fun openConnection(name: String?, props: Map<String, String>?): FunqlConnection?  = FqlMongoConnectionKt(name!!, props!!)
 
     public override fun supportsRanges() = true
 
     public override fun isAdvancedDriver() = false
 }
 
-class FqlMongoConnectionKt(name: String, val props: Map<String, String?>?): NamedImpl(name), FqlConnection
+class FqlMongoConnectionKt(name: String, val props: Map<String, String?>?): NamedImpl(name), FunqlConnection
 {
     public val dbname: String = props!!.get("db")?: throw SomethingMissingError("missing property db for mongo database.")
     public val mongoConn: Mongo = Mongo()

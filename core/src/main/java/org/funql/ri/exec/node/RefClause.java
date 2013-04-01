@@ -22,8 +22,8 @@ public class RefClause implements FqlStatement
 
     public FqlIterator execute(RunEnv env, FqlIterator precedent) throws FqlDataException
     {
-	FqlConnection fqlConnection = env.getConnection(entryPoint.getIndex());
-	FqlMapContainer mapContainer = fqlConnection.useMap(fieldpath);
+	FunqlConnection funqlConnection = env.getConnection(entryPoint.getIndex());
+	FqlMapContainer mapContainer = funqlConnection.useMap(fieldpath);
 
 	env.setMapContainer(entryPoint.getEntryPointIndex(), mapContainer);
 	return null;

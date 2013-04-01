@@ -10,15 +10,8 @@ import java.awt.*
 /**
  * Creates a [[ActionListener]] for the given function for processing each [[ActionEvent]]
  */
-inline fun actionListener(fn: (ActionEvent) -> Unit): ActionListener = FunctionActionListener(fn)
 
-private class FunctionActionListener(val fn: (ActionEvent) -> Unit) : ActionListener {
-    public override fun actionPerformed(e: ActionEvent) {
-        if (e != null) {
-            (fn)(e)
-        }
-    }
-}
+inline fun actionListener(fn: (ActionEvent) -> Unit): ActionListener = FunctionActionListener(fn)
 
 inline fun Button.addActionListener(fn: (ActionEvent) -> Unit): Unit {
     addActionListener(actionListener(fn))

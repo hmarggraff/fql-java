@@ -1,9 +1,7 @@
 package kotlin.swing
 
-import javax.swing.*
-import java.awt.event.*
 import java.awt.*
-
+import javax.swing.*
 
 // TODO ideally should use BorderPanel as only that class should have
 // the north / south / east west properties

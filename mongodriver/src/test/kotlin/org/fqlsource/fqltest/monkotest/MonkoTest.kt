@@ -19,7 +19,7 @@ import com.mongodb.BasicDBObject
 import org.funql.ri.data.FqlIterator
 import org.funql.ri.parser.FqlParser
 import org.funql.ri.kotlinutil.javaHashMap
-import org.funql.ri.data.FqlConnection
+import org.funql.ri.data.FunqlConnection
 import org.junit.AfterClass
 import org.testng.annotations.BeforeClass
 import com.sun.org.glassfish.gmbal.NameValue
@@ -32,7 +32,7 @@ import org.funql.ri.exec.NamedLong
 class Tests
 {
     val dbName = "funql_test"
-    var conn: FqlConnection? = null
+    var conn: FunqlConnection? = null
     var productsIterator: FqlIterator? = null
     val products = "products"
 

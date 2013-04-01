@@ -18,21 +18,11 @@ apply plugin: 'kotlin'
 compileJava.dependsOn compileKotlin
 compileTestJava.dependsOn compileTestKotlin
 
-
 dependencies {
+  compile project(':core')
   compile project(':driverapi')
-  compile project(':riutil')
   compile kotlinlib
   compile snakeYamlVersion
 
   runtime kotlinruntime
-
-  testCompile junitVersion
 }
-
-jar {
-    manifest {
-        attributes('Funql-Driver-Name': 'JSON-Yaml', 'Funql-Driver-Class': 'org.funql.ri.JsonDriver')
-    }
-}
-

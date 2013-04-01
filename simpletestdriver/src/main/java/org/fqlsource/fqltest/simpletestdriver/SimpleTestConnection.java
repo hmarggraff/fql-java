@@ -23,7 +23,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-public class SimpleTestConnection extends NamedImpl implements FqlConnectionWithRange
+public class SimpleTestConnection extends NamedImpl implements FunqlConnectionWithRange
 {
     final Map<String, String> props;
     String prefix = "";

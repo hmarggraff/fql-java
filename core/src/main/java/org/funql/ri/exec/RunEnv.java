@@ -26,7 +26,7 @@ public class RunEnv
     /**
      * the list of init connections
      */
-    FqlConnection[] connections;
+    FunqlConnection[] connections;
 
     /**
      * Stack of iterator lists, depth is equivalent to the nesting level of the query
@@ -44,7 +44,7 @@ public class RunEnv
 
     public RunEnv(int driverCount, int connectionCount, int iteratorCount, int mapCount, Object[] parameterValues)
     {
-	connections = new FqlConnection[connectionCount];
+	connections = new FunqlConnection[connectionCount];
 	iterators = new FqlIterator[iteratorCount];
 	maps = new FqlMapContainer[mapCount];
 	this.parameterValues = parameterValues;
@@ -62,17 +62,17 @@ public class RunEnv
 	return object;
     }
 
-    public FqlConnection getConnection(int connectionIndex)
+    public FunqlConnection getConnection(int connectionIndex)
     {
 	return connections[connectionIndex];
     }
 
-    public void setConnectionAt(int index, FqlConnection conn)
+    public void setConnectionAt(int index, FunqlConnection conn)
     {
 	connections[index] = conn;
     }
 
-    public FqlConnection[] getConnections()
+    public FunqlConnection[] getConnections()
     {
 	return connections;
     }

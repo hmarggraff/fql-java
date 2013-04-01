@@ -17,6 +17,12 @@ apply plugin: 'kotlin'
 
 compileJava.dependsOn compileKotlin
 
+jar {
+    manifest {
+        attributes "Funql-Driver-Name": "JSON-Yaml", 'Funql-Driver-Class': 'org.funql.ri.mongodriver.MongoDriverKt'
+    }
+}
+
 
 dependencies {
   compile project(':driverapi')
