@@ -38,6 +38,12 @@ fun JMenu.item(vararg actions: Action): Unit {
         add(answer)
     }
 }
+fun JMenu.menu(text: String, init: JMenu.() -> Unit): JMenu {
+    val answer = JMenu(text)
+    answer.init()
+    add(answer)
+    return answer;
+}
 
 fun JMenu.item(text: String, description: String? = null, mnemonic: Char? = null, accelerator: KeyStroke? = null): JMenuItem {
     val answer = menuItem(text, description, mnemonic, accelerator)
@@ -83,7 +89,7 @@ public fun radioButtonMenuItem(text: String, description: String? = null, mnemon
  */
 fun <T: JMenuItem> configureMenuItem(answer: T, description: String?, mnemonic: Char?, accelerator: KeyStroke?): T {
     if (description != null) {
-        answer.getAccessibleContext()?.setAccessibleDescription(description)
+        answer.getAccessibleContext().setAccessibleDescription(description)
     }
     if (mnemonic != null) {
         answer.setMnemonic(mnemonic)

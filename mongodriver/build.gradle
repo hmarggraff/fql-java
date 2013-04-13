@@ -19,18 +19,16 @@ compileJava.dependsOn compileKotlin
 
 jar {
     manifest {
-        attributes "Funql-Driver-Name": "JSON-Yaml", 'Funql-Driver-Class': 'org.funql.ri.mongodriver.MongoDriverKt'
+        attributes "Funql-Driver-Name": "MongoDB", 'Funql-Driver-Class': 'org.funql.ri.mongodriver.MongoDriverKt'
     }
 }
 
 
 dependencies {
-  compile project(':driverapi')
-  compile project(':riutil')
-  compile project(':mongodriver:bsonwrapper')
-  testCompile project(':core')
-  testCompile testNG
-  compile 'org.mongodb:mongo-java-driver:+'
-  compile kotlinlib
-  runtime kotlinruntime
+    compile project(':core')
+    compile project(':mongodriver:bsonwrapper')
+    compile 'org.mongodb:mongo-java-driver:+'
+    compile kotlinlib
+    testCompile testNG
+    runtime kotlinruntime
 }

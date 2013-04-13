@@ -20,7 +20,8 @@ compileTestJava.dependsOn compileTestKotlin
 
 dependencies {
   compile project(':core')
-  compile project(':driverapi')
+  compile project(':jsondriver')
+  compile project(':mongodriver')
   compile kotlinlib
   compile snakeYamlVersion
 

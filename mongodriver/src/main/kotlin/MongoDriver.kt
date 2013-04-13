@@ -24,7 +24,8 @@ import com.mongodb.DBRef
 class MongoDriverKt: FunqlDriver {
 
 
-    public override fun openConnection(name: String?, props: Map<String, String>?): FunqlConnection?  = FqlMongoConnectionKt(name!!, props!!)
+    //public override fun openConnection(name: String?, props: Map<String, String>?): FunqlConnection?  = FqlMongoConnectionKt(name!!, props!!)
+    public override fun openConnection(p0: String?, p1: Map<String, String>?): FunqlConnection?  = FqlMongoConnectionKt(p0!!, p1!!)
 
     public override fun supportsRanges() = true
 
@@ -41,16 +42,17 @@ class FqlMongoConnectionKt(name: String, val props: Map<String, String?>?): Name
     }
 
 
-    public override fun useIterator(streamName: String?): FqlIterator {
-        if (mongoDB.collectionExists(streamName!!))
-            return FqlMongoIteratorKt(mongoDB.getCollection(streamName)?.find()?:throw SomethingMissingError("Collection with name " + streamName + " not Found"))
+    //public override fun useIterator(streamName: String?): FqlIterator {
+    public override fun useIterator(p0: String?): FqlIterator {
+        if (mongoDB.collectionExists(p0!!))
+            return FqlMongoIteratorKt(mongoDB.getCollection(p0)?.find()?:throw SomethingMissingError("Collection with name " + p0 + " not Found"))
         else
-            throw SomethingMissingError("Collection with name " + streamName + " not Found")
+            throw SomethingMissingError("Collection with name " + p0 + " not Found")
     }
     public override fun close() = mongoConn.close()
 
 
-    public override fun useMap(fieldpath: List<String>?): FqlMapContainer? = useMapK(fieldpath = fieldpath.check())
+    public override fun useMap(p0: List<String>?): FqlMapContainer? = useMapK(fieldpath = p0.check())
     public fun useMapK(fieldpath: List<String>): FqlMapContainer?  {
 
         if (fieldpath.size() > 1) throw ImplementationLimitation("MongoDB only supports top level Collections");
@@ -62,8 +64,8 @@ class FqlMongoConnectionKt(name: String, val props: Map<String, String?>?): Name
 
 
     //public override fun useMultiMap(fieldpath: List<String>?): FqlMultiMapContainer? = useMultiMapK(fieldpath = fieldpath.check())
-    public override fun useMultiMap(fieldpath: List<String>?): FqlMultiMapContainer? {
-        val fpath = fieldpath.check("fieldpath")
+    public override fun useMultiMap(p0: List<String>?): FqlMultiMapContainer? {
+        val fpath = p0.check("fieldpath")
         if (fpath.size() > 1) throw ImplementationLimitation("MongoDB only supports top level Collections");
         if (fpath.size() == 0) throw java.lang.AssertionError("The path to open a map in $dbname is empty");
         val streamName = fpath[0]
@@ -72,26 +74,27 @@ class FqlMongoConnectionKt(name: String, val props: Map<String, String?>?): Name
     }
 
 
-    public override fun getMember(from: Any?, member: String?): Any? {
-        if (from == null) return null;
-        else if (from is Map<*,*>) return from[member!!]
-        else if (from is DBRef){
-            val fetch = from.fetch()
-            val value = fetch?.get(member!!)
+    public override fun getMember(p0: Any?, p1: String?): Any? {
+        if (p0 == null) return null;
+        else if (p0 is Map<*,*>) return p0[p1!!]
+        else if (p0 is DBRef){
+            val fetch = p0.fetch()
+            val value = fetch?.get(p1!!)
             return value;
         }
-        throw AssertionError("Mongo member access needs a map, but found a " + from.javaClass)
+        throw AssertionError("Mongo member access needs a map, but found a " + p0.javaClass)
     }
 
 
-    public override fun compareTo(other: Named): Int = name?.compareTo(other.getName()!!)!!
+
+    public override fun compareTo(s: Named): Int = name?.compareTo(s.getName()!!)!!
 }
 
 class FqlMongoIteratorKt(val data: DBCursor): FqlIterator
 {
     var currentVal: DBObject? = null
     public override fun hasNext(): Boolean = data.hasNext()
-    public override fun next(): Object? {
+    public override fun next(): Any? {
         currentVal = data.next();
         return currentVal
     }
@@ -101,16 +104,16 @@ class FqlMongoIteratorKt(val data: DBCursor): FqlIterator
 class FqlMongoLookupSingleKt(val fieldPath: String, val data: DBCollection): FqlMapContainer
 {
     val isId = fieldPath == "_id"
-    public override fun lookup(key: Any?): Any?
+    public override fun lookup(p0: Any?): Any?
     {
         val query = BasicDBObjectWrapper()
 
-        if (isId && key is ByteArray && key.size == 12)
-            query.put(fieldPath, ObjectId(key as ByteArray))
-        else if (key is DBRef)
-            return key.fetch()
+        if (isId && p0 is ByteArray && p0.size == 12)
+            query.put(fieldPath, ObjectId(p0 as ByteArray))
+        else if (p0 is DBRef)
+            return p0.fetch()
         else
-            query.put(fieldPath, key)
+            query.put(fieldPath, p0)
 
         val ret = data.find(query.getTarget())!!
         if (ret.hasNext())
@@ -121,10 +124,10 @@ class FqlMongoLookupSingleKt(val fieldPath: String, val data: DBCollection): Fql
 }
 class FqlMongoLookupSomeKt(val fieldPath: String, val data: DBCollection): FqlMultiMapContainer
 {
-    public override fun lookup(key: Any?): FqlIterator?
+    public override fun lookup(p0: Any?): FqlIterator?
     {
         val query = BasicDBObjectWrapper()
-        query.put(fieldPath, key)
+        query.put(fieldPath, p0)
         val ret = data.find(query.getTarget())!!
         return FqlMongoIteratorKt(ret)
     }

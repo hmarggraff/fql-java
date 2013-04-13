@@ -15,7 +15,6 @@ package org.funql.ri.data;
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.funql.ri.util.Named;
 
 import java.util.List;
 
@@ -23,7 +22,7 @@ import java.util.List;
  * This class implements the logic to implement a specific datasource
  * Actual data access in provided in the two Container classes.
  */
-public interface FunqlConnection extends Named
+public interface FunqlConnection
 {
 
     //void init(Map<String, String> props) throws FqlDataException;
@@ -36,4 +35,5 @@ public interface FunqlConnection extends Named
 
     FqlMapContainer useMap(List<String> fieldpath);
     FqlMultiMapContainer useMultiMap(List<String> fieldpath);
+    String getName();
 }

@@ -30,10 +30,10 @@ public class FqlParser {
     String txt;
     Lexer lex;
     protected Map<String, NamedIndex> connections = new HashMap<String, NamedIndex>();
-    final Map<String, EntryPointSlot> entryPoints = new HashMap<>();
+    final Map<String, EntryPointSlot> entryPoints = new HashMap<String, EntryPointSlot>();
     public Map<String, NamedIndex> parameters = new HashMap<String, NamedIndex>();
     public Map<String, FqlBuiltinFunction> functions = new HashMap<String, FqlBuiltinFunction>();
-    protected Stack<EntryPointSlot> iteratorStack = new Stack<>();
+    protected Stack<EntryPointSlot> iteratorStack = new Stack<EntryPointSlot>();
     private final List<FqlStatement> clauses = new ArrayList<FqlStatement>();
     protected int connectionCount;
     protected int entryPointCount;
@@ -185,7 +185,7 @@ public class FqlParser {
     protected void parseLink() throws FqlParseException {
         Token t;
         boolean hasString;
-        ArrayList<String> path = new ArrayList<>();
+        ArrayList<String> path = new ArrayList<String>();
         for (; ; ) {
             Token t1 = nextToken();
             hasString = t1 == Token.String;
@@ -212,7 +212,7 @@ public class FqlParser {
         }
         ArrayList<String> fieldpath = null;
         if (t == Token.By) {
-            fieldpath = new ArrayList<>();
+            fieldpath = new ArrayList<String>();
             for (; ; ) {
                 Token t1 = nextToken();
                 String step = name_or_string(t1);

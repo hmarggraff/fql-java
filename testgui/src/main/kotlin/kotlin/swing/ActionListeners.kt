@@ -13,6 +13,11 @@ import java.awt.*
 
 inline fun actionListener(fn: (ActionEvent) -> Unit): ActionListener = FunctionActionListener(fn)
 
+public class FunctionActionListener(val fn: (ActionEvent) -> Unit): ActionListener {
+    public override fun actionPerformed(p0: ActionEvent) {
+        fn(p0)
+    }
+}
 inline fun Button.addActionListener(fn: (ActionEvent) -> Unit): Unit {
     addActionListener(actionListener(fn))
 }

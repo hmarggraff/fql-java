@@ -51,7 +51,7 @@ class Tests
     //Test
     fun iterateProducts() {
         val pi = productsIterator!!
-        val current = if (pi.hasNext()) pi.next() else null
+        val current: Any? = if (pi.hasNext()) pi.next() else null
         assertNotNull(current, "Iterator $products did not yield data.")
         println(current)
         var cnt = 1

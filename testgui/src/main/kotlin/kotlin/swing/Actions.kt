@@ -11,14 +11,8 @@ import javax.swing.Icon
  */
 fun action(text: String, description: String? = null, mnemonic: Int? = null, icon: Icon? = null, fn: (ActionEvent) -> Unit): Action {
     val answer = object: AbstractAction(text, icon) {
-        public override fun actionPerformed(e: ActionEvent) {
-            val event: ActionEvent = if (e != null) {
-                e
-            } else {
-                // lets create a dummy event
-                ActionEvent(this, ActionEvent.ACTION_PERFORMED, text)
-            }
-            (fn)(event)
+        public override fun actionPerformed(p0: ActionEvent) {
+            fn(p0)
         }
     }
     if (description != null) answer.putValue(SHORT_DESCRIPTION, description)

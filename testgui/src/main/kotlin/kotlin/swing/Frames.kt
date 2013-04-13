@@ -31,19 +31,19 @@ var JFrame.title: String
     }
 
 var JFrame.size: Pair<Int, Int>
-    get() = Pair(getSize()!!.getWidth().toInt(), getSize()!!.getHeight().toInt())
+    get() = Pair(getSize().getWidth().toInt(), getSize().getHeight().toInt())
     set(dim) {
         setSize(Dimension(dim.first, dim.second))
     }
 
 var JFrame.height: Int
-    get() = getSize()!!.getHeight().toInt()
+    get() = getSize().getHeight().toInt()
     set(h) {
         setSize(width, h)
     }
 
 var JFrame.width: Int
-    get() = getSize()!!.getWidth().toInt()
+    get() = getSize().getWidth().toInt()
     set(w) {
         setSize(height, w)
     }

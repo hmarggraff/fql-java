@@ -3,10 +3,19 @@ package org.funql.ri.gui
 import java.io.File
 import java.io.FileWriter
 import java.io.FileReader
+import org.funql.ri.data.FunqlConnection
+import org.funql.ri.jsondriver.JsonConnection
+import java.util.ArrayList
 
 class TestRunnerControl(val view: TestRunnerView) {
+
+    public final val conNameKey: String = "conName"
+    public final val textKey: String = "text"
+    public final val fileKey: String = "file"
+
     var textChanged = false;
     var funqlFile: File? = null;
+    val connections = ArrayList<FunqlConnection>()
 
     fun writeFile(file: File, text: String) {
         var w: FileWriter? = null
@@ -33,12 +42,12 @@ class TestRunnerControl(val view: TestRunnerView) {
             writeFile(funqlFile!!, if (result) view.getResultText() else view.getQueryText())
     }
 
-    fun saveChanged() : Boolean{
+    fun saveChanged(): Boolean {
         if (textChanged){
             val userAnswer = view.askForSave()
             if (userAnswer == UserAnswer.cancel) return true
             if (userAnswer == UserAnswer.yes) saveFile(false)
-            }
+        }
         return false;
     }
 
@@ -52,16 +61,33 @@ class TestRunnerControl(val view: TestRunnerView) {
         if (saveChanged()) return
         val file = view.showOpenDialog("Open query file")
         if (file != null && file.canRead())
-            {
-                val r = FileReader(file)
-                val s = r.readText()
+        {
+            val r = FileReader(file)
+            val s = r.readText()
 
-                view.setQueryText(s)
-                r.close()
-                funqlFile = file;
-                view.setTitle(funqlFile!!.getPath())
-            }
-            else
-                view.error("File ${file} could not be opened.")
+            view.setQueryText(s)
+            r.close()
+            funqlFile = file;
+            view.setTitle(funqlFile!!.getPath())
         }
+        else
+            view.error("File ${file} could not be opened.")
     }
+    public fun createJsonConnection(props: Map<String, String>): Unit
+    {
+        val ret = JsonConnection(props[conNameKey]!!, props)
+        connections.add(ret)
+    }
+
+    public fun run(q: String){
+        view setResultText q
+
+    }
+    public fun close(conn: FunqlConnection){
+        conn.close()
+        connections.remove(conn)
+    }
+
+
+
+}
