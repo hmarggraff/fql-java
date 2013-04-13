@@ -7,7 +7,7 @@ import org.testng.annotations.Test
 import kotlin.test.assertNotNull
 import org.testng.annotations.AfterTest
 import com.mongodb.DB
-import org.funql.ri.mongodriver.FqlMongoConnectionKt
+import org.funql.ri.mongodriver.FunqlMongoConnection
 import kotlin.test.assertEquals
 import org.testng.annotations.DataProvider
 import java.util.ArrayList

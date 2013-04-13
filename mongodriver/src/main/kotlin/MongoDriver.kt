@@ -3,7 +3,7 @@ package org.funql.ri.mongodriver
 import org.funql.ri.data.FunqlDriver
 import org.funql.ri.data.FunqlConnection
 import org.funql.ri.util.NamedImpl
-import org.funql.ri.util.SomethingMissingError
+import org.funql.ri.util.ConfigurationError
 import org.funql.ri.data.FqlIterator
 import org.funql.ri.data.FqlMapContainer
 import org.funql.ri.util.ImplementationLimitation
@@ -19,47 +19,61 @@ import org.funql.ri.data.FqlMultiMapContainer
 import org.funql.ri.kotlinutil.check
 import org.funql.ri.mongodriver.workaround.BasicDBObjectWrapper
 import com.mongodb.DBRef
+import com.mongodb.MongoClient
 
 
 class MongoDriverKt: FunqlDriver {
 
 
     //public override fun openConnection(name: String?, props: Map<String, String>?): FunqlConnection?  = FqlMongoConnectionKt(name!!, props!!)
-    public override fun openConnection(p0: String?, p1: Map<String, String>?): FunqlConnection?  = FqlMongoConnectionKt(p0!!, p1!!)
+    public override fun openConnection(p0: String?, p1: Map<String, String>?): FunqlConnection? = FunqlMongoConnection(p0!!, p1!!)
 
     public override fun supportsRanges() = true
 
     public override fun isAdvancedDriver() = false
 }
 
-class FqlMongoConnectionKt(name: String, val props: Map<String, String?>?): NamedImpl(name), FunqlConnection
+class FunqlMongoConnection(name: String, val props: Map<String, String?>): NamedImpl(name), FunqlConnection
 {
-    public val dbname: String = props!!.get("db")?: throw SomethingMissingError("missing property db for mongo database.")
-    public val mongoConn: Mongo = Mongo()
-    public val mongoDB: DB = mongoConn.getDB(dbname)?: throw SomethingMissingError("Mongo Database named ${dbname} not found.");
-    {
-        println(mongoDB)
+    public val dbname: String = props.get("db")?: throw ConfigurationError("missing property db for mongo database.")
+    public val mongoConn: MongoClient = createClient(props)
+    public val mongoDB: DB = mongoConn.getDB(dbname)?: throw ConfigurationError("Mongo Database named ${dbname} not found.");
+    private fun createClient(props: Map<String, String?>): MongoClient {
+        val host: String = props["host"]?:"localhost"
+        val portString: String? = props["port"]
+        if (portString != null)
+        {
+            try
+            {
+                val port = Integer.parseInt(portString)
+                return MongoClient(host, port)
+            }
+            catch (x: NumberFormatException)
+            {
+                throw  ConfigurationError("Port property must be a number, not a $portString")
+            }
+        }
+        return MongoClient()
     }
-
 
     //public override fun useIterator(streamName: String?): FqlIterator {
     public override fun useIterator(p0: String?): FqlIterator {
         if (mongoDB.collectionExists(p0!!))
-            return FqlMongoIteratorKt(mongoDB.getCollection(p0)?.find()?:throw SomethingMissingError("Collection with name " + p0 + " not Found"))
+            return FunqlMongoIterator(mongoDB.getCollection(p0)?.find()?:throw ConfigurationError("Collection with name " + p0 + " not Found"))
         else
-            throw SomethingMissingError("Collection with name " + p0 + " not Found")
+            throw ConfigurationError("Collection with name " + p0 + " not Found")
     }
     public override fun close() = mongoConn.close()
 
 
     public override fun useMap(p0: List<String>?): FqlMapContainer? = useMapK(fieldpath = p0.check())
-    public fun useMapK(fieldpath: List<String>): FqlMapContainer?  {
+    public fun useMapK(fieldpath: List<String>): FqlMapContainer? {
 
         if (fieldpath.size() > 1) throw ImplementationLimitation("MongoDB only supports top level Collections");
         if (fieldpath.size() == 0) throw java.lang.AssertionError("The path to open a map in $dbname is empty");
         val streamName = fieldpath[0]
-        val coll: DBCollection = mongoDB.getCollection(streamName)?:throw SomethingMissingError("Collection with name " + streamName + " not Found")
-        return FqlMongoLookupSingleKt(streamName, coll)
+        val coll: DBCollection = mongoDB.getCollection(streamName)?:throw ConfigurationError("Collection with name " + streamName + " not Found")
+        return FunqlMongoLookupSingle(streamName, coll)
     }
 
 
@@ -69,14 +83,14 @@ class FqlMongoConnectionKt(name: String, val props: Map<String, String?>?): Name
         if (fpath.size() > 1) throw ImplementationLimitation("MongoDB only supports top level Collections");
         if (fpath.size() == 0) throw java.lang.AssertionError("The path to open a map in $dbname is empty");
         val streamName = fpath[0]
-        val coll: DBCollection = mongoDB.getCollection(streamName)?:throw SomethingMissingError("Collection with name " + streamName + " not Found")
-        return  FqlMongoLookupSomeKt(fpath[0], coll)
+        val coll: DBCollection = mongoDB.getCollection(streamName)?:throw ConfigurationError("Collection with name " + streamName + " not Found")
+        return  FunqlMongoLookupSome(fpath[0], coll)
     }
 
 
     public override fun getMember(p0: Any?, p1: String?): Any? {
         if (p0 == null) return null;
-        else if (p0 is Map<*,*>) return p0[p1!!]
+        else if (p0 is Map<*, *>) return p0[p1!!]
         else if (p0 is DBRef){
             val fetch = p0.fetch()
             val value = fetch?.get(p1!!)
@@ -86,11 +100,10 @@ class FqlMongoConnectionKt(name: String, val props: Map<String, String?>?): Name
     }
 
 
-
     public override fun compareTo(s: Named): Int = name?.compareTo(s.getName()!!)!!
 }
 
-class FqlMongoIteratorKt(val data: DBCursor): FqlIterator
+class FunqlMongoIterator(val data: DBCursor): FqlIterator
 {
     var currentVal: DBObject? = null
     public override fun hasNext(): Boolean = data.hasNext()
@@ -101,7 +114,7 @@ class FqlMongoIteratorKt(val data: DBCursor): FqlIterator
     public override fun current() = currentVal
 }
 
-class FqlMongoLookupSingleKt(val fieldPath: String, val data: DBCollection): FqlMapContainer
+class FunqlMongoLookupSingle(val fieldPath: String, val data: DBCollection): FqlMapContainer
 {
     val isId = fieldPath == "_id"
     public override fun lookup(p0: Any?): Any?
@@ -122,14 +135,14 @@ class FqlMongoLookupSingleKt(val fieldPath: String, val data: DBCollection): Fql
             return null
     }
 }
-class FqlMongoLookupSomeKt(val fieldPath: String, val data: DBCollection): FqlMultiMapContainer
+class FunqlMongoLookupSome(val fieldPath: String, val data: DBCollection): FqlMultiMapContainer
 {
     public override fun lookup(p0: Any?): FqlIterator?
     {
         val query = BasicDBObjectWrapper()
         query.put(fieldPath, p0)
         val ret = data.find(query.getTarget())!!
-        return FqlMongoIteratorKt(ret)
+        return FunqlMongoIterator(ret)
     }
 }
 

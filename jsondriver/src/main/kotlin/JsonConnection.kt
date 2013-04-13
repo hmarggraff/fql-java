@@ -11,7 +11,7 @@ import org.funql.ri.data.FqlDataException
 import org.funql.ri.data.FqlIterator
 import org.funql.ri.data.FqlMapContainer
 import org.funql.ri.util.Named
-import org.funql.ri.util.SomethingMissingError
+import org.funql.ri.util.ConfigurationError
 import org.yaml.snakeyaml.Yaml
 import org.funql.ri.data.FqlMultiMapContainer
 import org.funql.ri.util.ListFqlIterator
@@ -34,7 +34,7 @@ public open class JsonConnection(name: String, propsArg: Map<String, String>?): 
                 return readText
             }
             catch (ex: FileNotFoundException) {
-                throw SomethingMissingError("Yaml driver did not find the input file specified in the connection properties: " + file)
+                throw ConfigurationError("Yaml driver did not find the input file specified in the connection properties: " + file)
             }
             finally{
                 instream?.close()
@@ -45,7 +45,7 @@ public open class JsonConnection(name: String, propsArg: Map<String, String>?): 
             return props.get("text")!!
         }
         else
-            throw SomethingMissingError("Yaml driver needs a file (name) to read from.")
+            throw ConfigurationError("Yaml driver needs a file (name) to read from.")
     }
 
 

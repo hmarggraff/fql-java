@@ -61,15 +61,20 @@ public class SwingView: TestRunnerView
             }
             menu("Connections") {
                 menu("Open") {
-                    add(action("Open Json Text") {
+                    add(action("Open Json Text ...") {
                         val props: Map<String, String>? = jsonDriverText(guiFrame)
                         if (props != null)
                             control.createJsonConnection(props)
                     })
-                    add(action("Json File") {
+                    add(action("Json File ...") {
                         val props = jsonDriverFile(guiFrame)
                         if (props != null)
                             control.createJsonConnection(props)
+                    })
+                    add(action("MongoDB ...") {
+                        val props = mongoDriver(guiFrame)
+                        if (props != null)
+                            control.createMongoConnection(props)
                     })
                 }
                 menu("Edit") { }
@@ -140,6 +145,16 @@ public class SwingView: TestRunnerView
                 if (f != null)
                     edname.setText(f.getAbsolutePath())
             })
+        }
+        return values;
+    }
+
+    public fun mongoDriver(owner: JFrame): Map<String, String>? {
+        val values = formDialog(owner, "Connect to a MongoDB", 2) {
+            a("Connection Name", 2, nonEmpty(JTextField(), control.conNameKey), 1.0)
+            a("Database Name", nonEmpty(JTextField(), control.dbKey), 1.0)
+            a("Host Name", name(JTextField(), control.hostKey), 1.0)
+            a("Port Number", name(JTextField(), control.portKey), 1.0)
         }
         return values;
     }

@@ -6,12 +6,16 @@ import java.io.FileReader
 import org.funql.ri.data.FunqlConnection
 import org.funql.ri.jsondriver.JsonConnection
 import java.util.ArrayList
+import org.funql.ri.mongodriver.FunqlMongoConnection
 
 class TestRunnerControl(val view: TestRunnerView) {
 
     public final val conNameKey: String = "conName"
     public final val textKey: String = "text"
     public final val fileKey: String = "file"
+    public final val dbKey: String = "db"
+    public final val hostKey: String = "host"
+    public final val portKey: String = "port"
 
     var textChanged = false;
     var funqlFile: File? = null;
@@ -76,6 +80,11 @@ class TestRunnerControl(val view: TestRunnerView) {
     public fun createJsonConnection(props: Map<String, String>): Unit
     {
         val ret = JsonConnection(props[conNameKey]!!, props)
+        connections.add(ret)
+    }
+    public fun createMongoConnection(props: Map<String, String>): Unit
+    {
+        val ret = FunqlMongoConnection(props[conNameKey]!!, props)
         connections.add(ret)
     }
 
