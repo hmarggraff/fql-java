@@ -46,7 +46,7 @@ public class FqlParser {
         lex = new Lexer(txt);
     }
 
-    public FqlParser(String queryText, FunqlConnection[] conn) {
+    public FqlParser(String queryText, Iterable<FunqlConnection> conn) {
         this(queryText);
         for (FunqlConnection funqlConnection : conn) {
             connections.put(funqlConnection.getName(), new ProvidedConnection(connectionCount++, funqlConnection));
@@ -58,12 +58,16 @@ public class FqlParser {
         connections.put(conn.getName(), new ProvidedConnection(connectionCount++, conn));
     }
 
-    public static FqlIterator runQuery(String queryText, Object[] parameterValues, FunqlConnection... conn) throws FqlParseException, FqlDataException {
+    public static FqlIterator runQuery(String queryText, Object[] parameterValues, Iterable<FunqlConnection> conn) throws FqlParseException, FqlDataException {
         final FqlParser parser = new FqlParser(queryText, conn);
         final List<FqlStatement> fqlStatements = parser.parseClauses();
         final RunEnv runEnv = new RunEnv(parser.connectionCount, parser.iteratorCount, parser.entryPointCount, parameterValues);
-        for (int i = 0; i < conn.length; i++) {
-            runEnv.setConnectionAt(i, conn[i]);
+        if (conn != null) {
+            int at = 0;
+            for (FunqlConnection c : conn) {
+                runEnv.setConnectionAt(at, c);
+                at++;
+            }
         }
         FqlIterator precedent = null;
         for (int i = 0; i < fqlStatements.size(); i++) {
@@ -80,7 +84,7 @@ public class FqlParser {
     }
 
     public static FqlIterator runQuery(String queryText) throws FqlParseException, FqlDataException {
-        return runQuery(queryText, null);
+        return runQuery(queryText, null, null);
     }
 
     public String getQueryString() {

@@ -309,6 +309,10 @@ public class FqlExpressionParser {
             return new ConstBooleanNode(false, p.lex.getRow(), p.lex.getCol());
         } else if (t == Lexer.Token.Nil) {
             return new NilNode(p.lex.getRow(), p.lex.getCol());
+        } else if (t == Lexer.Token.Pos) {
+            return new PositionNode(p.iteratorStack.peek().getEntryPointIndex(), p.lex.getRow(), p.lex.getCol());
+        } else if (t == Token.It) {
+            return new ValueNode(p.lex.getRow(), p.lex.getCol());
         } else if (t == Lexer.Token.LParen) {
             final FqlNodeInterface node = parseAs();
             if (next() != Token.RParen) {

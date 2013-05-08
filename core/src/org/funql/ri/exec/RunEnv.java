@@ -113,4 +113,7 @@ public class RunEnv
 	Object object = connections[dataSlot.getIndex()].getMember(from, memberName);
 	return object;
     }
+    public FqlIterator getIteratorAt(int entryPointIndex) {
+        return iterators[entryPointIndex];
+    }
 }

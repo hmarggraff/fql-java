@@ -30,4 +30,6 @@ public class JsonArrayIterator(name: String, val data: List<Any?>): KNamedImpl(n
     override fun next(): Any? { pos = pos + 1; return data.get(pos) }
 
     override fun current() = data.get(pos)
+
+    override fun getPosition():Int = pos
 }

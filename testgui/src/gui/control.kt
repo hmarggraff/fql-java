@@ -7,6 +7,9 @@ import org.funql.ri.data.FunqlConnection
 import org.funql.ri.jsondriver.JsonConnection
 import java.util.ArrayList
 import org.funql.ri.mongodriver.FunqlMongoConnection
+import org.funql.ri.parser.FqlParser
+import org.yaml.snakeyaml.Yaml
+import java.io.StringWriter
 
 class TestRunnerControl(val view: TestRunnerView) {
 
@@ -89,7 +92,22 @@ class TestRunnerControl(val view: TestRunnerView) {
     }
 
     public fun run(q: String){
-        view setResultText q
+        try {
+
+            val fqlIterator = FqlParser.runQuery(q,null, connections)
+
+            if (fqlIterator == null) return
+            val y = Yaml()
+            val ret = StringWriter()
+            while (fqlIterator.hasNext()) {
+                val v = fqlIterator.next()!!
+                ret.append("- ")
+                y.dump(v, ret)
+            }
+            view setResultText ret.toString()
+        } catch (r:Throwable) {
+            view.error(r.getMessage()!!)
+        }
 
     }
     public fun close(conn: FunqlConnection){

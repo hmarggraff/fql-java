@@ -1,7 +1,7 @@
-package org.funql.ri.data;
+package org.funql.ri.exec.node;
 
 /*
- Copyright (C) 2011, Hans Marggraff and other copyright owners as documented in the project's IP log.
+   Copyright (C) 2011, Hans Marggraff and other copyright owners as documented in the project's IP log.
  This program and the accompanying materials are made available under the terms of the Eclipse Distribution License v1.0 which accompanies this distribution, is reproduced below, and is available at http://www.eclipse.org/org/documents/edl-v10.php
  All rights reserved.
  Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -15,12 +15,29 @@ package org.funql.ri.data;
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.funql.ri.data.FqlDataException;
+import org.funql.ri.exec.RunEnv;
 
-public interface FqlIterator
+/**
+ * Represents the current value (this) or the value of a key/value pair.
+ */
+public class PositionNode extends FqlNode
 {
-    boolean hasNext();
-    Object next();
-    Object current();
+    private int entryPointIndex;
 
-    int getPosition();
+    public PositionNode(int entryPointIndex, int row, int col)
+    {
+        super(row, col);
+        this.entryPointIndex = entryPointIndex;
+    }
+
+    public Object getValue(RunEnv env, Object from) throws FqlDataException
+    {
+        return env.getIteratorAt(entryPointIndex).getPosition();
+    }
+
+    @Override
+    public void dump(StringBuffer sb) {
+        sb.append("value");
+    }
 }
