@@ -1,7 +1,7 @@
 package org.fqlsource.fqltest.simpletestdriver;
 
 import org.funql.ri.data.FqlMapContainer;
-import org.fqlsource.ri.util.FqlRiStringUtils;
+import org.funql.ri.util.FqlRiStringUtils;
 import org.funql.ri.util.NamedImpl;
 
 import java.util.List;

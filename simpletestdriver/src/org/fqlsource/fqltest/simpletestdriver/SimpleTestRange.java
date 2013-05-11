@@ -7,12 +7,12 @@ import org.funql.ri.data.FqlIterator;
  */
 public class SimpleTestRange implements FqlIterator
 {
-    private final long start;
-    private final long end;
-    private long at;
+    private final int start;
+    private final int end;
+    private int at;
     private final boolean includeEnd;
 
-    public SimpleTestRange(long start, long end, boolean includeEnd)
+    public SimpleTestRange(int start, int end, boolean includeEnd)
     {
 	this.start = start;
 	this.end = end;
@@ -43,5 +43,10 @@ public class SimpleTestRange implements FqlIterator
 	if ((includeEnd && at > end) || at >= end)
 	    throw new FqlDataException("Mock iterator beyond end: " + end);
 	return at;
+    }
+
+    @Override
+    public int getPosition() {
+        return at;
     }
 }

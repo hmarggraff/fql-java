@@ -45,4 +45,9 @@ public class SimpleTestIterator extends NamedImpl implements FqlIterator {
     public Object current() {
         return current;
     }
+
+    @Override
+    public int getPosition() {
+        return at;
+    }
 }

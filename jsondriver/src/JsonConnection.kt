@@ -130,19 +130,3 @@ public open class JsonConnection(name: String, propsArg: Map<String, String>?): 
     public override fun getMember(p0: Any?, p1: String?): Any?  = if (p0 is Map<*, *>) p0.get(p1) else null
 }
 
-
-class JsonMapAccess(name: String, val data: Map<*, *>): KNamedImpl(name), FqlMapContainer
-{
-    public override fun lookup(p0: Any?): Any? = data.get(p0)
-}
-
-class JsonMultiMapAccess(name: String, val data: Map<*, *>): KNamedImpl(name), FqlMultiMapContainer
-{
-    public override fun lookup(p0: Any?): FqlIterator? {
-        val ret = data[p0]
-        if (ret is List<*>)
-            return JsonArrayIterator(getName(), ret)
-        throw FqlDataException("Entry of multi-map " + getName() + " is not a list. but a " + ret.javaClass)
-    }
-}
-

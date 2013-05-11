@@ -61,7 +61,11 @@ public class FqlExpressionParser {
         } else {
             left = new ContainerNameNode(source, p.lex.getRow(), p.lex.getCol());
         }
-        left = parseBracket(tok, left);
+        if (tok == Token.LBracket)
+        {
+            left = parseBracket(next(), left);
+            tok = next();
+        }
 
         while (tok == Token.Dot) {
             if (next() != Token.Name)
@@ -69,7 +73,8 @@ public class FqlExpressionParser {
 
             symName = p.lex.nameVal;
             left = new DotNode(left, symName, source, p.lex.getRow(), p.lex.getCol());
-            left = parseBracket(next(), left);
+            if (tok == Token.LBracket)
+                left = parseBracket(next(), left);
             tok = next();
         }
         p.lex.pushBack();
@@ -108,10 +113,8 @@ public class FqlExpressionParser {
     }
 
     private FqlNodeInterface parseBracket(Token tok, FqlNodeInterface left) throws FqlParseException {
-        if (tok != Token.LBracket)
-            return left;
         if (!(left instanceof ContainerNameNode))
-            throw new FqlParseException("Name to left of bracket, does not refer to an entry point. (use clause)", p);
+            throw new FqlParseException("Name to left of bracket, does not refer to a container.", p);
         FqlNodeInterface indexNode = parseAs();
         tok = next();
         final FqlNodeInterface ret;

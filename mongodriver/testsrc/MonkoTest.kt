@@ -1,7 +1,5 @@
 package org.fqlsource.fqltest.monkotest
 
-import org.funql.ri.mongodriver.MongoDriverKt
-import org.funql.ri.kotlinutil.javaHashMap
 import java.util.HashMap
 import org.testng.annotations.Test
 import kotlin.test.assertNotNull
@@ -28,7 +26,7 @@ import org.funql.ri.exec.NamedDouble
 import org.funql.ri.exec.NamedLong
 import org.testng.annotations.AfterClass
 import com.mongodb.DBObject
-
+import org.funql.ri.mongodriver.MongoDriverKt
 
 class MonkoTest
 {
@@ -49,8 +47,17 @@ class MonkoTest
 
     }
 
+
+    Test(dataProvider = "query")  // , dependsOnMethods= array("iterateProducts"))
+    fun testQuery(query: String, expected: String) {
+
+        val result = run(query)
+        println(result)
+        if (expected != result) throw AssertionError(" Expected: $expected found $result.")
+    }
+
     Test
-    fun iterateProducts() {
+            fun iterateProducts() {
         val pi = productsIterator!!
         val current: Any? = if (pi.hasNext()) pi.next() else null
         assertNotNull(current, "Iterator $products did not yield data.")
@@ -67,29 +74,22 @@ class MonkoTest
         assert(cnt == 32, "Wrong number of products")
     }
 
-    Test(dataProvider = "query", dependsOnMethods= array("iterateProducts"))
-            fun testQuery(query: String, expected: String) {
-
-        val result = run(query)
-        println(result)
-        if (expected != result) throw AssertionError(" Expected: $expected found $result.")
-    }
-
-    DataProvider(name = "query")
-            fun createData1() = array(
+    DataProvider(name = "query") fun createData1() = array(
 
             //array("from homeOrg", "''")
-            array("from homeOrg select name", "'The Hypothetical Camera Shop'"),
-            array("from products where name like \"Olympus*\" select name", "'Olympus SP-560 UZ'"),
-            array("from products where name like \"Ricoh*\" select name", "['Ricoh Caplio GX100','Ricoh Caplio 500G Wide','Ricoh Caplio R7']"),
-            array("from orders where orderId = \"QS.2\" select orderId, customer.name", "{f1:'QS.2',f2:'Atufotra Ltd'}") //,
-            //array("from orders where orderId = \"QS.2\" select orderId, from customers where customer = _id end", "{f1:'QS.2',f2:'Atufotra Ltd'}") //,
+            //array("from products where name like \"Olympus*\" select name", "'Olympus SP-560 UZ'"),
+            //array("from products where name like \"Ricoh*\" select name", "['Ricoh Caplio GX100','Ricoh Caplio 500G Wide','Ricoh Caplio R7']"),
+            //array("from orders where orderId = \"QS.2\" select orderId, customer.name", "{f1:'QS.2',f2:'Atufotra Ltd'}"),
+            //array("from orders where customer.name = \"Friulpe Inc\" select orderId, customer.zipCode", "[{f1:'QS.17',f2:'D 9359'},{f1:'QS.99',f2:'D 9359'}]"),
+            array("from orders where customer.name = \"Friulpe Inc\" select customer", "['{ \"\$ref\" : \"organisations\", \"\$id\" : \"68\" }','{ \"\$ref\" : \"organisations\", \"\$id\" : \"68\" }']"),
+            //array("from orders where orderId = \"QS.2\" select orderId, from customers where customer = _id end", "{f1:'QS.2',f2:'Atufotra Ltd'}"),
             //array("from orders where orderId = \"QS.2\" select orderId, from customers get customer end", "{f1:'QS.2',f2:'Atufotra Ltd'}") //,
-            //array("access organisations by _id from orders where orderId = \"QS.2\" select orderId, organisations[customer]", "The Hypothetical Camera Shop") //,
+            //array("access organisations by _id from orders where orderId = \"QS.2\" select orderId, organisations[customer]", "The Hypothetical Camera Shop"),
             //array("from orders where orderId = \"QS.2\" select orderId, customer -> organisations.id", "The Hypothetical Camera Shop") //,
             //array("access organisations by _id from orders where orderId = \"QS.13\" select orderId, organisations[customer].name", "The Hypothetical Camera Shop") //,
             //array("from products select name", "[Panasonic Lumix DMC-FX100, Ricoh Caplio GX100]"),
             //lookup(customer, organisations, id)
+            array("from homeOrg select name", "'The Hypothetical Camera Shop'")
     )
 
     fun run(query: String): String {
@@ -114,13 +114,11 @@ class MonkoTest
 
 
     fun dump(s: Any?, sb: StringBuffer, indent: Int) {
-        //var neednewline = false;
-
-        if (s is BasicDBObject) {
+        if (s is Map<*,*>) {
             sb.append('{')
             var cnt = 0
-            val mutableSet: MutableSet<MutableMap.MutableEntry<String, Any>> = s.entrySet()
-            for (e in mutableSet) {
+            val entrySet: Set<Map.Entry<Any?, Any?>> = s.entrySet()
+            for (e in entrySet) {
                 if (cnt > 0) sb.append(',')
                 cnt++
                 sb.append(e.getKey()).append(':')
@@ -145,25 +143,13 @@ class MonkoTest
                 cnt++
                 sb.append((it as NamedValue).getName()).append(':')
                 dump(it, sb, indent + 1)
-                //neednewline = true
 
             }
             sb.append("}")
-            //neednewline = true
         }
         else {
-            //neednewline = newline(neednewline, indent, sb);
-
             sb.append('\'').append(s.toString()).append('\'')
         }
-    }
-
-    fun newline(needed: Boolean, indent: Int, sb: StringBuffer): Boolean
-    {
-        if (!needed) return needed
-        sb.append('\n')
-        for (i in 1..indent) sb.append(' ')
-        return false
     }
 
     AfterClass fun close() {

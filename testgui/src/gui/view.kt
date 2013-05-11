@@ -16,12 +16,20 @@ import javax.swing.event.MenuListener
 import javax.swing.event.MenuEvent
 import org.funql.ri.data.FunqlConnection
 import java.awt.event.ActionListener
+import java.util.HashMap
+import org.funql.ri.gui.SwingView.Reopener
+import java.awt.event.KeyEvent
+import java.awt.event.InputEvent
+import java.net.URL
+import java.awt.event.WindowListener
+import java.awt.event.WindowAdapter
+import java.awt.event.WindowEvent
+import java.awt.Insets
 
 fun main(args: Array<String>): Unit {
     val v = SwingView()
     v.guiFrame.setSize(800, 600)
     v.guiFrame.setLocationRelativeTo(null)
-
     v.guiFrame.setVisible(true)
 }
 public enum class UserAnswer {yes; no; cancel
@@ -44,6 +52,7 @@ public class SwingView: TestRunnerView
     val edResult = JTextArea("Result")
     val control = TestRunnerControl(this)
     val closemenu = JMenu("Close");
+    val runAction = action("Run", "Run the query under the cursor", null, icon("media_play_green.png")) { run() }
 
 
     val guiFrame: JFrame = frame("Funql Runner")
@@ -53,16 +62,17 @@ public class SwingView: TestRunnerView
         jmenuBar = menuBar{
             menu("File") {
                 add(action("Open") { control.openFile() })
+                add(previous())
                 add(action("Save Funql") { control.saveFile(false) })
                 add(action("Save Funql As") { control.saveFile(true) })
                 add(action("Save Results As") { control.saveFile(true, true) })
                 add(action("Clear") { control.clear() })
-                add(action("Run") { run() })
+                add(runAction)
             }
             menu("Connections") {
                 menu("Open") {
                     add(action("Open Json Text ...") {
-                        val props: Map<String, String>? = jsonDriverText(guiFrame)
+                        val props: MutableMap<String, String>? = jsonDriverText(guiFrame)
                         if (props != null)
                             control.createJsonConnection(props)
                     })
@@ -94,8 +104,22 @@ public class SwingView: TestRunnerView
 
 
         }
-        center = JSplitPane(JSplitPane.HORIZONTAL_SPLIT, edQuery, edResult)
+        north = toolbar(){
+            add(toolbarbutton(runAction))
+        }
+        val splitPane = JSplitPane(JSplitPane.HORIZONTAL_SPLIT, JScrollPane(edQuery), JScrollPane(edResult))
+        splitPane.setDividerLocation(400)
+        center = splitPane
     };
+
+    fun toolbarbutton(action: Action): JButton{
+        val ret = JButton(action)
+        ret.setBorder(null)
+        ret.setMargin(Insets(1,1,1,1))
+        ret.setHideActionText(true)
+        ret.setBackground(null)
+        return ret
+    }
 
     {
         closemenu.addMenuListener(object: MenuListener {
@@ -109,7 +133,36 @@ public class SwingView: TestRunnerView
             public override fun menuDeselected(p0: MenuEvent?) { }
             public override fun menuCanceled(p0: MenuEvent?) { }
         })
+        defineShortcutkey(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_MASK), action("Search") {showsearch()})
+        defineShortcutkey(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.CTRL_MASK), action("Search") {run()})
+        guiFrame.addWindowListener(object: WindowAdapter() {
 
+            public override fun windowClosing(e: WindowEvent) {
+                control.windowClosing()
+            }
+        })
+
+        control.startUi()
+    }
+
+    public fun defineShortcutkey(key : KeyStroke?, action : Action?) : Unit {
+        var im : InputMap? = guiFrame.getRootPane()?.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+        im?.put(key, action)
+        var am : ActionMap? = guiFrame.getRootPane()?.getActionMap()
+        am?.put(action, action)
+    }
+
+    fun showsearch() {
+    }
+
+
+        fun previous():JMenu{
+        val connections = org.funql.ri.gui.prefs.getConnections()
+        val ret = JMenu("Reopen ..")
+        connections.forEach {
+            ret.add(Reopener(it))
+        }
+        return ret
     }
 
     fun run() {
@@ -127,7 +180,7 @@ public class SwingView: TestRunnerView
         control.run(q!!)
     }
 
-    public fun jsonDriverText(owner: JFrame): Map<String, String>? {
+    public fun jsonDriverText(owner: JFrame): MutableMap<String, String>? {
         val values = formDialog(owner, "Use Json Text for a Connection", 2) {
             a("Connection Name", nonEmpty(JTextField(), control.conNameKey))
             a("Json Text")
@@ -135,7 +188,7 @@ public class SwingView: TestRunnerView
         }
         return values;
     }
-    public fun jsonDriverFile(owner: JFrame): Map<String, String>? {
+    public fun jsonDriverFile(owner: JFrame): MutableMap<String, String>? {
         val values = formDialog(owner, "Use Json Text for a Connection", 3) {
             a("Connection Name", 2, nonEmpty(JTextField(), control.conNameKey), 1.0)
             val edname = nonEmpty(JTextField(), control.fileKey)
@@ -149,7 +202,7 @@ public class SwingView: TestRunnerView
         return values;
     }
 
-    public fun mongoDriver(owner: JFrame): Map<String, String>? {
+    public fun mongoDriver(owner: JFrame): MutableMap<String, String>? {
         val values = formDialog(owner, "Connect to a MongoDB", 2) {
             a("Connection Name", 2, nonEmpty(JTextField(), control.conNameKey), 1.0)
             a("Database Name", nonEmpty(JTextField(), control.dbKey), 1.0)
@@ -176,6 +229,27 @@ public class SwingView: TestRunnerView
         return null;
     }
 
+    protected fun icon(name : String) : Icon {
+        try
+        {
+            val u : URL? = javaClass<SwingView>().getResource("icons/" + name)
+            if (u == null)
+            {
+                System.out.println("Icon " + name + " not found.")
+                return javax.swing.plaf.metal.MetalIconFactory.getRadioButtonIcon()!!
+            }
+            else
+                return ImageIcon(u)
+        }
+        catch (ex : Exception) {
+            System.out.println("Icon " + name + " could not be read.")
+            return javax.swing.plaf.metal.MetalIconFactory.getRadioButtonIcon()!!
+
+        }
+
+    }
+
+
     override fun setQueryText(text: String) = edQuery.setText(text)
     override fun setResultText(text: String) = edResult.setText(text)
     override fun getQueryText(): String = edQuery.getText()!!
@@ -193,6 +267,12 @@ public class SwingView: TestRunnerView
 
         public override fun actionPerformed(p0: ActionEvent) {
             control.close(conn)
+        }
+    }
+    inner class Reopener(val conn: MutableMap<String,String>): AbstractAction(conn[Keys.conName.toString()]!!) {
+
+        public override fun actionPerformed(p0: ActionEvent) {
+            control.createConnection(conn)
         }
     }
 }

@@ -13,10 +13,12 @@ public open class SimpleTestDriverBase {
     val yaml = Yaml()
 
 
-    fun callInit(): SimpleTestConnection {
+    fun callInit():  ArrayList<SimpleTestConnection> {
         val p = HashMap<String, String>();
         val tconn = SimpleTestConnection("SimpleTest", p);
-        return tconn
+        val ret =  ArrayList<SimpleTestConnection>()
+        ret.add(tconn)
+        return ret
     }
 
     fun run(query: String, expectation: Any) {

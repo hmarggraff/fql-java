@@ -1,4 +1,4 @@
-package org.fqlsource.fqltest.monkotest
+package org.fqlsource.fqltest.monkotest1
 
 import java.util.Date
 import java.util.HashMap
@@ -16,6 +16,7 @@ import org.funql.ri.test.genericobject.Ref
 import org.funql.ri.mongodriver.workaround.BasicDBObjectWrapper
 import org.funql.ri.test.cameradata.CameraData
 import org.funql.ri.mongokotlinwrapper
+import org.bson.BSONObject
 
 
 fun main(args: Array<String>) {
@@ -41,12 +42,24 @@ fun main(args: Array<String>) {
         assert(obj.get("name") == "The Hypothetical Camera Shop")
 
         val b: List<DBObject> = db.getCollection("orders")!!.find()!!.toArray()!!
-        val customer = b.get(0).get("customer") as ByteArray
-        val cid = ObjectId(customer)
 
-        val q = BasicDBObject("_id", cid)
-        val custColl = db.getCollection("organisations")!!
-        val customerObj = custColl.findOne(q)
+        val map = HashMap<Any, Int>()
+        b.forEach {
+            val cust: Any = it.get("customer")!!
+            val cnt: Int? = map.get(cust)
+            if (cnt == null) map.put(cust, 1)
+            else map.put(cust, cnt+1)
+        }
+        var minCnt = 10000
+        var res: Any? = null;
+        map.entrySet().forEach { if (it.getValue() < minCnt) {
+            res = it.getKey()
+            minCnt = it.getValue()
+        } }
+        println( "Customer $res with $minCnt orders")
+        val custRef: DBRef = res as DBRef
+        val customerObj = custRef.fetch()
+
         println(customerObj)
         mongoConn.close()
     }

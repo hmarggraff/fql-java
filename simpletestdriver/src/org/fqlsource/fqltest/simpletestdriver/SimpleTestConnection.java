@@ -100,12 +100,12 @@ public class SimpleTestConnection extends NamedImpl implements FunqlConnectionWi
 	}
     }
 
-    static long letterNum(String fieldName)
+    static int letterNum(String fieldName)
     {
 	String vTxt = fieldName.substring(1);
 	try
 	{
-	    final long ret = Long.parseLong(vTxt);
+	    final int ret = Integer.parseInt(vTxt);
 	    return ret;
 	}
 	catch (NumberFormatException fex)

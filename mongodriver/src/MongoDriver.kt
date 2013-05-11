@@ -22,7 +22,7 @@ import com.mongodb.DBRef
 import com.mongodb.MongoClient
 
 
-class MongoDriverKt: FunqlDriver {
+public class MongoDriverKt: FunqlDriver {
 
 
     //public override fun openConnection(name: String?, props: Map<String, String>?): FunqlConnection?  = FqlMongoConnectionKt(name!!, props!!)
@@ -33,7 +33,7 @@ class MongoDriverKt: FunqlDriver {
     public override fun isAdvancedDriver() = false
 }
 
-class FunqlMongoConnection(name: String, val props: Map<String, String?>): NamedImpl(name), FunqlConnection
+public class FunqlMongoConnection(name: String, val props: Map<String, String?>): NamedImpl(name), FunqlConnection
 {
     public val dbname: String = props.get("db")?: throw ConfigurationError("missing property db for mongo database.")
     public val mongoConn: MongoClient = createClient(props)
@@ -41,6 +41,7 @@ class FunqlMongoConnection(name: String, val props: Map<String, String?>): Named
     private fun createClient(props: Map<String, String?>): MongoClient {
         val host: String = props["host"]?:"localhost"
         val portString: String? = props["port"]
+
         if (portString != null)
         {
             try
@@ -103,15 +104,19 @@ class FunqlMongoConnection(name: String, val props: Map<String, String?>): Named
     public override fun compareTo(s: Named): Int = name?.compareTo(s.getName()!!)!!
 }
 
-class FunqlMongoIterator(val data: DBCursor): FqlIterator
+public class FunqlMongoIterator(val data: DBCursor): FqlIterator
 {
     var currentVal: DBObject? = null
+    var at: Int = 0
+
     public override fun hasNext(): Boolean = data.hasNext()
     public override fun next(): Any? {
         currentVal = data.next();
         return currentVal
     }
     public override fun current() = currentVal
+
+    public override fun getPosition(): Int = $at
 }
 
 class FunqlMongoLookupSingle(val fieldPath: String, val data: DBCollection): FqlMapContainer

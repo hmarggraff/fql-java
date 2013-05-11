@@ -38,7 +38,7 @@ fun form(cols: Int, init: FormBuilder.() -> Unit): FormBuilder {
     return g
 }
 
-fun formDialog(owner: Frame?, title: String, cols: Int, init: FormBuilder.() -> Unit): Map<String, String>? {
+fun formDialog(owner: Frame?, title: String, cols: Int, init: FormBuilder.() -> Unit): MutableMap<String, String>? {
     val p = JPanel(GridBagLayout())
     val g = FormBuilder(p, cols)
     g.init()
@@ -205,10 +205,13 @@ public open class FormBuilder(val target: JComponent, val cols: Int): GridBagCon
             is JTree -> c.getSelectionModel()?.getSelectionPath()?.getLastPathComponent()
             else -> null
         }
-        return v?.toString()?:null
+        val string = v?.toString()?.trim()
+        if (string != null && string.size > 0)
+            return string;
+        return null
     }
 
-    public fun getStringResults(): Map<String, String> {
+    public fun getStringResults(): MutableMap<String, String> {
         val ret:HashMap<String, String>  = HashMap<String, String>()
         values.entrySet().forEach{
             val value = textOf(it.getValue())

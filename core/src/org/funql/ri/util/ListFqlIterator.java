@@ -35,4 +35,9 @@ public class ListFqlIterator implements FqlIterator {
             throw new FqlDataException("List iterator " + name + " beyond end: " + data.size());
         return data.get(at);
     }
+
+    @Override
+    public int getPosition() {
+        return at;
+    }
 }

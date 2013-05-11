@@ -11,7 +11,7 @@ class TestNGTest()
     val init = callInit()
     var res : String = "";
 
-    fun callInit():Int  { val c = cnt; cnt++; println("init " + cnt); return c}
+    fun callInit():Int  { val c = cnt; cnt++; println("init " + c); return c}
 
     DataProvider(name = "whattosay")
     fun createData1()  = array(array("gidday", "gidday"), array("goodbye", "goodbye"))
