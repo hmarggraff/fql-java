@@ -81,10 +81,6 @@ public class SelectStatement implements FqlStatement
 	    {
 		return fields;
 	    }
-            @Override
-            public int getPosition() {
-                return precedent.getPosition();
-            }
 	};
     }
 }

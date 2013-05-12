@@ -312,8 +312,6 @@ public class FqlExpressionParser {
             return new ConstBooleanNode(false, p.lex.getRow(), p.lex.getCol());
         } else if (t == Lexer.Token.Nil) {
             return new NilNode(p.lex.getRow(), p.lex.getCol());
-        } else if (t == Lexer.Token.Pos) {
-            return new PositionNode(p.iteratorStack.peek().getEntryPointIndex(), p.lex.getRow(), p.lex.getCol());
         } else if (t == Token.It) {
             return new ValueNode(p.lex.getRow(), p.lex.getCol());
         } else if (t == Lexer.Token.LParen) {
@@ -322,10 +320,12 @@ public class FqlExpressionParser {
                 throw new FqlParseException("Missing )", p);
             }
             return node;
-        } else if (t == Lexer.Token.Name) {
+        } else if (t == Token.Name) {
             return parseNav();
-        } else if (t == Lexer.Token.Param) {
+        } else if (t == Token.Param) {
             return parseParam();
+        } else if (t == Token.From) {
+            return p.parseNestedQuery();
         } else if (t == Lexer.Token.EOFComment || t == Lexer.Token.EOF) {
             throw new FqlParseException(Res.str("Missing expression"), p);
         }
@@ -347,7 +347,7 @@ public class FqlExpressionParser {
         FqlNodeInterface left = parseAs();
 
         Lexer.Token t = next();
-        if (t != Token.Assign) {
+        if (t != Token.Colon) {
             return pushBack(left);
         }
         if (!(left instanceof MemberNode)) {
@@ -355,7 +355,6 @@ public class FqlExpressionParser {
         }
         MemberNode an = (MemberNode) left;
         String targetName = an.getMemberName();
-
 
         final FqlNodeInterface right = parseAs();
         return pushBack(new AssignNode(targetName, right, p.lex.getRow(), p.lex.getCol()));

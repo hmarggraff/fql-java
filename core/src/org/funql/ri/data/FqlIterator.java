@@ -21,6 +21,4 @@ public interface FqlIterator
     boolean hasNext();
     Object next();
     Object current();
-
-    int getPosition();
 }

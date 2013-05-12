@@ -7,7 +7,7 @@ import java.awt.*
 public fun toolbar(init: JToolBar.() -> Unit): JToolBar {
     val answer = JToolBar()
     answer.setFloatable(false)
-    answer.setLayout(FlowLayout(FlowLayout.LEFT, 0, 0))
+    answer.setLayout(FlowLayout(FlowLayout.LEFT, 5, 0))
 
     answer.init()
     return answer;

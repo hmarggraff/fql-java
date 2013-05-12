@@ -25,6 +25,7 @@ import java.awt.event.WindowListener
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 import java.awt.Insets
+import java.awt.Image
 
 fun main(args: Array<String>): Unit {
     val v = SwingView()
@@ -53,20 +54,26 @@ public class SwingView: TestRunnerView
     val control = TestRunnerControl(this)
     val closemenu = JMenu("Close");
     val runAction = action("Run", "Run the query under the cursor", null, icon("media_play_green.png")) { run() }
+    val openAction = action("Open", "Open a file with queries", null, icon("folder_out.png")) { control.openFile() }
+    val saveQueryAction = action("Save Queries", "Save the query text in the query editor", null, icon("disk_blue.png")) { control.saveFile(false) }
+    val saveQueryAsAction = action("Save Queries As", "Save the query text in the query editor in another file", null, icon("disks.png")) { control.saveFile(true) }
+    val saveResultsAsAction = action("Save Results As", "Save result output as", null, icon("document_out.png")) { control.saveFile(true, true) }
+    val clearAction = action("Clear") { control.clear() }
 
 
     val guiFrame: JFrame = frame("Funql Runner")
     {
         exitOnClose()
+        setIconImage(image("transform2.png"))
 
         jmenuBar = menuBar{
             menu("File") {
-                add(action("Open") { control.openFile() })
+                add(openAction)
                 add(previous())
-                add(action("Save Funql") { control.saveFile(false) })
-                add(action("Save Funql As") { control.saveFile(true) })
-                add(action("Save Results As") { control.saveFile(true, true) })
-                add(action("Clear") { control.clear() })
+                add(saveQueryAction)
+                add(saveQueryAsAction)
+                add(saveResultsAsAction)
+                add(clearAction)
                 add(runAction)
             }
             menu("Connections") {
@@ -105,22 +112,16 @@ public class SwingView: TestRunnerView
 
         }
         north = toolbar(){
+            add(toolbarbutton(openAction))
+            add(toolbarbutton(saveQueryAction))
+            add(toolbarbutton(saveQueryAsAction))
+            add(toolbarbutton(saveResultsAsAction))
             add(toolbarbutton(runAction))
         }
         val splitPane = JSplitPane(JSplitPane.HORIZONTAL_SPLIT, JScrollPane(edQuery), JScrollPane(edResult))
         splitPane.setDividerLocation(400)
         center = splitPane
     };
-
-    fun toolbarbutton(action: Action): JButton{
-        val ret = JButton(action)
-        ret.setBorder(null)
-        ret.setMargin(Insets(1,1,1,1))
-        ret.setHideActionText(true)
-        ret.setBackground(null)
-        return ret
-    }
-
     {
         closemenu.addMenuListener(object: MenuListener {
 
@@ -134,7 +135,10 @@ public class SwingView: TestRunnerView
             public override fun menuCanceled(p0: MenuEvent?) { }
         })
         defineShortcutkey(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_MASK), action("Search") {showsearch()})
-        defineShortcutkey(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.CTRL_MASK), action("Search") {run()})
+        defineShortcutkey(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK), openAction)
+        defineShortcutkey(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK), saveQueryAction)
+        defineShortcutkey(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK or InputEvent.SHIFT_MASK), saveQueryAsAction)
+        defineShortcutkey(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.CTRL_MASK), runAction)
         guiFrame.addWindowListener(object: WindowAdapter() {
 
             public override fun windowClosing(e: WindowEvent) {
@@ -144,6 +148,18 @@ public class SwingView: TestRunnerView
 
         control.startUi()
     }
+
+
+    fun toolbarbutton(action: Action): JButton{
+        val ret = JButton(action)
+        ret.setBorder(null)
+        ret.setMargin(Insets(1,1,1,1))
+        ret.setHideActionText(true)
+        ret.setBackground(null)
+        return ret
+    }
+
+
 
     public fun defineShortcutkey(key : KeyStroke?, action : Action?) : Unit {
         var im : InputMap? = guiFrame.getRootPane()?.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
@@ -247,6 +263,18 @@ public class SwingView: TestRunnerView
 
         }
 
+    }
+
+    protected fun image(name : String) : Image? {
+        try
+        {
+            val u : URL? = javaClass<SwingView>().getResource("icons/" + name)
+            if (u != null) return ImageIcon(u).getImage()
+        }
+        catch (ex : Exception) {
+            System.out.println("Icon " + name + " could not be read.")
+        }
+        return null
     }
 
 

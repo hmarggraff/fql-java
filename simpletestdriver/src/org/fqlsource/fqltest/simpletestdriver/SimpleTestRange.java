@@ -44,9 +44,4 @@ public class SimpleTestRange implements FqlIterator
 	    throw new FqlDataException("Mock iterator beyond end: " + end);
 	return at;
     }
-
-    @Override
-    public int getPosition() {
-        return at;
-    }
 }

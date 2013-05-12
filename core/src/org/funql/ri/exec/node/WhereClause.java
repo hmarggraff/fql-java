@@ -17,7 +17,6 @@ public class WhereClause implements FqlStatement
     public FqlIterator execute(final RunEnv env, final FqlIterator precedent) throws FqlDataException
     {
         return new FqlIterator() {
-            int pos = 0;
             Object nextMatch;
 	    Object currentMatch;
             public boolean hasNext() throws FqlDataException
@@ -47,7 +46,6 @@ public class WhereClause implements FqlStatement
             {
 		currentMatch = nextMatch;
 		nextMatch = null;
-                pos++;
 		return currentMatch;
             }
 
@@ -56,10 +54,6 @@ public class WhereClause implements FqlStatement
 	    {
 		return currentMatch;
 	    }
-            @Override
-            public int getPosition() {
-                return pos;
-            }
 	};
     }
 }

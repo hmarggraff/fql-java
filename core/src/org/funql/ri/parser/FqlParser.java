@@ -85,7 +85,7 @@ public class FqlParser {
         final List<FqlStatement> fqlStatements = parser.parseClauses();
         final RunEnv runEnv = new RunEnv(parser.connectionCount, parser.iteratorCount, parser.entryPointCount,
                 parameterValues);
-        if (conn != null) {
+        if (conn != null) { //TODO set connections by matching name, not by index, when starting query execution
             int at = 0;
             for (FunqlConnection c : conn) {
                 runEnv.setConnectionAt(at, c);
@@ -93,8 +93,7 @@ public class FqlParser {
             }
         }
         FqlIterator precedent = null;
-        for (int i = 0; i < fqlStatements.size(); i++) {
-            FqlStatement statement = fqlStatements.get(i);
+        for (FqlStatement statement : fqlStatements) {
             precedent = statement.execute(runEnv, precedent);
         }
         return precedent;
@@ -102,8 +101,7 @@ public class FqlParser {
 
     public static List<FqlStatement> parse(String queryText) throws FqlParseException {
         final FqlParser parser = new FqlParser(queryText);
-        final List<FqlStatement> fqlStatements = parser.parseClauses();
-        return fqlStatements;
+        return parser.parseClauses();
     }
 
     public static FqlIterator runQuery(String queryText) throws FqlParseException, FqlDataException {
@@ -130,24 +128,32 @@ public class FqlParser {
             parseLink();
             t = nextToken();
         }
-
         if (t == Token.From) {
-            parseFrom();
+            clauses.add(parseFrom());
         } else {
             throw new FqlParseException("Expected from, but found " + t, this);
         }
+
+        parseNestableClauses(clauses);
+        return clauses;
+    }
+
+    private void parseNestableClauses(List<FqlStatement> innerClauses) throws FqlParseException {
+        Token t;
         while (Token.EOF != (t = nextToken())) {
             if (t == Token.Where) {
-                clauses.add(new WhereClause(FqlExpressionParser.parseExpression(this)));
+                innerClauses.add(new WhereClause(FqlExpressionParser.parseExpression(this)));
 
             } else if (t == Token.Select) {
-                clauses.add(parseObject());
+                innerClauses.add(parseObject());
+
+            } else if (t == Token.End) {
+                break;
 
             } else {
                 throw new FqlParseException("Expected keyword, but found " + t, this);
             }
         }
-        return clauses;
     }
 
     private FqlStatement parseObject() throws FqlParseException {
@@ -273,7 +279,7 @@ public class FqlParser {
         entryPointCount++;
     }
 
-    protected void parseFrom() throws FqlParseException {
+    protected FromClause parseFrom() throws FqlParseException {
         if (connections.size() == 0) {
             throw new FqlParseException("No connection specified", this);
         }
@@ -296,22 +302,63 @@ public class FqlParser {
             throw new FqlParseException("Expected 'in connection_name'", this);
         }
 
+        FromClause fromClause;
         EntryPointSlot dataIndex = new EntryPointSlot(connectionIndex, entryPointName, iteratorCount);
         if (t == Token.As) {
             String alias = expect_name("entry point alias");
-            FromClause fromClause = new FromClause(entryPointName, alias, dataIndex);
-            //sources.put(alias, new NamedIndex(alias, sources.size()));
-            clauses.add(fromClause);
+            fromClause = new FromClause(entryPointName, alias, dataIndex);
         } else {
             lex.pushBack();
-            FromClause fromClause = new FromClause(entryPointName, entryPointName, dataIndex);
-            //sources.put(entryPointName, new NamedIndex(entryPointName, sources.size()));
-
-            clauses.add(fromClause);
+            fromClause = new FromClause(entryPointName, entryPointName, dataIndex);
         }
         iteratorStack.push(dataIndex);
         iteratorCount++;
+        return fromClause;
     }
+    //TODO parse inner from (allow expression as source)
+    protected FromClause parseInnerFrom() throws FqlParseException {
+        final Token t1 = nextToken();
+        String entryPointName = name_or_string(t1);
+
+        final NamedIndex connectionIndex;
+        Token t = nextToken();
+        if (t == Token.In) {
+            String connectionName = expect_name("connection");
+            connectionIndex = connections.get(connectionName);
+            if (connectionIndex == null) {
+                throw new FqlParseException("Connection named '" + connectionName + "' not found.", this);
+            }
+            t = nextToken();
+        } else if (connections.size() == 1) {
+            connectionIndex = (NamedIndex) connections.values().toArray()[0];
+        } else if (iteratorCount > 0) {
+            EntryPointSlot entryPoint = iteratorStack.peek();
+            connectionIndex = connections.get(entryPoint.getEntryPointName());
+        } else {
+            throw new FqlParseException("Expected 'in connection_name'", this);
+        }
+
+        FromClause fromClause;
+        EntryPointSlot dataIndex = new EntryPointSlot(connectionIndex, entryPointName, iteratorCount);
+        if (t == Token.As) {
+            String alias = expect_name("entry point alias");
+            fromClause = new FromClause(entryPointName, alias, dataIndex);
+        } else {
+            lex.pushBack();
+            fromClause = new FromClause(entryPointName, entryPointName, dataIndex);
+        }
+        iteratorStack.push(dataIndex);
+        iteratorCount++;
+        return fromClause;
+    }
+
+    FqlNodeInterface parseNestedQuery() throws FqlParseException {
+        final List<FqlStatement> clauses = new ArrayList<FqlStatement>();
+        clauses.add(parseInnerFrom());
+        parseNestableClauses(clauses);
+        return new NestedQueryNode(clauses, lex.row, lex.col);
+    }
+
 
     Token expect_next(final Token expect) throws FqlParseException {
         final Token t;
@@ -379,6 +426,4 @@ public class FqlParser {
         }
         return parameter;
     }
-
-
 }
