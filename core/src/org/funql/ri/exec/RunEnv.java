@@ -47,7 +47,6 @@ public class RunEnv {
      */
     FqlMapContainer[] mapContainers;
 
-    Stack<FqlIterator> iteratorStack = new Stack<>();
     Stack<Object> outerObjects = new Stack<>();
 
 
@@ -105,9 +104,6 @@ public class RunEnv {
         return object;
     }
 
-    public void popIterator() {
-        iteratorStack.pop();
-    }
     public void pushObject(Object o) {
         outerObjects.push(o);
     }

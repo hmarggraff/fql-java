@@ -28,12 +28,12 @@ public enum BuiltIns implements FqlBuiltinFunction, Comparable<BuiltIns> {
         @Override
         public Object val(RunEnv env, Object from, Object[] argvals) throws FqlDataException {
             if (argvals.length == 0)
-                return env.iteratorStack.peek();
+                return env.outerObjects.peek();
             else if (argvals.length == 1 && argvals[0] instanceof Number){
                 int level = ((Number)argvals[0]).intValue();
-                if (level > env.iteratorStack.size())
-                    throw new IllegalArgumentException("function it: nesting " + env.iteratorStack.size() + " is less than argument " + level);
-                return env.iteratorStack.get(env.iteratorStack.size()-level);
+                if (level > env.outerObjects.size())
+                    throw new IllegalArgumentException("function it: nesting " + env.outerObjects.size() + " is less than argument " + level);
+                return env.outerObjects.get(env.outerObjects.size()-level);
             }
             else throw new IllegalArgumentException(badArgs(argvals, name()));
         }
