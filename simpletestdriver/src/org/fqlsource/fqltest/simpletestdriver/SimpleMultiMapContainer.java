@@ -23,6 +23,6 @@ public class SimpleMultiMapContainer implements FqlMultiMapContainer
     @Override
     public FqlIterator lookup(Object key)
     {
-	return connection.useIterator(fieldStr);
+	return connection.getIterator(fieldStr);
     }
 }

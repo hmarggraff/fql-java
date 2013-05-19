@@ -2,23 +2,32 @@ package org.funql.ri.parser;
 
 /*
    Copyright (C) 2011, Hans Marggraff and other copyright owners as documented in the project's IP log.
- This program and the accompanying materials are made available under the terms of the Eclipse Distribution License v1.0 which accompanies this distribution, is reproduced below, and is available at http://www.eclipse.org/org/documents/edl-v10.php
+ This program and the accompanying materials are made available under the terms of the Eclipse Distribution License
+ v1.0 which accompanies this distribution, is reproduced below, and is available at http://www.eclipse
+ .org/org/documents/edl-v10.php
  All rights reserved.
- Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
- - Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
- - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
- - Neither the name of the Eclipse Foundation, Inc. nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+ Redistribution and use in source and binary forms, with or without modification,
+ are permitted provided that the following conditions are met:
+ - Redistributions of source code must retain the above copyright notice, this list of conditions and the following
+ disclaimer.
+ - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the
+ following disclaimer in the documentation and/or other materials provided with the distribution.
+ - Neither the name of the Eclipse Foundation, Inc. nor the names of its contributors may be used to endorse or
+ promote products derived from this software without specific prior written permission.
 
- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ DISCLAIMED.
+ IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.funql.ri.exec.*;
+import org.funql.ri.exec.FqlBuiltinFunction;
 import org.funql.ri.exec.node.*;
 import org.funql.ri.parser.Lexer.Token;
-import org.funql.ri.exec.node.EntryPointSlot;
 import org.funql.ri.util.NamedIndex;
 
 import java.util.ArrayList;
@@ -44,6 +53,25 @@ public class FqlExpressionParser {
     }
 
 
+    /**
+     * nav starts with a name
+     * if the name is followed by a Left parenthesis then it is a function call
+     * if it is a left bracket, then it is a lookup, either in a map-like member or in another source
+     * if it is a dot it is a member or a member of an upper object.
+     * cases
+     * func(params) // a built in function
+     * func(params).field // a built in function returning an object, that is navigated into
+     * func(params).method(params) // a built in function returning an object, with the call of a built in method
+     * it.field // a field in the current object
+     * field // a field in the current object
+     * up.field // a field in the parent object
+     * up(n).field //a field in an outer object
+     * up.up.field // a field in grand parent
+     * map[key_expr] // a field in a map member or a mapping top-level source
+     *
+     * @return
+     * @throws FqlParseException
+     */
     FqlNodeInterface parseNav() throws FqlParseException {
         String symName = p.lex.nameVal;
         Lexer.Token tok = next();
@@ -54,16 +82,15 @@ public class FqlExpressionParser {
         EntryPointSlot currentSource = p.iteratorStack.peek();
 
         FqlNodeInterface left;
-        EntryPointSlot source = p.entryPoints.get(symName);
+        EntryPointSlot source = p.maps.get(symName);
         if (source == null || source.getEntryPointName().equals(currentSource.getEntryPointName())) {
             source = currentSource;
             left = new MemberNode(symName, currentSource, p.lex.getRow(), p.lex.getCol());
         } else {
             left = new ContainerNameNode(source, p.lex.getRow(), p.lex.getCol());
         }
-        if (tok == Token.LBracket)
-        {
-            left = parseBracket(next(), left);
+        if (tok == Token.LBracket) {
+            left = parseBracket(left);
             tok = next();
         }
 
@@ -74,7 +101,7 @@ public class FqlExpressionParser {
             symName = p.lex.nameVal;
             left = new DotNode(left, symName, source, p.lex.getRow(), p.lex.getCol());
             if (tok == Token.LBracket)
-                left = parseBracket(next(), left);
+                left = parseBracket(left);
             tok = next();
         }
         p.lex.pushBack();
@@ -91,7 +118,7 @@ public class FqlExpressionParser {
         Token t1 = next();
         while (t1 != Token.RParen) {
             p.lex.pushBack();
-            FqlNodeInterface arg = parseAs();
+            FqlNodeInterface arg = parseQuestion();
             argList.add(arg);
             t1 = next();
             if (t1 == Token.RParen) {
@@ -112,11 +139,11 @@ public class FqlExpressionParser {
         return new FunctionNode(builtin, argNodes, p.lex.getRow(), p.lex.getCol());
     }
 
-    private FqlNodeInterface parseBracket(Token tok, FqlNodeInterface left) throws FqlParseException {
+    private FqlNodeInterface parseBracket(FqlNodeInterface left) throws FqlParseException {
         if (!(left instanceof ContainerNameNode))
             throw new FqlParseException("Name to left of bracket, does not refer to a container.", p);
-        FqlNodeInterface indexNode = parseAs();
-        tok = next();
+        FqlNodeInterface indexNode = parseQuestion();
+        Token tok = next();
         final FqlNodeInterface ret;
         if (tok == Token.RBracket) {
             ret = new IndexOpNode(left, indexNode, p.lex.getRow(), p.lex.getCol());
@@ -125,12 +152,11 @@ public class FqlExpressionParser {
             if (tok == Token.RBracket) {
                 ret = new CollectionSliceNode(left, indexNode, null, p.lex.getRow(), p.lex.getCol());
             } else {
-                FqlNodeInterface upperBound = parseAs();
+                FqlNodeInterface upperBound = parseQuestion();
                 ret = new CollectionSliceNode(left, indexNode, upperBound, p.lex.getRow(), p.lex.getCol());
                 p.expect_next(Token.RBracket);
             }
-        }
-        else
+        } else
             throw new FqlParseException("Expected right bracket ']' or ellipses '..'", p);
 
         return ret;
@@ -149,7 +175,8 @@ public class FqlExpressionParser {
         }
         FqlNodeInterface falseBranchNode = parseOr();
 
-        return new QuestionNode(conditionNode, trueBranchNode, falseBranchNode, conditionNode.getRow(), conditionNode.getCol());
+        return new QuestionNode(conditionNode, trueBranchNode, falseBranchNode, conditionNode.getRow(),
+                conditionNode.getCol());
     }
 
     FqlNodeInterface parseOr() throws FqlParseException {
@@ -315,13 +342,11 @@ public class FqlExpressionParser {
         } else if (t == Token.It) {
             return new ValueNode(p.lex.getRow(), p.lex.getCol());
         } else if (t == Lexer.Token.LParen) {
-            final FqlNodeInterface node = parseAs();
-            if (next() != Token.RParen) {
-                throw new FqlParseException("Missing )", p);
-            }
+            final FqlNodeInterface node = parseQuestion();
+            p.expect_next(Token.RParen);
             return node;
         } else if (t == Token.Name) {
-            return parseNav();
+            return parseNav2(t);
         } else if (t == Token.Param) {
             return parseParam();
         } else if (t == Token.From) {
@@ -329,9 +354,11 @@ public class FqlExpressionParser {
         } else if (t == Lexer.Token.EOFComment || t == Lexer.Token.EOF) {
             throw new FqlParseException(Res.str("Missing expression"), p);
         }
-        throw new FqlParseException(Res.str("Unexpected token: The character at this position cannot be understood"), p);
+        throw new FqlParseException(Res.str("Unexpected token: The character at this position cannot be understood"),
+                p);
     }
 
+/*
     FqlNodeInterface parseAs() throws FqlParseException {
         FqlNodeInterface left = parseQuestion();
         final Lexer.Token t = next();
@@ -341,10 +368,11 @@ public class FqlExpressionParser {
         final String className = p.lex.nameVal;
         return new TypeCastNode(left, className, p.lex.getRow(), p.lex.getCol());
     }
+    */
 
     FqlNodeInterface parseAssign() throws FqlParseException {
         // parse expression
-        FqlNodeInterface left = parseAs();
+        FqlNodeInterface left = parseQuestion();
 
         Lexer.Token t = next();
         if (t != Token.Colon) {
@@ -356,7 +384,7 @@ public class FqlExpressionParser {
         MemberNode an = (MemberNode) left;
         String targetName = an.getMemberName();
 
-        final FqlNodeInterface right = parseAs();
+        final FqlNodeInterface right = parseQuestion();
         return pushBack(new AssignNode(targetName, right, p.lex.getRow(), p.lex.getCol()));
     }
 
@@ -368,12 +396,72 @@ public class FqlExpressionParser {
 
     static FqlNodeInterface parseExpression(FqlParser p) throws FqlParseException {
         FqlExpressionParser fqlExpressionParser = new FqlExpressionParser(p);
-        return fqlExpressionParser.parseAs();
+        return fqlExpressionParser.parseAssign();
+
+    }
+
+    static FqlNodeInterface parseQuestion(FqlParser p) throws FqlParseException {
+        FqlExpressionParser fqlExpressionParser = new FqlExpressionParser(p);
+        return fqlExpressionParser.parseQuestion();
 
     }
 
     public static FqlNodeInterface parseAssignedValue(FqlParser parser) throws FqlParseException {
         FqlExpressionParser fqlExpressionParser = new FqlExpressionParser(parser);
         return fqlExpressionParser.parseAssign();
+    }
+
+    /**
+     * nav starts with a name
+     * if the name is followed by a Left parenthesis then it is a function call
+     * if it is a left bracket, then it is a lookup, either in a map-like member or in another source
+     * if it is a dot it is a member or a member of an upper object.
+     * cases
+     * func(params) // a built in function
+     * func(params).field // a built in function returning an object, that is navigated into
+     * func(params).method(params) // a built in function returning an object, with the call of a built in method
+     * it.field // a field in the current object
+     * field // a field in the current object
+     * it(n).field //a field in an outer object
+     * map[key_expr] // a field in a map member or a mapping top-level source
+     *
+     * @return
+     * @throws FqlParseException
+     */
+    FqlNodeInterface parseNav2(Token t) throws FqlParseException {
+        Lexer.Token tok = next();
+        FqlNodeInterface left;
+        String symName;
+        EntryPointSlot source = p.iteratorStack.peek();
+
+        if (t == Token.It) symName = "it";
+        else symName = p.lex.nameVal;
+        if (tok == Lexer.Token.LParen) {
+            left = parseFunctionCall(symName);
+            tok = next();
+        } else if (tok == Token.LBracket) {
+            source = p.maps.get(symName);
+            left = new ContainerNameNode(source, p.lex.getRow(), p.lex.getCol());
+            left = parseBracket(left);
+            tok = next();
+        } else {
+
+            left = new MemberNode(symName, source, p.lex.getRow(), p.lex.getCol());
+        }
+
+        while (tok == Token.Dot) {
+            if (next() != Token.Name)
+                throw new FqlParseException(Res.str("Name expected after dot"), p);
+
+            symName = p.lex.nameVal;
+            left = new DotNode(left, symName, source, p.lex.getRow(), p.lex.getCol());
+
+            if ((tok = next()) == Token.LBracket) {
+                left = parseBracket(left);
+                tok = next();
+            }
+        }
+        p.lex.pushBack();
+        return left;
     }
 }

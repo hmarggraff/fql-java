@@ -56,7 +56,7 @@ public class SimpleTestDriverTest
     @Test
     public void testApp() throws FqlDataException
     {
-	Assert.assertNotNull(conn.useIterator("E8080"));
+	Assert.assertNotNull(conn.getIterator("E8080"));
     }
 
     /**
@@ -68,7 +68,7 @@ public class SimpleTestDriverTest
     @Test(expected = FqlDataException.class)
     public void testApp2() throws FqlDataException
     {
-	conn.useIterator("ExceptionTesting");
+	conn.getIterator("ExceptionTesting");
 	Assert.fail("Entry point should not exist");
     }
 
@@ -81,7 +81,7 @@ public class SimpleTestDriverTest
     @Test
     public void testAppFields() throws FqlDataException
     {
-	final SimpleTestIterator stream = (SimpleTestIterator) conn.useIterator("E42");
+	final SimpleTestIterator stream = (SimpleTestIterator) conn.getIterator("E42");
 
 	int count = 1;
 	while (stream.hasNext())

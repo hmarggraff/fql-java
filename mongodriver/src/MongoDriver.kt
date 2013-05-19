@@ -58,7 +58,7 @@ public class FunqlMongoConnection(name: String, val props: Map<String, String?>)
     }
 
     //public override fun useIterator(streamName: String?): FqlIterator {
-    public override fun useIterator(p0: String?): FqlIterator {
+    public override fun getIterator(p0: String?): FqlIterator {
         if (mongoDB.collectionExists(p0!!))
             return FunqlMongoIterator(mongoDB.getCollection(p0)?.find()?:throw ConfigurationError("Collection with name " + p0 + " not Found"))
         else

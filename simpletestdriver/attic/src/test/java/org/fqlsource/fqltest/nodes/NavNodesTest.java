@@ -51,7 +51,7 @@ public class NavNodesTest extends NodeTestBase
 
 	env = new RunEnv(1,1,1,null);
 	env.setConnectionAt(0,conn);
-	source = conn.useIterator("I3");
+	source = conn.getIterator("I3");
 	env.setIterator(0, source);
 
 	epI3 = new EntryPointSlot(conn.getName(), 0, "I3", 0);

@@ -41,7 +41,7 @@ class MonkoTest
         println("got driver ${driver}")
         conn = driver.openConnection(dbName, kmap) //as FqlMongoConnectionKt
         assertNotNull(conn, "Connection $dbName could not be created.")
-        productsIterator = conn?.useIterator(products)
+        productsIterator = conn?.getIterator(products)
         println("got products iterator $productsIterator")
         assertNotNull(productsIterator, "Iterator $products could not be opened. (Did you start mongod?)")
 
@@ -82,14 +82,14 @@ class MonkoTest
             //array("from orders where orderId = \"QS.2\" select orderId, customer.name", "{f1:'QS.2',f2:'Atufotra Ltd'}"),
             //array("from orders where customer.name = \"Friulpe Inc\" select orderId, customer.zipCode", "[{f1:'QS.17',f2:'D 9359'},{f1:'QS.99',f2:'D 9359'}]"),
             //array("from orders where customer.name = \"Friulpe Inc\" select customer", "['{ \"\$ref\" : \"organisations\", \"\$id\" : \"68\" }','{ \"\$ref\" : \"organisations\", \"\$id\" : \"68\" }']"),
-            array("from orders where orderId = \"QS.2\" select orderId, from customers where customer = _id end", "{f1:'QS.2',f2:'Atufotra Ltd'}"),
+            array("from orders where orderId = \"QS.2\" select orderId, from organisations where customerId = it(2).customer.customerId end", "{f1:'QS.2',f2:'Atufotra Ltd'}")
             //array("from orders where orderId = \"QS.2\" select orderId, from customers get customer end", "{f1:'QS.2',f2:'Atufotra Ltd'}") //,
             //array("access organisations by _id from orders where orderId = \"QS.2\" select orderId, organisations[customer]", "The Hypothetical Camera Shop"),
             //array("from orders where orderId = \"QS.2\" select orderId, customer -> organisations.id", "The Hypothetical Camera Shop") //,
             //array("access organisations by _id from orders where orderId = \"QS.13\" select orderId, organisations[customer].name", "The Hypothetical Camera Shop") //,
             //array("from products select name", "[Panasonic Lumix DMC-FX100, Ricoh Caplio GX100]"),
             //lookup(customer, organisations, id)
-            array("from homeOrg select name", "'The Hypothetical Camera Shop'")
+            //array("from homeOrg select name", "'The Hypothetical Camera Shop'")
     )
 
     fun run(query: String): String {

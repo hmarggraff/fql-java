@@ -4,7 +4,10 @@ import org.funql.ri.data.FqlDataException;
 import org.funql.ri.data.FqlIterator;
 import org.funql.ri.exec.FqlStatement;
 import org.funql.ri.exec.RunEnv;
+import org.funql.ri.util.FqlIterator4Iterable;
+import org.funql.ri.util.ListFqlIterator;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -24,11 +27,14 @@ public class NestedQueryNode extends FqlNode {
         for (FqlStatement statement : clauses) {
             precedent = statement.execute(env, precedent);
         }
-        return precedent;
+        ArrayList<Object> result = new ArrayList<>();
+        while (precedent.hasNext())
+            result.add(precedent.next());
+        return result;
     }
 
     @Override
     public void dump(StringBuffer sb) {
-          sb.append(" from ... end ");
+        sb.append(" from ... end ");
     }
 }

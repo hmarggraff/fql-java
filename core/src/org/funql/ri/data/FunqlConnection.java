@@ -29,7 +29,7 @@ public interface FunqlConnection
 
     void close();
 
-    FqlIterator useIterator(String streamName) throws FqlDataException;
+    FqlIterator getIterator(String streamName) throws FqlDataException;
 
     Object getMember(Object from, String member);
 

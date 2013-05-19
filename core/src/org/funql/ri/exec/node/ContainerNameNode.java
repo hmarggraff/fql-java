@@ -1,6 +1,7 @@
 package org.funql.ri.exec.node;
 
 import org.funql.ri.data.FqlDataException;
+import org.funql.ri.data.FqlIterator;
 import org.funql.ri.data.FqlMapContainer;
 import org.funql.ri.exec.RunEnv;
 import org.funql.ri.util.NamedIndex;
@@ -19,8 +20,10 @@ public class ContainerNameNode extends FqlNode
 
     public Object getValue(RunEnv env, Object from) throws FqlDataException
     {
-        FqlMapContainer mapContainer = env.getMap(it.index);
-        return mapContainer;
+        FqlMapContainer container = env.getMapContainer(it.index);
+        if (container instanceof FqlIterator)
+            ((FqlIterator) container).current();
+        return container;
     }
 
     public void dump(StringBuffer sb)

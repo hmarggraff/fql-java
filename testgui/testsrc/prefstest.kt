@@ -13,7 +13,7 @@ class Prefs()
         org.funql.ri.gui.mode = RunMode.test
     }
     Test fun save() {
-        val preferences = Preferences.userRoot()!!.node(Factory.prefConnections)!!
+        val preferences = Preferences.userRoot()!!.node(Factory.prefKey+"/connections")!!
         preferences.removeNode()
         preferences.flush()
         val p = hashMapOf(Keys.conName.toString() to "a", "driverType" to "json", "text" to "{a:a}")

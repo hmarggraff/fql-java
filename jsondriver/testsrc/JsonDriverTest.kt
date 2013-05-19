@@ -49,7 +49,7 @@ class JsonDriverTest
     Test fun testApp()
     {
         val conn = openConnction("[]")
-        Assert.assertNotNull(conn.useIterator("top"))
+        Assert.assertNotNull(conn.getIterator("top"))
         conn.close()
     }
 
@@ -82,7 +82,7 @@ class JsonDriverTest
     {
         val conn = openConnction("{a: b, c: d}")
         try {
-            conn.useIterator("ExceptionTesting")
+            conn.getIterator("ExceptionTesting")
             Assert.fail("Entry point should not exist")
         } catch (ex: FqlDataException) {
             // ok
@@ -99,7 +99,7 @@ class JsonDriverTest
     Test fun testAppFields()
     {
         val conn = openConnction("[2,3,5,7]")
-        val stream = conn.useIterator("top")!!
+        val stream = conn.getIterator("top")!!
 
         var count: Int = 0
         while (stream.hasNext())

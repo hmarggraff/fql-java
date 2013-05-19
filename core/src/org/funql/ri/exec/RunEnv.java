@@ -28,34 +28,33 @@ package org.funql.ri.exec;
 import org.funql.ri.data.*;
 import org.funql.ri.exec.node.EntryPointSlot;
 
+import java.util.HashMap;
+import java.util.Stack;
+
 public class RunEnv {
     public static final String default_provided_connection_name = "provided_connection";
     Object[] parameterValues;
-
     /**
-     * the list of init connections
+     * the array of all the database drivers used in this query
+     */
+    HashMap<String, FunqlDriver> drivers = new HashMap<String, FunqlDriver>();
+    /**
+     * the list of connections (i.e. databases)
      */
     FunqlConnection[] connections;
-
     /**
-     * Stack of iterator lists, depth is equivalent to the nesting level of the query
+     * The entry points (i.e. tables, collections, containers, column families)
      */
-    FqlIterator[] iterators;
+    FqlMapContainer[] mapContainers;
 
-    FqlMapContainer[] maps;
+    Stack<FqlIterator> iteratorStack = new Stack<>();
+    Stack<Object> outerObjects = new Stack<>();
 
-    FunqlDriver[] drivers;
 
-    public RunEnv(int connectionCount, int iteratorCount, int mapCount, Object[] parameterValues) {
-        this(1, connectionCount, iteratorCount, mapCount, parameterValues);
-    }
-
-    public RunEnv(int driverCount, int connectionCount, int iteratorCount, int mapCount, Object[] parameterValues) {
+    public RunEnv(int connectionCount, int entryPointCount, Object[] parameterValues) {
         connections = new FunqlConnection[connectionCount];
-        iterators = new FqlIterator[iteratorCount];
-        maps = new FqlMapContainer[mapCount];
+        mapContainers = new FqlMapContainer[entryPointCount];
         this.parameterValues = parameterValues;
-        drivers = new FunqlDriver[driverCount];
     }
 
     public Object getVariable(int parameterIndex) {
@@ -79,31 +78,26 @@ public class RunEnv {
         return connections;
     }
 
-    public FunqlDriver getDriverAt(int ix) {
-        return drivers[ix];
-    }
-
-    public FunqlDriver newDriver(int at, String driverClassName) throws ClassNotFoundException,
+    public FunqlDriver getDriver(String driverClassName) throws ClassNotFoundException,
             IllegalAccessException, InstantiationException {
-        if (drivers[at] != null)
-            throw new IllegalStateException("a driver already exists at index: " + at);
-        final Class<?> driverClass = Class.forName(driverClassName);
-        if (!FunqlDriver.class.isAssignableFrom(driverClass))
-            throw new FqlDataException("The driver  class " + driverClassName + " does not implement FunqlDriver.");
-        FunqlDriver funqlDriver = (FunqlDriver) driverClass.newInstance();
-        return funqlDriver;
+        FunqlDriver driver = drivers.get(driverClassName);
+        if (driver == null) {
+            final Class<?> driverClass = Class.forName(driverClassName);
+            if (!FunqlDriver.class.isAssignableFrom(driverClass))
+                throw new FqlDataException("The driver  class " + driverClassName + " does not implement FunqlDriver.");
+            driver = (FunqlDriver) driverClass.newInstance();
+            drivers.put(driverClassName, driver);
+        }
+
+        return driver;
     }
 
-    public void setMapContainer(int runtimeIndex, FqlMapContainer mapContainer) {
-        maps[runtimeIndex] = mapContainer;
+    public void putMapContainer(int runtimeIndex, FqlMapContainer mapContainer) {
+        mapContainers[runtimeIndex] = mapContainer;
     }
 
-    public FqlMapContainer getMap(int index) {
-        return maps[index];
-    }
-
-    public void setIterator(int ix, FqlIterator container) {
-        iterators[ix] = container;
+    public FqlMapContainer getMapContainer(int index) {
+        return mapContainers[index];
     }
 
     public Object getMember(Object from, String memberName, EntryPointSlot dataSlot) {
@@ -111,7 +105,14 @@ public class RunEnv {
         return object;
     }
 
-    public FqlIterator getIteratorAt(int entryPointIndex) {
-        return iterators[entryPointIndex];
+    public void popIterator() {
+        iteratorStack.pop();
+    }
+    public void pushObject(Object o) {
+        outerObjects.push(o);
+    }
+
+    public void popObject() {
+        outerObjects.pop();
     }
 }

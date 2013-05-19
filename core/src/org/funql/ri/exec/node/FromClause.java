@@ -43,8 +43,7 @@ public class FromClause implements FqlStatement {
 
     public FqlIterator execute(RunEnv env, FqlIterator precedent) throws FqlDataException {
         FunqlConnection funqlConnection = env.getConnection(connectionSlot.getIndex());
-        FqlIterator listContainer = funqlConnection.useIterator(containerName);
-        env.setIterator(connectionSlot.getEntryPointIndex(), listContainer);
+        FqlIterator listContainer = funqlConnection.getIterator(containerName);
         return listContainer;
     }
 }

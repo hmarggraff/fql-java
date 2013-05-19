@@ -25,7 +25,7 @@ public class RefClause implements FqlStatement
 	FunqlConnection funqlConnection = env.getConnection(entryPoint.getIndex());
 	FqlMapContainer mapContainer = funqlConnection.useMap(fieldpath);
 
-	env.setMapContainer(entryPoint.getEntryPointIndex(), mapContainer);
+	env.putMapContainer(entryPoint.getEntryPointIndex(), mapContainer);
 	return null;
     }
 }

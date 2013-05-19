@@ -43,7 +43,7 @@ public class SimpleTestConnection extends NamedImpl implements FunqlConnectionWi
 	}
     }
 
-    public FqlIterator useIterator(String streamName) throws FqlDataException
+    public FqlIterator getIterator(String streamName) throws FqlDataException
     {
 	if (Character.isJavaIdentifierStart(streamName.charAt(0)) && Character.isDigit(streamName.charAt(1)))
 	{

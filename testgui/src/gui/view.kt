@@ -141,7 +141,7 @@ public class SwingView: TestRunnerView
         defineShortcutkey(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.CTRL_MASK), runAction)
         guiFrame.addWindowListener(object: WindowAdapter() {
 
-            public override fun windowClosing(e: WindowEvent) {
+            public override fun windowClosing(p0: WindowEvent) {
                 control.windowClosing()
             }
         })

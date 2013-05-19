@@ -39,15 +39,15 @@ class SeparateConnections extends spock.lang.Specification {
   {
     def conn1 = new SimpleTestConnection(it00.name, ['driver': 'SimpleTest', 'count':'1'])
     def conn2 = new SimpleTestConnection(it11.name, ['driver': 'SimpleTest', 'count':'1', 'prefix':'_c2', 'factor':'3'])
-    RunEnv env = new RunEnv(2, 2, 2, null)
+    RunEnv env = new RunEnv(2, 2, null)
     env.setConnectionAt(0, conn1)
     env.setConnectionAt(1, conn2)
     List<String> path0 = [map00.entryPointName]
     List<String> fp0 = ['bla', 'blubb']
-    env.setMapContainer(0, conn1.useMap(fp0))
-    env.setMapContainer(1, conn2.useMap(['f1.f1a']))
-    env.setIterator(0, conn1.useIterator(it00.entryPointName))
-    env.setIterator(1, conn2.useIterator(it11.entryPointName))
+    env.putMapContainer(0, conn1.useMap(fp0))
+    env.putMapContainer(1, conn2.useMap(['f1.f1a']))
+    env.setIterator(0, conn1.getIterator(it00.entryPointName))
+    env.setIterator(1, conn2.getIterator(it11.entryPointName))
     return env
   }
 

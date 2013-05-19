@@ -38,9 +38,9 @@ class TestLookup extends spock.lang.Specification {
     def tconn = new SimpleTestConnection('TestLookup', props)
 
     def sep = tconn.useMap(['f'])
-    RunEnv env = new RunEnv(1, 0, 1, null)
+    RunEnv env = new RunEnv(1, 1, null)
     env.setConnectionAt(0, tconn)
-    env.setMapContainer(0, sep)
+    env.putMapContainer(0, sep)
     return env
   }
 
