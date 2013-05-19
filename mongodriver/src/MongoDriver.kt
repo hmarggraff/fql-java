@@ -106,14 +106,9 @@ public class FunqlMongoConnection(name: String, val props: Map<String, String?>)
 
 public class FunqlMongoIterator(val data: DBCursor): FqlIterator
 {
-    var currentVal: DBObject? = null
-
-    public override fun hasNext(): Boolean = data.hasNext()
     public override fun next(): Any? {
-        currentVal = data.next();
-        return currentVal
+        return data.next();
     }
-    public override fun current() = currentVal
 }
 
 class FunqlMongoLookupSingle(val fieldPath: String, val data: DBCollection): FqlMapContainer

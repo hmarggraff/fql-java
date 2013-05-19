@@ -14,17 +14,7 @@ public class NestedClauseIterator implements FqlIterator {
     }
 
     @Override
-    public boolean hasNext() {
-        return precedent.hasNext();
-    }
-
-    @Override
     public Object next() {
         return precedent.next();
-    }
-
-    @Override
-    public Object current() {
-        return precedent.current();
     }
 }

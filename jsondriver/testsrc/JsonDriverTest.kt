@@ -102,14 +102,13 @@ class JsonDriverTest
         val stream = conn.getIterator("top")!!
 
         var count: Int = 0
-        while (stream.hasNext())
+        while (true)
         {
             val it = stream.next()
 
-            if (it is Int)
-                count = count + it
-            else
-                throw ClassCastException("json array iterator returns ${it.javaClass} when Int was expected: ${it.toString()}")
+            if (it == FqlIterator.sentinel) break
+            else if (it is Int) count = count + it
+            else throw ClassCastException("json array iterator returns ${it.javaClass} when Int was expected: ${it.toString()}")
         }
         Assert.assertEquals(count, 17)
     }
@@ -122,14 +121,13 @@ class JsonDriverTest
         val stream: FqlIterator = mmap.lookup("a")!!
 
         var count: Int = 0
-        while (stream.hasNext())
+        while (true)
         {
             val it = stream.next()
 
-            if (it is Int)
-                count = count + it
-            else
-                throw ClassCastException("json array iterator returns ${it.javaClass} when Int was expected: ${it.toString()}")
+            if (it == FqlIterator.sentinel) break
+            else if (it is Int) count = count + it
+            else throw ClassCastException("json array iterator returns ${it.javaClass} when Int was expected: ${it.toString()}")
         }
         Assert.assertEquals(count, 17)
     }

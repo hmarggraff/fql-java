@@ -23,7 +23,6 @@ public class SimpleTestIterator extends NamedImpl implements FqlIterator {
     final protected int count;
     final protected SimpleTestConnection connection;
     protected int at = 0;
-    protected Integer current;
 
     public SimpleTestIterator(final SimpleTestConnection connection, String name, int count) {
         super(name);
@@ -37,12 +36,6 @@ public class SimpleTestIterator extends NamedImpl implements FqlIterator {
 
     public Object next() {
         at++;
-        current = new Integer(at);
-        return current;
-    }
-
-    @Override
-    public Object current() {
-        return current;
+        return new Integer(at);
     }
 }

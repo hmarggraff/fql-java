@@ -25,9 +25,10 @@ public class JsonArrayIterator(name: String, val data: List<Any?>): KNamedImpl(n
 {
     var pos = -1
 
-    override fun hasNext(): Boolean = pos < data.size() - 1
-
-    override fun next(): Any? { pos = pos + 1; return data.get(pos) }
-
-    override fun current() = data.get(pos)
+    override fun next(): Any? {
+        if (pos >= data.size()-1)
+            return FqlIterator.sentinel
+        pos = pos + 1;
+        return data.get(pos)
+    }
 }

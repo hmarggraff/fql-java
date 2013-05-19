@@ -6,6 +6,7 @@ import org.fqlsource.fqltest.simpletestdriver.SimpleTestConnection
 import org.funql.ri.parser.FqlParser
 import org.yaml.snakeyaml.Yaml
 import java.util.HashMap
+import org.funql.ri.data.FqlIterator
 
 public open class SimpleTestDriverBase {
 
@@ -23,16 +24,16 @@ public open class SimpleTestDriverBase {
 
     fun run(query: String, expectation: Any) {
         print(query)
-        print(" --> ")
+        println(" -->")
         val  it = FqlParser.runQuery(query, null, conn)!!
         val result: MutableList<Any?> = ArrayList<Any?>()      // Annotation required for a bug in kotlin v 0.4.68
-        while (it.hasNext()) {
-            val nexta = it.next()
-            if (nexta is Array<Any> && nexta.size == 1)
-                result.add(nexta[0]);
-            else
-                result.add(nexta)
-        }
+        while(true)
+            {
+                val t: Any? = it.next()
+                if (t  == FqlIterator.sentinel) break
+                if (t is Array<Any> && t.size == 1) result.add(t[0]);
+                else result.add(t)
+            }
         val dump = if (result.size() == 1) yaml.dump(result[0])!! else yaml.dump(result)!!
         val shortRes = dump.substring(0, dump.length() - 1);
         println(shortRes);

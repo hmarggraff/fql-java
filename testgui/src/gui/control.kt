@@ -11,6 +11,7 @@ import org.funql.ri.mongodriver.FunqlMongoConnection
 import org.funql.ri.exec.NamedValue
 import org.funql.ri.exec.NamedObject
 import com.mongodb.DBRef
+import org.funql.ri.data.FqlIterator
 
 class TestRunnerControl(val view: TestRunnerView) {
 
@@ -112,13 +113,14 @@ class TestRunnerControl(val view: TestRunnerView) {
             if (it == null) return
             val sb = StringBuffer()
             var cnt = 0
-            while (it.hasNext()) {
+            while (true) {
                 if (cnt == 1) sb.insert(0, '[')
                 if (cnt > 0) sb.append(",\n")
                 cnt++
 
                 val obj = it.next()!!;
-                if (obj is Array<Any?>)
+                if (obj == FqlIterator.sentinel) break
+                else if (obj is Array<Any?>)
                 {
                     val singleton = obj.size == 1
                     dump(if (singleton) obj[0] else obj, sb, 0, singleton)

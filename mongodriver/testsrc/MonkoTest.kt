@@ -59,14 +59,16 @@ class MonkoTest
     Test
             fun iterateProducts() {
         val pi = productsIterator!!
-        val current: Any? = if (pi.hasNext()) pi.next() else null
+        val current: Any? = pi.next()
         assertNotNull(current, "Iterator $products did not yield data.")
+        assert(current != FqlIterator.sentinel, "Iterator $products did not yield data.")
         println(current)
         var cnt = 1
-        while (pi.hasNext())
+        while (true)
         {
-            val item = pi.next() as DBObject
-            val imagefile = item.get("imagefile") as String
+            val item = pi.next()
+            if (item == FqlIterator.sentinel) break;
+            val imagefile = (item as DBObject).get("imagefile") as String
             assert(imagefile.startsWith("pix/"))
             cnt++
         }
@@ -97,12 +99,13 @@ class MonkoTest
         val it = FqlParser.runQuery(query, null, conn)!!
         val sb = StringBuffer()
         var cnt = 0
-        while (it.hasNext()) {
+        while (true) {
             if (cnt == 1) sb.insert(0, '[')
             if (cnt > 0) sb.append(',')
             cnt++
 
-            val obj = it.next()!!;
+            val obj = it.next()
+            if (obj == FqlIterator.sentinel) break;
             if (obj is Array<Any?>)
                 dump(if (obj.size == 1) obj[0] else obj, sb, 0)
             else

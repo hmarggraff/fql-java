@@ -72,7 +72,7 @@ public open class JsonConnection(name: String, propsArg: Map<String, String>?): 
             val start = startKey.toInt()
             val end = endKey.toInt()
             val subList = (data as List<*>).subList(start, end)
-            return ListFqlIterator(subList, name)
+            return ListFqlIterator(subList)
         }
         else if (data is LinkedHashMap<*, *>)
         {
@@ -103,7 +103,7 @@ public open class JsonConnection(name: String, propsArg: Map<String, String>?): 
                         }
                     }
             }
-            return ListFqlIterator(ret, name)
+            return ListFqlIterator(ret)
         }
         else
             throw FqlDataException("Connection '" + getName() + "' is not a range.")

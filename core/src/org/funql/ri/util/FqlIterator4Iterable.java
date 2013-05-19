@@ -9,31 +9,16 @@ import java.util.List;
 /**
  */
 public class FqlIterator4Iterable implements FqlIterator {
-    protected Iterable data;
-    protected Iterator it;
-    protected int at;
-    Object current;
+    protected final Iterator it;
 
     public FqlIterator4Iterable(Iterable data) {
-        this.data = data;
-    }
-
-    @Override
-    public boolean hasNext() {
-        return it.hasNext();
+        it = data.iterator();
     }
 
     @Override
     public Object next() {
-        if (!hasNext())
-            throw new FqlDataException("Iterator beyond end: " + at);
-        current = it.next();
-        at++;
-        return current;
-    }
-
-    @Override
-    public Object current() {
-        return current;
+        if (!it.hasNext())
+            throw new FqlDataException("Iterator beyond end.");
+        return it.next();
     }
 }
