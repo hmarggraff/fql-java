@@ -78,20 +78,19 @@ class MonkoTest
 
     DataProvider(name = "query") fun createData1() = array(
 
-            //array("from homeOrg", "''")
-            //array("from products where name like \"Olympus*\" select name", "'Olympus SP-560 UZ'"),
-            //array("from products where name like \"Ricoh*\" select name", "['Ricoh Caplio GX100','Ricoh Caplio 500G Wide','Ricoh Caplio R7']"),
-            //array("from orders where orderId = \"QS.2\" select orderId, customer.name", "{f1:'QS.2',f2:'Atufotra Ltd'}"),
-            //array("from orders where customer.name = \"Friulpe Inc\" select orderId, customer.zipCode", "[{f1:'QS.17',f2:'D 9359'},{f1:'QS.99',f2:'D 9359'}]"),
-            //array("from orders where customer.name = \"Friulpe Inc\" select customer", "['{ \"\$ref\" : \"organisations\", \"\$id\" : \"68\" }','{ \"\$ref\" : \"organisations\", \"\$id\" : \"68\" }']"),
-            array("from orders where orderId = \"QS.2\" select orderId, from organisations where customerId = it(2).customer.customerId end", "{f1:'QS.2',f2:'Atufotra Ltd'}")
+            array("from homeOrg where name = \"nonexisten\"", ""),
+            array("from products where name like \"Olympus*\" select name", "'Olympus SP-560 UZ'"),
+            array("from products where name like \"Ricoh*\" select name", "['Ricoh Caplio GX100','Ricoh Caplio 500G Wide','Ricoh Caplio R7']"),
+            array("from orders where orderId = \"QS.2\" select orderId, customer.name", "{f1:'QS.2',f2:'Atufotra Ltd'}"),
+            array("from orders where customer.name = \"Friulpe Inc\" select orderId, customer.zipCode", "[{f1:'QS.17',f2:'D 9359'},{f1:'QS.99',f2:'D 9359'}]"),
+            array("from orders where customer.name = \"Friulpe Inc\" select customer", "['{ \"\$ref\" : \"organisations\", \"\$id\" : \"68\" }','{ \"\$ref\" : \"organisations\", \"\$id\" : \"68\" }']"),
+            array("from orders where orderId = \"QS.2\" select orderId, from organisations where it(2).customer.customerId = customerId select name end", "{f1:'QS.2',f2:[{f1:'Atufotra Ltd'}]}"),
             //array("from orders where orderId = \"QS.2\" select orderId, from customers get customer end", "{f1:'QS.2',f2:'Atufotra Ltd'}") //,
-            //array("access organisations by _id from orders where orderId = \"QS.2\" select orderId, organisations[customer]", "The Hypothetical Camera Shop"),
-            //array("from orders where orderId = \"QS.2\" select orderId, customer -> organisations.id", "The Hypothetical Camera Shop") //,
-            //array("access organisations by _id from orders where orderId = \"QS.13\" select orderId, organisations[customer].name", "The Hypothetical Camera Shop") //,
+            array("link organisations by _id from orders where orderId = \"QS.2\" select orderId, organisations[customer].name", "{f1:'QS.2',f2:'Atufotra Ltd'}"),
+            //array("from orders where orderId = \"QS.2\" select orderId, customer -> organisations.id", "The Hypothetical Camera Shop"),
+            //array("link organisations by _id from orders where orderId = \"QS.13\" select orderId, organisations[customer].name", "The Hypothetical Camera Shop"),
             //array("from products select name", "[Panasonic Lumix DMC-FX100, Ricoh Caplio GX100]"),
-            //lookup(customer, organisations, id)
-            //array("from homeOrg select name", "'The Hypothetical Camera Shop'")
+            array("from homeOrg select name", "'The Hypothetical Camera Shop'")
     )
 
     fun run(query: String): String {
@@ -100,12 +99,12 @@ class MonkoTest
         val sb = StringBuffer()
         var cnt = 0
         while (true) {
+            val obj = it.next()
+            if (obj == FqlIterator.sentinel) break;
             if (cnt == 1) sb.insert(0, '[')
             if (cnt > 0) sb.append(',')
             cnt++
 
-            val obj = it.next()
-            if (obj == FqlIterator.sentinel) break;
             if (obj is Array<Any?>)
                 dump(if (obj.size == 1) obj[0] else obj, sb, 0)
             else
@@ -135,20 +134,32 @@ class MonkoTest
             sb.append(s1.getVal())
         }
         else if (s is NamedValue) {
-            sb.append('\'').append(s.getVal().toString()).append('\'')
+            //sb.append('\'')
+            dump(s.getVal(), sb, indent+1)
+            //sb.append('\'')
         }
         else if (s is Array<Any?>) {
-            val arr: Array<Any?> = s
+            if (s is Array<NamedValue?>)
+                System.currentTimeMillis()
             sb.append('{');
             var cnt = 0
-            arr.forEach {
+            s.forEach {
                 if (cnt > 0) sb.append(',')
                 cnt++
                 sb.append((it as NamedValue).getName()).append(':')
                 dump(it, sb, indent + 1)
-
             }
             sb.append("}")
+        }
+        else if (s is List<Any?>) {
+            sb.append('[');
+            var cnt = 0
+            s.forEach {
+                if (cnt > 0) sb.append(',')
+                cnt++
+                dump(it, sb, indent + 1)
+            }
+            sb.append("]")
         }
         else {
             sb.append('\'').append(s.toString()).append('\'')

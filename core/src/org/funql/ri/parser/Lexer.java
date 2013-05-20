@@ -61,7 +61,6 @@ public class Lexer {
         In,
         Instanceof,
         Is,
-        It,
         LBrace,
         LBracket,
         LParen,
@@ -140,7 +139,6 @@ public class Lexer {
         keywords.put("some", Token.Some);
         keywords.put("true", Token.True);
         keywords.put("where", Token.Where);
-        keywords.put("it", Token.It);
         keywords.put("count", Token.Count);
     }
 

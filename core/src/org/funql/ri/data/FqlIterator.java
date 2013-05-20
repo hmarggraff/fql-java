@@ -19,7 +19,6 @@ package org.funql.ri.data;
 public interface FqlIterator
 {
     public static final Object sentinel = new Object();
-    //boolean hasNext();
 
     /**
      * check and step to next object.

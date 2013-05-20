@@ -25,7 +25,7 @@ package org.funql.ri.parser;
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.funql.ri.exec.FqlBuiltinFunction;
+import org.funql.ri.exec.BuiltIns;
 import org.funql.ri.exec.node.*;
 import org.funql.ri.parser.Lexer.Token;
 import org.funql.ri.util.NamedIndex;
@@ -109,8 +109,8 @@ public class FqlExpressionParser {
     }
 
     private FqlNodeInterface parseFunctionCall(String symName) throws FqlParseException {
-        FqlBuiltinFunction builtin = p.functions.get(symName);
-        if (builtin == null) {
+        final BuiltIns func = BuiltIns.valueOf(symName);
+        if (func == null) {
             throw new FqlParseException("Built-in function not found: " + symName, p);
         }
 
@@ -136,7 +136,7 @@ public class FqlExpressionParser {
         } else {
             argNodes = null;
         }
-        return new FunctionNode(builtin, argNodes, p.lex.getRow(), p.lex.getCol());
+        return new FunctionNode(func, argNodes, p.lex.getRow(), p.lex.getCol());
     }
 
     private FqlNodeInterface parseBracket(FqlNodeInterface left) throws FqlParseException {
@@ -339,14 +339,12 @@ public class FqlExpressionParser {
             return new ConstBooleanNode(false, p.lex.getRow(), p.lex.getCol());
         } else if (t == Lexer.Token.Nil) {
             return new NilNode(p.lex.getRow(), p.lex.getCol());
-        } else if (t == Token.It) {
-            return new ValueNode(p.lex.getRow(), p.lex.getCol());
         } else if (t == Lexer.Token.LParen) {
             final FqlNodeInterface node = parseQuestion();
             p.expect_next(Token.RParen);
             return node;
         } else if (t == Token.Name) {
-            return parseNav2(t);
+            return parseNav2();
         } else if (t == Token.Param) {
             return parseParam();
         } else if (t == Token.From) {
@@ -428,14 +426,12 @@ public class FqlExpressionParser {
      * @return
      * @throws FqlParseException
      */
-    FqlNodeInterface parseNav2(Token t) throws FqlParseException {
+    FqlNodeInterface parseNav2() throws FqlParseException {
+        String symName  = p.lex.nameVal;
         Lexer.Token tok = next();
         FqlNodeInterface left;
-        String symName;
         EntryPointSlot source = p.iteratorStack.peek();
 
-        if (t == Token.It) symName = "it";
-        else symName = p.lex.nameVal;
         if (tok == Lexer.Token.LParen) {
             left = parseFunctionCall(symName);
             tok = next();

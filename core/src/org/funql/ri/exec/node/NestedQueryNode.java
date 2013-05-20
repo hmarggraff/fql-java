@@ -28,9 +28,13 @@ public class NestedQueryNode extends FqlNode {
             precedent = statement.execute(env, precedent);
         }
         ArrayList<Object> result = new ArrayList<>();
-        Object t;
-        while ((t = precedent.next()) != FqlIterator.sentinel)
+        while (true)
+        {
+            Object t = precedent.next();
+            if (t == FqlIterator.sentinel)
+                break;
             result.add(t);
+        }
         return result;
     }
 

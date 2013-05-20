@@ -107,7 +107,9 @@ public class FunqlMongoConnection(name: String, val props: Map<String, String?>)
 public class FunqlMongoIterator(val data: DBCursor): FqlIterator
 {
     public override fun next(): Any? {
-        return data.next();
+        if (data.hasNext())
+            return data.next()
+        return FqlIterator.sentinel
     }
 }
 

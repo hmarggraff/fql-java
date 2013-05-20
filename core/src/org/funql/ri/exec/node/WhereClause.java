@@ -15,20 +15,26 @@ public class WhereClause implements FqlStatement {
     public FqlIterator execute(final RunEnv env, final FqlIterator precedent) throws FqlDataException {
         return new FqlIterator() {
             public Object next() throws FqlDataException {
-                Object t;
-                while ((t = precedent.next()) != FqlIterator.sentinel) {
-                    Object val = expr.getValue(env, t);
-                    if (val != null)
-                        if (val instanceof Boolean) {
-                            Boolean cond = (Boolean) val;
-                            if (cond)
-                                return t;
-                        } else
-                            throw new FqlDataException(String.format("Where condition at %d, " +
-                                    "%d does not return a Boolean, but a %s", expr.getRow(), expr.getCol(),
-                                    t.getClass().getSimpleName()));
+                while (true) {
+                    Object t = precedent.next();
+                    if (t == FqlIterator.sentinel)
+                        return t;
+                    try {
+                        env.pushObject(t);
+                        Object val = expr.getValue(env, t);
+                        if (val != null) {
+                            if (val instanceof Boolean) {
+                                if ((Boolean) val)
+                                    return t;
+                            } else
+                                throw new FqlDataException(String.format("Where condition at %d, " +
+                                        "%d does not return a Boolean, but a %s", expr.getRow(), expr.getCol(),
+                                        t.getClass().getSimpleName()));
+                        }
+                    } finally {
+                        env.popObject();
+                    }
                 }
-                return FqlIterator.sentinel;
             }
         };
     }

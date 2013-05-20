@@ -130,11 +130,18 @@ public class FqlParser {
         if (t == Token.From) {
             clauses.add(parseFrom());
         } else {
-            throw new FqlParseException("Expected from, but found " + t, this);
+            throw new FqlParseException("Expected from, but found " + tokenVal(t), this);
         }
 
         parseNestableClauses(clauses);
         return clauses;
+    }
+
+    private String tokenVal(Token t) {
+        if (t == Token.Name)
+            return lex.nameVal;
+        else if (t == Token.String) return '"' + lex.stringVal + '"';
+        else return t.toString();
     }
 
     private void parseNestableClauses(List<FqlStatement> innerClauses) throws FqlParseException {
@@ -154,7 +161,7 @@ public class FqlParser {
                 }
 
             } else {
-                throw new FqlParseException("Expected keyword, but found " + t, this);
+                throw new FqlParseException("Expected keyword, but found " + tokenVal(t), this);
             }
         }
     }
@@ -166,6 +173,7 @@ public class FqlParser {
             fieldList.add(fqlNodeInterface);
         }
         while (nextToken() == Token.Comma);
+        lex.pushBack();
         return new SelectStatement(fieldList);
     }
 
@@ -195,7 +203,7 @@ public class FqlParser {
                 if (t == Token.RBrace)
                     break;
             } else
-                throw new FqlParseException("Expected comma or right brace (,}), but found " + t, this);
+                throw new FqlParseException("Expected comma or right brace (,}), but found " + tokenVal(t), this);
         }
         if (!config.containsKey("driver")) {
             throw new FqlParseException("Connection must specify a driver. (driver=\"driverclass\")", this);
@@ -339,7 +347,7 @@ public class FqlParser {
         final Token t;
         t = nextToken();
         if (t != expect) {
-            throw new FqlParseException("Expected \"" + expect + "\" but found \"" + t + '"', this);
+            throw new FqlParseException("Expected \"" + expect + "\" but found \"" + tokenVal(t) + '"', this);
         }
         return nextToken();
     }
@@ -348,19 +356,19 @@ public class FqlParser {
         final Token t;
         t = nextToken();
         if (t != expect) {
-            throw new FqlParseException("Expected \"" + expect + "\" but found \"" + t + '"', this);
+            throw new FqlParseException("Expected \"" + expect + "\" but found \"" + tokenVal(t) + '"', this);
         }
     }
 
-    protected String name_or_string(Token t1) throws FqlParseException {
+    protected String name_or_string(Token t) throws FqlParseException {
         final String entryPointName;
-        if (t1 == Token.String) {
+        if (t == Token.String) {
             entryPointName = lex.stringVal;
-        } else if (t1 == Token.Name) {
+        } else if (t == Token.Name) {
             entryPointName = lex.nameVal;
         } else {
             throw new FqlParseException("Expected connection, dataset or iterator variable as name or string, " +
-                    "but found " + t1, this);
+                    "but found " + tokenVal(t), this);
         }
         return entryPointName;
     }
@@ -374,7 +382,7 @@ public class FqlParser {
         } else if (t == Token.Name) {
             name1 = lex.nameVal;
         } else {
-            throw new FqlParseException("Expected " + msg + " as name or string, but found " + t, this);
+            throw new FqlParseException("Expected " + msg + " as name or string, but found " + tokenVal(t), this);
         }
         return name1;
     }
@@ -385,7 +393,7 @@ public class FqlParser {
         if (t == Token.Name) {
             return lex.nameVal;
         } else {
-            throw new FqlParseException("Expected " + msg + " name, but found " + t, this);
+            throw new FqlParseException("Expected " + msg + " name, but found " + tokenVal(t), this);
         }
     }
 
