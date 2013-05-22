@@ -71,6 +71,16 @@
     <build>
         <sourceDirectory>${project.basedir}/src</sourceDirectory>
         <testSourceDirectory>${project.basedir}/testsrc</testSourceDirectory>
+        <resources>
+            <resource>
+                <directory>resources</directory>
+            </resource>
+        </resources>
+        <testResources>
+            <testResource>
+                <directory>testresources</directory>
+            </testResource>
+        </testResources>
 
         <pluginManagement>
 

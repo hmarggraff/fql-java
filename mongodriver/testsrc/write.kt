@@ -11,6 +11,7 @@ import org.funql.ri.test.genericobject.Ref
 import org.funql.ri.mongodriver.workaround.BasicDBObjectWrapper
 import org.funql.ri.test.cameradata.CameraData
 import org.funql.ri.test.genericobject.TestObject
+import org.funql.ri.test.genericobject.Lid
 
 class TestCameraWrite
 {
@@ -33,6 +34,8 @@ class TestCameraWrite
         val homeOrg = db.getCollection("homeOrg")!!
         homeOrg.drop()
         homeOrg.insert(toDBObject(CameraData.homeOrg))
+        homeOrg.insert(toDBObject(CameraData.primes))
+        homeOrg.insert(toDBObject(CameraData.even))
         rewriteCollection(productNamespace, org.funql.ri.test.cameradata.CameraData.products)
         rewriteCollection(organisationsNamespace, org.funql.ri.test.cameradata.CameraData.orgs)
         rewriteCollection("orders", org.funql.ri.test.cameradata.CameraData.orders())
@@ -50,23 +53,28 @@ class TestCameraWrite
         for (i in 0..data.values.size-1) {
             val v = data.values[i]
             val k = data.typ.fields[i].name
-            when(v){
-                is TestObject -> doc.put(k, toDBObject(v))
+            val pv : Any? = when(v){
+                is TestObject -> toDBObject(v)
+                is Array<Int> -> literalList(v)
+                is Array<String> -> literalList(v)
                 is Array<TestObject> -> {
                     val list = BasicDBList()
                     for (to in v) list.add(toDBObject(to))
-                    //list.addAll(v.toCollection())
-                    doc.put(k, list)
+                    list
                 }
-                is Ref ->
-                    {
-                        val l: Long = (v.target as TestObject).oid
-                        doc.put(k, DBRef(db, v.container, l))
-                    }
-                else -> doc.put(k, v)
+                is Ref -> DBRef(db, v.container, (v.target as TestObject).oid)
+                is Lid -> (v.target as TestObject).oid
+                else -> v
             }
+            doc.put(k,pv);
         }
         return doc.getTarget()!!
+    }
+
+    fun literalList(v: Array<out Any>): BasicDBList{
+        val list = BasicDBList()
+        for (to in v) list.add(to)
+        return list
     }
 }
 

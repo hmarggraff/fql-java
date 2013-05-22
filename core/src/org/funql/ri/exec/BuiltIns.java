@@ -9,6 +9,9 @@ import java.util.Map;
 /**
  */
 public enum BuiltIns implements FqlBuiltinFunction, Comparable<BuiltIns> {
+    //TODO function ref as method on a value i.e. a.b.ref(container) or a.b.ref(conainer, joinfield)
+    //TODO method fields to return iterator over fields
+
     date {
         @Override
         public Object val(RunEnv env, Object from, Object[] argvals) throws FqlDataException {

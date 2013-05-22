@@ -6,10 +6,10 @@ import org.funql.ri.test.genericobject.FieldDef.*
 import org.funql.ri.test.RandomGenerator.*
 import org.funql.ri.test.genericobject.TestObject
 import org.funql.ri.test.genericobject.Ref
+import org.funql.ri.test.genericobject.Lid
 
 object CameraData
 {
-
     val employeeType = TypeDef("Employee", str("name"), str("surname"), date("birthDate"), str("job"), str("telno"))
     val dayFields = TypeDef("Day", int("year"), int("month"), int("day"))
     val organisationFields = TypeDef("Organisation", str("name"), str("streetAddress"), str("phoneNumber"), str("city"), str("zipCode"), str("customerId"), str("country"), obj("accountManager"), arr("employees"))
@@ -19,9 +19,12 @@ object CameraData
     val countryCodes: Array<String> = array("US", "F", "D", "CH", "GB", "FI")
     val streetTypes: Array<String> = array("Rd", "St", "Ave")
     val countries = array("D", "A", "CH", "F", "B", "NL", "GB", "USA", "CAN", "PL")
+    val primeNumbers = intArray(2,3,5,7,11,13,17,19,23,29,31)
+    val evenNumbers = intArray(2,4,6,8,10)
     val jobNames = array("CEO", "Programmer", "Assistant", "Hausmeister", "VP Sales", "Accountant", "Scrum master", "Product Owner")
     val shippingStates = array("ordered", "incomplete", "shipped", "paid")
     val orderType = TypeDef("Order", str("orderId"), ref("customer"), arr("items"), float("value"), float("cost"), int("shippingState"), date("date"))
+    val literalArrayType = TypeDef("LiteralArray", str("name"), arr("intarray"), arr("stringarray"), lid("other"))
 
 
     fun telno(): String = (100 + nextInt(900)).toString() + " " + (100 + nextInt(900)).toString() + (1000 + nextInt(9000)).toString()
@@ -38,7 +41,8 @@ object CameraData
             TestObject(employeeType, "Hill", "David Octavius", day(1802, 12, 2), "Founder", telno()),
             TestObject(employeeType, "Heidersberger", "Heinrich", day(1923, 12, 2), "Programmer", telno())
     )
-    public val homeOrg: TestObject = TestObject(organisationFields, "The Hypothetical Camera Shop", "Fichtenstr. 19", "+49 89 89026748", "Germering", "82110", "ThatsUs", "DE", employees[0], employees)
+    public val homeOrg: TestObject = TestObject(organisationFields, "The Hypothetical Camera Shop", "Fichtenstr. 19", "+49 89 89026748", "Germering", "82110", "ThatsUs", "DE", employees[0], employees, orgTypes)
+
     public val products: Array<TestObject> = array(
             TestObject(cameraFields, "Olympus SP-560 UZ", 8.0, 27, 486, 550.00, 445, "pix/cam_002.jpg", "Blitz-Langzeitsynchronisation, Anschluss fuer externen Blitz (Blitzschuh), Videoaufzeichnung 640 x 480 Pixel, Direkt-Druck-Funktion"),
             TestObject(cameraFields, "General Imaging GE E850", 8.0, 28, 140, 99.0, 155, "pix/c2_002.jpg", "Blitz-Langzeitsynchronisation, Anschluss fuer externen Blitz (Blitzschuh), Videoaufzeichnung 640 x 480 Pixel, Direkt-Druck-Funktion"),
@@ -73,6 +77,10 @@ object CameraData
             TestObject(cameraFields, "Panasonic Lumix DMC-FZ18", 8.3, 28, 504, 480.00, 407, "pix/cam_008.jpg", "Blitz-Langzeitsynchronisation, Videoaufzeichnung 848 x 480 Pixel, Direkt-Druck-Funktion"),
             TestObject(cameraFields, "Panasonic Lumix DMC-FX100", 12.2, 28, 100, 362.00, 176, "pix/cam_009.jpg", "Blitz-Langzeitsynchronisation, Anschluss fuer externen Blitz (Blitzschuh), Videoaufzeichnung 1280 x 720 Pixel ), Direkt-Druck-Funktion")
     )
+
+    public val even: TestObject = TestObject(literalArrayType, "even", evenNumbers, orgTypes, Lid(homeOrg))
+    public val primes: TestObject = TestObject(literalArrayType, "primes", primeNumbers, countryCodes, Lid(even))
+
 
 
     public val orgs: Array<TestObject> = array(org(), org(), org(), org(), org(), org(), org(), org(), org(), org()) // init with closure fails due to a bug in kotlin M4
