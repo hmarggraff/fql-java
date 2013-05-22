@@ -153,6 +153,9 @@ public class FqlParser {
             } else if (t == Token.Select) {
                 innerClauses.add(parseObject());
 
+            } else if (t == Token.Limit) {
+                innerClauses.add(parseLimit());
+
             } else if (t == Token.End) {
                 {
                     innerClauses.add(new EndClause());
@@ -165,6 +168,35 @@ public class FqlParser {
             }
         }
     }
+
+    private FqlStatement parseLimit() throws FqlParseException {
+        Token t = nextToken();
+        if (t == Token.ConstInteger) {
+            long intVal = lex.intVal;
+            if (intVal < 0)
+                throw new FqlParseException("Limit must be greater or equal to 0.", this);
+            return new LimitClause(new ConstIntNode(intVal, lex.getRow(), lex.getCol()));
+        }
+        else if (t == Token.Param)
+        {
+            return new LimitClause(parseParam());
+        }
+        else
+            throw new FqlParseException("limit must be literal number or a parameter", this);
+    }
+
+    protected FqlNode parseParam() throws FqlParseException {
+        String paramName = lex.nameVal;
+        if (paramName.length() == 0) {
+            throw new FqlParseException(Res.str("Parameters must have a name"), this);
+        }
+        NamedIndex parameter = getParameter(paramName);
+        return new QueryParameterNode(parameter, lex.getRow(), lex.getCol());
+
+
+    }
+
+
 
     private FqlStatement parseObject() throws FqlParseException {
         ArrayList<FqlNodeInterface> fieldList = new ArrayList<FqlNodeInterface>();

@@ -3,6 +3,8 @@ package org.funql.ri.exec;
 import org.funql.ri.data.FqlDataException;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  */
@@ -29,11 +31,25 @@ public enum BuiltIns implements FqlBuiltinFunction, Comparable<BuiltIns> {
         public Object val(RunEnv env, Object from, Object[] argvals) throws FqlDataException {
             if (argvals.length == 0)
                 return env.outerObjects.peek();
+            else throw new IllegalArgumentException(badArgs(argvals, name()));
+        }
+
+
+    },
+    up {
+        @Override
+        public Object val(RunEnv env, Object from, Object[] argvals) throws FqlDataException {
+            if (env.outerObjects.size() <= 1)
+                throw new IllegalStateException("Function up can only be used in a nested query.");
+            if (argvals.length == 0)
+                return env.outerObjects.get(env.outerObjects.size()-2);
             else if (argvals.length == 1 && argvals[0] instanceof Number){
                 int level = ((Number)argvals[0]).intValue();
-                if (level > env.outerObjects.size())
+                if (level < 0)
+                    throw new IllegalArgumentException("function it: nesting must be > 0");
+                if (level >= env.outerObjects.size()-1)
                     throw new IllegalArgumentException("function it: nesting " + env.outerObjects.size() + " is less than argument " + level);
-                return env.outerObjects.get(env.outerObjects.size()-level);
+                return env.outerObjects.get(env.outerObjects.size()-level-1);
             }
             else throw new IllegalArgumentException(badArgs(argvals, name()));
         }
@@ -56,4 +72,24 @@ public enum BuiltIns implements FqlBuiltinFunction, Comparable<BuiltIns> {
     public String getName() {
         return name();
     }
+
+    static Map<String, BuiltIns> parameterless = new HashMap<>();
+    static Map<String, BuiltIns> allFunctions = new HashMap<>();
+    static {
+        parameterless.put(it.name(), it);
+        parameterless.put(up.name(), up);
+        for (BuiltIns b : BuiltIns.values()) {
+
+            parameterless.put(b.name(), b);
+        }
+    }
+
+    public static BuiltIns get(String nam){
+        return allFunctions.get(nam);
+    }
+
+    public static BuiltIns getParameterless(String nam){
+        return parameterless.get(nam);
+    }
+
 }

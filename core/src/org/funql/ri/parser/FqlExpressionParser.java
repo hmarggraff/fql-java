@@ -41,75 +41,8 @@ public class FqlExpressionParser {
     }
 
 
-    protected FqlNode parseParam() throws FqlParseException {
-        String paramName = p.lex.nameVal;
-        if (paramName.length() == 0) {
-            throw new FqlParseException(Res.str("Parameters must have a name"), p);
-        }
-        NamedIndex parameter = p.getParameter(paramName);
-        return new QueryParameterNode(parameter, p.lex.getRow(), p.lex.getCol());
-
-
-    }
-
-
-    /**
-     * nav starts with a name
-     * if the name is followed by a Left parenthesis then it is a function call
-     * if it is a left bracket, then it is a lookup, either in a map-like member or in another source
-     * if it is a dot it is a member or a member of an upper object.
-     * cases
-     * func(params) // a built in function
-     * func(params).field // a built in function returning an object, that is navigated into
-     * func(params).method(params) // a built in function returning an object, with the call of a built in method
-     * it.field // a field in the current object
-     * field // a field in the current object
-     * up.field // a field in the parent object
-     * up(n).field //a field in an outer object
-     * up.up.field // a field in grand parent
-     * map[key_expr] // a field in a map member or a mapping top-level source
-     *
-     * @return
-     * @throws FqlParseException
-     */
-    FqlNodeInterface parseNav() throws FqlParseException {
-        String symName = p.lex.nameVal;
-        Lexer.Token tok = next();
-        if (tok == Lexer.Token.LParen)// function: start parsing argList
-        {
-            return parseFunctionCall(symName);
-        }
-        EntryPointSlot currentSource = p.iteratorStack.peek();
-
-        FqlNodeInterface left;
-        EntryPointSlot source = p.maps.get(symName);
-        if (source == null || source.getEntryPointName().equals(currentSource.getEntryPointName())) {
-            source = currentSource;
-            left = new MemberNode(symName, currentSource, p.lex.getRow(), p.lex.getCol());
-        } else {
-            left = new ContainerNameNode(source, p.lex.getRow(), p.lex.getCol());
-        }
-        if (tok == Token.LBracket) {
-            left = parseBracket(left);
-            tok = next();
-        }
-
-        while (tok == Token.Dot) {
-            if (next() != Token.Name)
-                throw new FqlParseException(Res.str("Name expected after dot"), p);
-
-            symName = p.lex.nameVal;
-            left = new DotNode(left, symName, source, p.lex.getRow(), p.lex.getCol());
-            if (tok == Token.LBracket)
-                left = parseBracket(left);
-            tok = next();
-        }
-        p.lex.pushBack();
-        return left;
-    }
-
     private FqlNodeInterface parseFunctionCall(String symName) throws FqlParseException {
-        final BuiltIns func = BuiltIns.valueOf(symName);
+        final BuiltIns func = BuiltIns.get(symName);
         if (func == null) {
             throw new FqlParseException("Built-in function not found: " + symName, p);
         }
@@ -140,8 +73,6 @@ public class FqlExpressionParser {
     }
 
     private FqlNodeInterface parseBracket(FqlNodeInterface left) throws FqlParseException {
-        if (!(left instanceof ContainerNameNode))
-            throw new FqlParseException("Name to left of bracket, does not refer to a container.", p);
         FqlNodeInterface indexNode = parseQuestion();
         Token tok = next();
         final FqlNodeInterface ret;
@@ -344,9 +275,9 @@ public class FqlExpressionParser {
             p.expect_next(Token.RParen);
             return node;
         } else if (t == Token.Name) {
-            return parseNav2();
+            return parseNav();
         } else if (t == Token.Param) {
-            return parseParam();
+            return p.parseParam();
         } else if (t == Token.From) {
             return p.parseNestedQuery();
         } else if (t == Lexer.Token.EOFComment || t == Lexer.Token.EOF) {
@@ -426,8 +357,8 @@ public class FqlExpressionParser {
      * @return
      * @throws FqlParseException
      */
-    FqlNodeInterface parseNav2() throws FqlParseException {
-        String symName  = p.lex.nameVal;
+    FqlNodeInterface parseNav() throws FqlParseException {
+        String symName = p.lex.nameVal;
         Lexer.Token tok = next();
         FqlNodeInterface left;
         EntryPointSlot source = p.iteratorStack.peek();
@@ -437,12 +368,19 @@ public class FqlExpressionParser {
             tok = next();
         } else if (tok == Token.LBracket) {
             source = p.maps.get(symName);
-            left = new ContainerNameNode(source, p.lex.getRow(), p.lex.getCol());
+            if (source != null)
+                left = new ContainerNameNode(source, p.lex.getRow(), p.lex.getCol());
+            else
+                left = new MemberNode(symName, source,  p.lex.getRow(), p.lex.getCol());
             left = parseBracket(left);
             tok = next();
-        } else {
 
-            left = new MemberNode(symName, source, p.lex.getRow(), p.lex.getCol());
+        } else {
+            BuiltIns func = BuiltIns.getParameterless(symName);
+            if (func != null)
+                left = new FunctionNode(func, null, p.lex.getRow(), p.lex.getCol());
+            else
+                left = new MemberNode(symName, source, p.lex.getRow(), p.lex.getCol());
         }
 
         while (tok == Token.Dot) {
