@@ -52,7 +52,7 @@ public class SelectStatement implements FqlStatement {
                 if (parent == FqlIterator.sentinel)
                     return FqlIterator.sentinel;
                 Object[] fields;
-                fields = new Object[fieldList.size()];
+                fields = new NamedValue[fieldList.size()];
 
                 try {
                     env.pushObject(parent);
