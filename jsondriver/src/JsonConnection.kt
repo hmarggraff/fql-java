@@ -59,8 +59,10 @@ public open class JsonConnection(name: String, propsArg: Map<String, String>?): 
     //public override fun useIterator(streamName: String?): FqlIterator? {
     public override fun getIterator(p0: String?): FqlIterator? {
         if (p0 != "top") throw FqlDataException("Entry point for list must be named top not: " + p0)
-        else if (!(data is ArrayList<*>)) throw FqlDataException("Entry point for list is not a list: " + p0)
-        return JsonArrayIterator(p0, data as ArrayList<*>)
+        else if (data is Map<*,*>) return JsonArrayIterator(p0, arrayListOf(data))
+        else if (data is ArrayList<*>) return JsonArrayIterator(p0, data as ArrayList<*>)
+        else throw FqlDataException("Entry point is not a list or a map: " + p0)
+
     }
 
     //public override fun range(name: String?, startKey: String?, endKey: String?, includeEnd: Boolean): FqlIterator?  = range1(name!!, startKey!!, endKey!!, includeEnd)

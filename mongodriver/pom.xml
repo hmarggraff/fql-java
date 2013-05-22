@@ -52,8 +52,11 @@
             <artifactId>funql-camerasample</artifactId>
             <version>${project.version}</version>
         </dependency>
-
-
+        <dependency>
+            <groupId>org.funql.ri</groupId>
+            <artifactId>funql-kutil</artifactId>
+            <version>${version}</version>
+        </dependency>
     </dependencies>
 
 

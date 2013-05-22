@@ -27,8 +27,10 @@ import org.funql.ri.exec.NamedLong
 import org.testng.annotations.AfterClass
 import com.mongodb.DBObject
 import org.funql.ri.mongodriver.MongoDriverKt
+import org.funql.ri.test.util.dump
 
-class MonkoTest
+class
+MonkoTest
 {
     val dbName = "funql_test"
     var conn: FunqlConnection? = null
@@ -115,56 +117,6 @@ class MonkoTest
     }
 
 
-    fun dump(s: Any?, sb: StringBuffer, indent: Int) {
-        if (s is Map<*,*>) {
-            sb.append('{')
-            var cnt = 0
-            val entrySet: Set<Map.Entry<Any?, Any?>> = s.entrySet()
-            for (e in entrySet) {
-                if (cnt > 0) sb.append(',')
-                cnt++
-                sb.append(e.getKey()).append(':')
-                dump(e.getValue(), sb, indent + 1)
-            }
-            sb.append("}")
-
-        }
-        else if (s is NamedLong || s is NamedDouble || s is NamedBoolean) {
-            val s1 = (s as NamedValue)
-            sb.append(s1.getVal())
-        }
-        else if (s is NamedValue) {
-            //sb.append('\'')
-            dump(s.getVal(), sb, indent+1)
-            //sb.append('\'')
-        }
-        else if (s is Array<Any?>) {
-            if (s is Array<NamedValue?>)
-                System.currentTimeMillis()
-            sb.append('{');
-            var cnt = 0
-            s.forEach {
-                if (cnt > 0) sb.append(',')
-                cnt++
-                sb.append((it as NamedValue).getName()).append(':')
-                dump(it, sb, indent + 1)
-            }
-            sb.append("}")
-        }
-        else if (s is List<Any?>) {
-            sb.append('[');
-            var cnt = 0
-            s.forEach {
-                if (cnt > 0) sb.append(',')
-                cnt++
-                dump(it, sb, indent + 1)
-            }
-            sb.append("]")
-        }
-        else {
-            sb.append('\'').append(s.toString()).append('\'')
-        }
-    }
 
     AfterClass fun close() {
         conn?.close()

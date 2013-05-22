@@ -46,12 +46,8 @@ public class FqlParser {
     protected Map<String, NamedIndex> connections = new HashMap<String, NamedIndex>();
     final Map<String, EntryPointSlot> maps = new HashMap<String, EntryPointSlot>();
     public Map<String, NamedIndex> parameters = new HashMap<String, NamedIndex>();
-    public Map<String, FqlBuiltinFunction> functions = new HashMap<String, FqlBuiltinFunction>();
     protected Stack<EntryPointSlot> iteratorStack = new Stack<EntryPointSlot>();
     private final List<FqlStatement> clauses = new ArrayList<FqlStatement>();
-    //protected int connectionCount;
-    //protected int entryPointCount;
-    //protected int parameterCount;
     protected int iteratorCount = 0;
 
 

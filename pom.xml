@@ -13,6 +13,7 @@
 
     <modules>
         <module>core</module>
+        <module>kutil</module>
         <module>jsondriver</module>
         <module>simpletestdriver</module>
         <module>kamerasample</module>
