@@ -12,7 +12,7 @@ class FieldDef(val name: String, val typ: Types)
         fun date(name: String) = FieldDef(name, Types.date)
         fun ref(name: String) = FieldDef(name, Types.ref)
         fun obj(name: String) = FieldDef(name, Types.obj)
-        fun lid(name: String) = FieldDef(name, Types.lid)
+        fun id(name: String) = FieldDef(name, Types.lid)
         fun arr(name: String) = FieldDef(name, Types.array)
     }
 }

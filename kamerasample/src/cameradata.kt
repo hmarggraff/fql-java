@@ -12,7 +12,7 @@ object CameraData
 {
     val employeeType = TypeDef("Employee", str("name"), str("surname"), date("birthDate"), str("job"), str("telno"))
     val dayFields = TypeDef("Day", int("year"), int("month"), int("day"))
-    val organisationFields = TypeDef("Organisation", str("name"), str("streetAddress"), str("phoneNumber"), str("city"), str("zipCode"), str("customerId"), str("country"), obj("accountManager"), arr("employees"))
+    val organisationFields = TypeDef("Organisation", str("name"), str("streetAddress"), str("phoneNumber"), str("city"), str("zipCode"), str("customerId"), str("country"), obj("accountManager"), arr("employees"), arr("orgTypes"))
     val cameraFields = TypeDef("Camera", str("name"), float("pixels"), int("wide"), int("tele"), float("price"), int("weight"), str("imagefile"), str("description"))
     val orderItemType = TypeDef("OrderItem", ref("product"), int("units"), float("price"))
     val orgTypes: Array<String> = array("Inc", "SA", "GmbH", "AG", "Ltd", "Oy")
@@ -24,7 +24,7 @@ object CameraData
     val jobNames = array("CEO", "Programmer", "Assistant", "Hausmeister", "VP Sales", "Accountant", "Scrum master", "Product Owner")
     val shippingStates = array("ordered", "incomplete", "shipped", "paid")
     val orderType = TypeDef("Order", str("orderId"), ref("customer"), arr("items"), float("value"), float("cost"), int("shippingState"), date("date"))
-    val literalArrayType = TypeDef("LiteralArray", str("name"), arr("intarray"), arr("stringarray"), lid("other"))
+    val literalArrayType = TypeDef("LiteralArray", str("name"), arr("intarray"), arr("stringarray"), id("local_id"))
 
 
     fun telno(): String = (100 + nextInt(900)).toString() + " " + (100 + nextInt(900)).toString() + (1000 + nextInt(9000)).toString()

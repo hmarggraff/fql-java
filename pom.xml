@@ -38,6 +38,9 @@
         <repository>
             <id>jetbrains-all</id>
             <url>http://repository.jetbrains.com/all</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
     </repositories>
 
