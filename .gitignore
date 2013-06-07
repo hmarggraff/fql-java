@@ -5,4 +5,4 @@ quarry/
 build/
 lib
 out/
-libij/
+target
