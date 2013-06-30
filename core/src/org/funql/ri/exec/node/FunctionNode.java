@@ -21,7 +21,7 @@ public class FunctionNode extends FqlNode
 
     public Object getValue(RunEnv env, Object from) throws FqlDataException
     {
-        Object[] argvals = new Object[argNodes.length];
+        Object[] argvals = new Object[argNodes!=null?argNodes.length:0];
         for (int i = 0; i < argvals.length; i++)
         {
             argvals[i] = argNodes[i].getValue(env, from);
@@ -33,6 +33,14 @@ public class FunctionNode extends FqlNode
     public void dump(StringBuffer sb)
     {
         lispify(sb, "function");
+    }
+
+    public FqlBuiltinFunction getFunction() {
+        return function;
+    }
+
+    public FqlNodeInterface[] getArgNodes() {
+        return argNodes;
     }
 
 }

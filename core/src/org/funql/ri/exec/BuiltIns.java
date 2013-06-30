@@ -49,9 +49,9 @@ public enum BuiltIns implements FqlBuiltinFunction, Comparable<BuiltIns> {
             else if (argvals.length == 1 && argvals[0] instanceof Number){
                 int level = ((Number)argvals[0]).intValue();
                 if (level < 0)
-                    throw new IllegalArgumentException("function it: nesting must be > 0");
-                if (level >= env.outerObjects.size()-1)
-                    throw new IllegalArgumentException("function it: nesting " + env.outerObjects.size() + " is less than argument " + level);
+                    throw new IllegalArgumentException("function up: nesting must be > 0");
+                if (level >= env.outerObjects.size())
+                    throw new IllegalArgumentException("function up: nesting " + env.outerObjects.size() + " is less than argument " + level);
                 return env.outerObjects.get(env.outerObjects.size()-level-1);
             }
             else throw new IllegalArgumentException(badArgs(argvals, name()));
@@ -77,18 +77,17 @@ public enum BuiltIns implements FqlBuiltinFunction, Comparable<BuiltIns> {
     }
 
     static Map<String, BuiltIns> parameterless = new HashMap<>();
-    static Map<String, BuiltIns> allFunctions = new HashMap<>();
+    static Map<String, BuiltIns> parameterizedFunctions = new HashMap<>();
     static {
         parameterless.put(it.name(), it);
         parameterless.put(up.name(), up);
-        for (BuiltIns b : BuiltIns.values()) {
-
-            parameterless.put(b.name(), b);
-        }
+        parameterless.put(date.name(), date);
+        parameterizedFunctions.put(up.name(), up);
+        parameterizedFunctions.put(date.name(), date);
     }
 
     public static BuiltIns get(String nam){
-        return allFunctions.get(nam);
+        return parameterizedFunctions.get(nam);
     }
 
     public static BuiltIns getParameterless(String nam){

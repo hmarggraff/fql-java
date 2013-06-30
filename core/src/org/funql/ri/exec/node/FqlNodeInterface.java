@@ -33,4 +33,6 @@ public interface FqlNodeInterface
     int getCol();
 
     void dump(StringBuffer sb);
+
+    void buildMemberName(StringBuffer target);
 }

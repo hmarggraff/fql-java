@@ -29,6 +29,11 @@ public class MemberNode extends FqlNode
         lispify(sb, "memberName", "source");
     }
 
+    @Override
+    public void buildMemberName(StringBuffer target) {
+        target.append(memberName);
+    }
+
     public String getMemberName()
     {
         return memberName;

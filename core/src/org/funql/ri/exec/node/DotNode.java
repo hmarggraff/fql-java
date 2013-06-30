@@ -28,4 +28,18 @@ public class DotNode extends UnaryNode
         lispify(sb, "memberName", "right");
     }
 
+    public String getMemberName() {
+        return memberName;
+    }
+
+    public EntryPointSlot getEntryPointSlot() {
+        return entryPointSlot;
+    }
+
+    @Override
+    public void buildMemberName(StringBuffer target) {
+        operand.buildMemberName(target);
+        target.append('_');
+        target.append(memberName);
+    }
 }

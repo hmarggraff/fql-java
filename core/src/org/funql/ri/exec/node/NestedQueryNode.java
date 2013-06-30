@@ -42,4 +42,16 @@ public class NestedQueryNode extends FqlNode {
     public void dump(StringBuffer sb) {
         sb.append(" from ... end ");
     }
+
+    @Override
+    public void buildMemberName(StringBuffer target) {
+        final FqlStatement fqlStatement = clauses.get(0);
+        if (fqlStatement instanceof  NestedFromClause) {
+            NestedFromClause nfc = (NestedFromClause) fqlStatement;
+            nfc.buildMemberName(target);
+        } else if (fqlStatement instanceof  FromClause) {
+            FromClause nfc = (FromClause) fqlStatement;
+            nfc.buildMemberName(target);
+        }
+    }
 }

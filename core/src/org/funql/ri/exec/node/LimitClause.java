@@ -21,14 +21,14 @@ public class LimitClause implements FqlStatement {
     @Override
     public FqlIterator execute(final RunEnv env, final FqlIterator precedent) throws FqlDataException {
         Object value = node.getValue(env, null);
-        if (!(value instanceof Number))
+        if (!(value instanceof Long))
             throw new FqlDataException("Limit is not a number, but a: " + value.getClass().getName());
-        final int limit = (int) value;
+        final long limit = (long) value;
         return new FqlIterator() {
             int at = 0;
             @Override
             public Object next() {
-                if (at > limit)
+                if (at >= limit)
                     return FqlIterator.sentinel;
                 at++;
                 return precedent.next();

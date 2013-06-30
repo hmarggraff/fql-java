@@ -17,5 +17,11 @@ public abstract class UnaryNode extends FqlNode
         lispify(sb, "right");
     }
 
+    @Override
+    public void buildMemberName(StringBuffer target) {
+    }
 
+    public FqlNodeInterface getOperand() {
+        return operand;
+    }
 }

@@ -27,4 +27,8 @@ public class NestedFromClause implements FqlStatement {
         if (fromValue instanceof FqlIterator) return (FqlIterator) fromValue;
         throw new FqlDataException("Not an iterator in from clause of nested query.", fromNode.getRow(), fromNode.getCol());
     }
+
+    public void buildMemberName(StringBuffer target) {
+        fromNode.buildMemberName(target);
+    }
 }

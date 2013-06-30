@@ -142,5 +142,10 @@ public abstract class FqlNode implements FqlNodeInterface
         return new FqlDataException(msg, getRow(), getCol());
     }
 
+    @Override
+    public void buildMemberName(StringBuffer target) {
+    }
+
+
 
 }

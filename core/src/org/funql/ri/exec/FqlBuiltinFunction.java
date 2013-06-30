@@ -7,18 +7,8 @@ import org.funql.ri.util.NamedImpl;
 
 /**
  */
-public interface FqlBuiltinFunction// extends Named
+public interface FqlBuiltinFunction
 {
-    /*
-    public FqlBuiltinFunction(String name)
-    {
-        super(name);
-    }
-    */
-
     public String name();
-
     public abstract Object val(RunEnv env, Object from, Object[] argvals) throws FqlDataException;
-    //{ throw new NotYetImplementedError(); }
-
 }

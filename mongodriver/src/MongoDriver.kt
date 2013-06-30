@@ -20,6 +20,7 @@ import org.funql.ri.kotlinutil.check
 import org.funql.ri.mongodriver.workaround.BasicDBObjectWrapper
 import com.mongodb.DBRef
 import com.mongodb.MongoClient
+import org.funql.ri.util.FqlIterator4Iterable
 
 
 public class MongoDriverKt: FunqlDriver {
@@ -91,14 +92,16 @@ public class FunqlMongoConnection(name: String, val props: Map<String, String?>)
 
     public override fun getMember(p0: Any?, p1: String?): Any? {
         if (p0 == null) return null;
-        else if (p0 is Map<*, *>) return p0[p1!!]
+        else if (p0 is Map<*, *>) {
+            return wrapIfIterable(p0[p1!!])
+        }
         else if (p0 is DBRef){
-            val fetch = p0.fetch()
-            val value = fetch?.get(p1!!)
-            return value;
+            return wrapIfIterable(p0.fetch()?.get(p1!!))
         }
         throw AssertionError("Mongo member access needs a map, but found a " + p0.javaClass)
     }
+
+    private fun wrapIfIterable(value: Any?): Any? = if (value is Iterable<*>) FqlIterator4Iterable(value) else value
 
 
     public override fun compareTo(s: Named): Int = name?.compareTo(s.getName()!!)!!

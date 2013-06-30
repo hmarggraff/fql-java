@@ -18,7 +18,7 @@ public class FqlIterator4Iterable implements FqlIterator {
     @Override
     public Object next() {
         if (!it.hasNext())
-            throw new FqlDataException("Iterator beyond end.");
+            return sentinel;
         return it.next();
     }
 }

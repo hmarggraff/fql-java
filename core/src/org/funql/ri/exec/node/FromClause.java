@@ -46,4 +46,8 @@ public class FromClause implements FqlStatement {
         FqlIterator listContainer = funqlConnection.getIterator(containerName);
         return listContainer;
     }
+
+    public void buildMemberName(StringBuffer target) {
+        target.append(containerName);
+    }
 }

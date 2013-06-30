@@ -30,6 +30,7 @@ import org.funql.ri.data.FqlIterator;
 import org.funql.ri.exec.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * Implements the select clause
@@ -45,6 +46,7 @@ public class SelectStatement implements FqlStatement {
 
     public FqlIterator execute(final RunEnv env, final FqlIterator precedent) throws FqlDataException {
         return new FqlIterator() {
+            HashSet<String> usednames = new HashSet<>();
 
             @Override
             public Object next() {
@@ -59,26 +61,56 @@ public class SelectStatement implements FqlStatement {
                     for (int i = 0; i < fieldList.size(); i++) {
                         FqlNodeInterface node = fieldList.get(i);
                         Object value = node.getValue(env, parent);
+                        String result;
+                        result = buildFieldName(node);
+                        String fieldName = result;
                         if (value instanceof Integer)
-                            fields[i] = new NamedLong("f" + (i + 1), ((Integer) value).longValue());
+                            fields[i] = new NamedLong(fieldName, ((Integer) value).longValue());
                         else if (value instanceof Long)
-                            fields[i] = new NamedLong("f" + (i + 1), ((Long) value).longValue());
+                            fields[i] = new NamedLong(fieldName, ((Long) value).longValue());
                         else if (value instanceof Float)
-                            fields[i] = new NamedDouble("f" + (i + 1), ((Float) value).doubleValue());
+                            fields[i] = new NamedDouble(fieldName, ((Float) value).doubleValue());
                         else if (value instanceof Double)
-                            fields[i] = new NamedDouble("f" + (i + 1), ((Float) value).doubleValue());
+                            fields[i] = new NamedDouble(fieldName, ((Float) value).doubleValue());
                         else if (value instanceof Boolean)
-                            fields[i] = new NamedBoolean("f" + (i + 1), ((Boolean) value).booleanValue());
+                            fields[i] = new NamedBoolean(fieldName, ((Boolean) value).booleanValue());
                         else if (value instanceof NamedValue)
                             fields[i] = value;
                         else
-                            fields[i] = new NamedObject("f" + (i + 1), value);
+                            fields[i] = new NamedObject(fieldName, value);
                     }
                 } finally {
                     env.popObject();
                 }
                 return fields;
             }
+
+            private String buildFieldName(FqlNodeInterface node) {
+                final String result;
+                int i = 1;
+                String ret;
+                StringBuffer fieldNameBuffer = new StringBuffer();
+                node.buildMemberName(fieldNameBuffer);
+                if (fieldNameBuffer.length() > 0)
+                {
+                    result = fieldNameBuffer.toString();
+                    ret = result;
+                }
+                else if (fieldList.size() == 1)
+                    return "f";
+                else
+                {
+                    result = "f";
+                    ret = result + i;
+                }
+                while (usednames.contains(ret))
+                {
+                    ret = result + i;
+                    i++;
+                }
+                return result;
+            }
+
         };
     }
 }

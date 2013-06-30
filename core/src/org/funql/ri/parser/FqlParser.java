@@ -1,7 +1,7 @@
 package org.funql.ri.parser;
 
-/*
-   Copyright (C) 2011, Hans Marggraff and other copyright owners as documented in the project's IP log.
+/**
+ Copyright (C) 2011, Hans Marggraff and other copyright owners as documented in the project's IP log.
  This program and the accompanying materials are made available under the terms of the Eclipse Distribution License
  v1.0 which accompanies this distribution, is reproduced below, and is available at http://www.eclipse
  .org/org/documents/edl-v10.php
@@ -23,12 +23,11 @@ package org.funql.ri.parser;
  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+ **/
 
 import org.funql.ri.data.FqlDataException;
 import org.funql.ri.data.FqlIterator;
 import org.funql.ri.data.FunqlConnection;
-import org.funql.ri.exec.FqlBuiltinFunction;
 import org.funql.ri.exec.FqlStatement;
 import org.funql.ri.exec.ProvidedConnection;
 import org.funql.ri.exec.RunEnv;
@@ -124,7 +123,7 @@ public class FqlParser {
             t = nextToken();
         }
         if (t == Token.From) {
-            clauses.add(parseFrom());
+            clauses.add(parseTopLevelFrom());
         } else {
             throw new FqlParseException("Expected from, but found " + tokenVal(t), this);
         }
@@ -172,12 +171,9 @@ public class FqlParser {
             if (intVal < 0)
                 throw new FqlParseException("Limit must be greater or equal to 0.", this);
             return new LimitClause(new ConstIntNode(intVal, lex.getRow(), lex.getCol()));
-        }
-        else if (t == Token.Param)
-        {
+        } else if (t == Token.Param) {
             return new LimitClause(parseParam());
-        }
-        else
+        } else
             throw new FqlParseException("limit must be literal number or a parameter", this);
     }
 
@@ -191,7 +187,6 @@ public class FqlParser {
 
 
     }
-
 
 
     private FqlStatement parseObject() throws FqlParseException {
@@ -317,41 +312,50 @@ public class FqlParser {
         clauses.add(new RefClause(path, entryPointSlot, fieldpath));
     }
 
-    protected FromClause parseFrom() throws FqlParseException {
+    protected FromClause parseTopLevelFrom() throws FqlParseException {
         if (connections.size() == 0) {
             throw new FqlParseException("No connection specified", this);
         }
 
         final Token t1 = nextToken();
-        return parseOuterFrom(t1);
+        return parseFrom(t1);
     }
 
-    private FromClause parseOuterFrom(Token t1) throws FqlParseException {
-        String entryPointName = name_or_string(t1);
+    private FromClause parseFrom(Token t1) throws FqlParseException {
+        final String firstname = name_or_string(t1);
+        final String root;
 
         final NamedIndex connectionIndex;
         Token t = nextToken();
-        if (t == Token.In) {
-            String connectionName = expect_name("connection");
-            connectionIndex = connections.get(connectionName);
+        if (t == Token.Dot) {
+            root = expect_name("root");
+            connectionIndex = connections.get(firstname);
             if (connectionIndex == null) {
-                throw new FqlParseException("Connection named '" + connectionName + "' not found.", this);
+                throw new FqlParseException("Connection named '" + firstname + "' not found.", this);
             }
             t = nextToken();
         } else if (connections.size() == 1) {
-            connectionIndex = (NamedIndex) connections.values().toArray()[0];
+            {
+                connectionIndex = (NamedIndex) connections.values().toArray()[0];
+                root = firstname;
+            }
         } else {
-            throw new FqlParseException("Expected 'in connection_name'", this);
+            throw new FqlParseException("Expected 'connection_name.root'", this);
         }
 
+        FromClause fromClause = buildFromClause(root, connectionIndex, t);
+        return fromClause;
+    }
+
+    private FromClause buildFromClause(String root, NamedIndex connectionIndex, Token t) throws FqlParseException {
         FromClause fromClause;
-        EntryPointSlot entryPointSlot = new EntryPointSlot(connectionIndex, entryPointName, iteratorCount);
+        EntryPointSlot entryPointSlot = new EntryPointSlot(connectionIndex, root, iteratorCount);
         if (t == Token.As) {
             String alias = expect_name("entry point alias");
-            fromClause = new FromClause(entryPointName, alias, entryPointSlot);
+            fromClause = new FromClause(root, alias, entryPointSlot);
         } else {
             lex.pushBack();
-            fromClause = new FromClause(entryPointName, entryPointName, entryPointSlot);
+            fromClause = new FromClause(root, root, entryPointSlot);
         }
         iteratorStack.push(entryPointSlot);
         return fromClause;
@@ -359,15 +363,37 @@ public class FqlParser {
 
 
     FqlNodeInterface parseNestedQuery() throws FqlParseException {
+        final FqlNodeInterface fromNode = FqlExpressionParser.parseQuestion(this);
+        List<FqlStatement> innerClauses = new ArrayList<FqlStatement>();
+        innerClauses.add(parseNestedFrom(fromNode));
+
+        /*
         final List<FqlStatement> clauses = new ArrayList<FqlStatement>();
         final Token t1 = nextToken();
         if (t1 == Token.LBrace) {
             clauses.add(new NestedFromClause(FqlExpressionParser.parseQuestion(this)));
             expect_next(Token.RBrace);
         } else
-            clauses.add(parseOuterFrom(t1));
-        parseNestableClauses(clauses);
-        return new NestedQueryNode(clauses, lex.row, lex.col);
+            clauses.add(parseFrom(t1));
+        */
+        parseNestableClauses(innerClauses);
+        return new NestedQueryNode(innerClauses, lex.row, lex.col);
+
+    }
+
+    private FqlStatement parseNestedFrom(FqlNodeInterface fromNode) throws FqlParseException {
+        if (fromNode instanceof DotNode) {
+            DotNode dn = (DotNode) fromNode;
+            final FqlNodeInterface operand = dn.getOperand();
+
+            if (operand instanceof MemberNode) {
+                MemberNode mn = (MemberNode) operand;
+                NamedIndex connectionIndex = connections.get(mn.getMemberName());
+                if (connectionIndex != null)
+                    return buildFromClause(dn.getMemberName(), connectionIndex, nextToken());
+            }
+        }
+        return new NestedFromClause(fromNode);
     }
 
 
