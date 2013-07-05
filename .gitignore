@@ -6,3 +6,5 @@ build/
 lib
 out/
 target
+installer/
+kotlinannotations/
