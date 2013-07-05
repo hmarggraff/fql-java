@@ -52,7 +52,7 @@ class JsonQueryTest
         run("[]", "from top", FqlIterator.sentinel)
     }
     Test fun oneObject() {
-        run("{a: b, c: d}", "from top select a", "{f1:'b'}")
+        run("{a: b, c: d}", "from top select a", "{a:'b'}")
     }
     //Test fun testApp2() { openConnction("{a: b, c: d}", "from top select a + c", "bd") }
     //Test fun testAppFields() { openConnction("[2,3,5,7]", "from top where i > 5 select it", 7) }
