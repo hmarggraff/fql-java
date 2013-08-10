@@ -300,7 +300,7 @@ public class FqlExpressionParser {
     */
 
     FqlNodeInterface parseAssign() throws FqlParseException {
-        // parse expression
+        // parse expression that can be assigned by name: expr
         FqlNodeInterface left = parseQuestion();
 
         Lexer.Token t = next();
