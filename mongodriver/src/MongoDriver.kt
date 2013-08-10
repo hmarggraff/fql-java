@@ -23,7 +23,7 @@ import com.mongodb.MongoClient
 import org.funql.ri.util.FqlIterator4Iterable
 
 
-public class MongoDriverKt: FunqlDriver {
+public class MongoDriver: FunqlDriver {
 
 
     //public override fun openConnection(name: String?, props: Map<String, String>?): FunqlConnection?  = FqlMongoConnectionKt(name!!, props!!)
@@ -52,7 +52,7 @@ public class FunqlMongoConnection(name: String, val props: Map<String, String?>)
             }
             catch (x: NumberFormatException)
             {
-                throw  ConfigurationError("Port property must be a number, not a $portString")
+                throw  ConfigurationError("Port property must be a number, not the text '$portString'")
             }
         }
         return MongoClient()

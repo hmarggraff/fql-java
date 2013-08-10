@@ -10,7 +10,7 @@ import org.funql.ri.data.FunqlConnection
 import org.testng.annotations.BeforeClass
 import org.testng.annotations.AfterClass
 import com.mongodb.DBObject
-import org.funql.ri.mongodriver.MongoDriverKt
+import org.funql.ri.mongodriver.MongoDriver
 import org.funql.ri.test.util.dump
 import java.net.ConnectException
 
@@ -23,7 +23,7 @@ MonkoTest
     val products = "products"
 
     BeforeClass public fun mongoconnection() {
-        val driver = MongoDriverKt()
+        val driver = MongoDriver()
         val kmap: Map<String, String> = javaHashMap("db" to dbName)
         println("got driver ${driver}")
         conn = driver.openConnection(dbName, kmap) //as FqlMongoConnectionKt
