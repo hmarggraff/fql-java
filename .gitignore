@@ -1,6 +1,10 @@
 .idea/
 *.iml
-/quarry/
-/.gradle/
-build
+quarry/
+.gradle/
+build/
 lib
+out/
+target
+installer/
+kotlinannotations/
