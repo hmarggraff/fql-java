@@ -57,8 +57,10 @@ public class FqlParser {
 
     public FqlParser(String queryText, Iterable<FunqlConnection> conn) {
         this(queryText);
-        for (FunqlConnection funqlConnection : conn) {
-            connections.put(funqlConnection.getName(), new ProvidedConnection(connections.size(), funqlConnection));
+        if (conn != null) {
+            for (FunqlConnection funqlConnection : conn) {
+                connections.put(funqlConnection.getName(), new ProvidedConnection(connections.size(), funqlConnection));
+            }
         }
     }
 
@@ -214,7 +216,7 @@ public class FqlParser {
                 throw new FqlParseException("Expected " + "driver configuration" + " as name or string, " +
                         "but found " + t, this);
             }
-            check_token(Token.Equal);
+            check_token(Token.Colon);
             check_token(Token.String);
             String val = lex.stringVal;
             config.put(key, val);
@@ -233,7 +235,7 @@ public class FqlParser {
         }
         t = nextToken();
         if (t == Token.As) {
-            String conn_name = expect_name("connection");
+            String conn_name = expect_name("as");
             final ConnectClause connectClause = new ConnectClause(conn_name, connections.size(), config, lex.getRow(),
                     lex.getCol());
             clauses.add(connectClause);

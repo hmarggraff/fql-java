@@ -13,7 +13,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.fqlsource.fqltest.jsondrivertest
+package org.funql.ri.jsondriver.test
 
 import kotlin.test.assertEquals
 import org.funql.ri.jsondriver.JsonConnection
@@ -132,5 +132,4 @@ class JsonDriverTest
         Assert.assertEquals(count, 17)
     }
 
-
-}
+    }

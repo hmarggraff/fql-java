@@ -30,33 +30,23 @@ import org.funql.ri.parser.FqlParser
 import org.funql.ri.test.util.dump
 
 /**
- * Unit test for simple MockDriver.
+ * Unit test for inline Json Connection
  */
-class JsonQueryTest
+class JsonQueryConnectTest
 {
-    fun run(txt: String, q: String, expect: Any)
+    fun run(q: String, expect: String)
     {
-        val p = HashMap<String, String>()
-        p.put("driver", "JsonDriver")
-        p.put("text", txt)
-        val conn = JsonConnection("Json", p)
-        val iter = FqlParser.runQuery(q, null, conn)!!
+        val iter = FqlParser.runQuery(q)!!
         val nextVal = iter.next()
         val strRes = dump(nextVal)
         Assert.assertEquals(strRes, expect)
-        conn.close()
     }
 
-    //Test
+    Test
             fun testEmpty() {
-        run("[]", "from top", FqlIterator.sentinel)
+        run("open{driver:\"org.funql.ri.jsondriver.JsonDriver\","
+            + "text:\"[{key: 25, val: 99}, {key: 26, val: 104}]\"} "
+            + "from top where key > 25 select val",
+            " {val:104}")
     }
-    Test fun oneObject() {
-        run("{a: b, c: d}", "from top select a", "{a:'b'}")
-    }
-    Test fun testApp2() { run("{a: b, c: d}", "from top select a + c", "{f:'bd'}") }
-    Test fun testAppFields() { run("[2,3,5,7]", "from top where it > 5 select it", "{f:7}") }
-    //Test fun testMultiMap() { run("{a: [2,3,5,7]}", "from top select from a where it < 3 select it", 2) }
-
-
 }
