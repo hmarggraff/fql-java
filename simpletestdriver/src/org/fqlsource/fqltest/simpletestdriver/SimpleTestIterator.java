@@ -30,12 +30,10 @@ public class SimpleTestIterator extends NamedImpl implements FqlIterator {
         this.count = count;
     }
 
-    public boolean hasNext() {
-        return at < count;
-    }
-
     public Object next() {
         at++;
-        return new Integer(at);
+        if (at > count)
+            return FqlIterator.sentinel;
+        return at;
     }
 }

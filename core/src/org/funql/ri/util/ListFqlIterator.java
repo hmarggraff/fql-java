@@ -18,8 +18,8 @@ public class ListFqlIterator implements FqlIterator {
 
     @Override
     public Object next() {
-        if (!(at < data.size()))
-            throw new FqlDataException("List iterator beyond end: " + data.size());
-        return data.get(at++);
+        if (at < data.size())
+            return data.get(at++);
+        return FqlIterator.sentinel;
     }
 }

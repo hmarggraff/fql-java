@@ -33,7 +33,6 @@ public interface FunqlConnection
 
     Object getMember(Object from, String member);
 
-    FqlMapContainer useMap(List<String> fieldpath);
-    FqlMultiMapContainer useMultiMap(List<String> fieldpath);
+    FqlMapContainer useMap(String name, List<String> fieldpath, boolean single);
     String getName();
 }

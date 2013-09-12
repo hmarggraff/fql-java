@@ -15,29 +15,36 @@
 
 package org.funql.ri.jsondriver.test
 
+import org.funql.ri.jsondriver.JsonConnection
+import java.util.HashMap
 import org.testng.annotations.Test
 import org.testng.Assert
 import org.funql.ri.parser.FqlParser
 import org.funql.ri.test.util.dump
 
 /**
- * Unit test for inline Json Connection
+ * Unit test for simple MockDriver.
  */
-class JsonQueryConnectTest
+class JsonLookupTest
 {
-    fun run(q: String, expect: String)
+    fun run(txt: String, q: String, expect: Any)
     {
-        val iter = FqlParser.runQuery(q)!!
-        val nextVal = iter.next()
-        val strRes = dump(nextVal)
+        val p = HashMap<String, String>()
+        p.put("driver", "JsonDriver")
+        p.put("text", txt)
+        val conn = JsonConnection("Json", p)
+        val iter = FqlParser.runQuery(q, null, conn)!!
+        //val nextVal = iter.next()
+        val strRes = dump(iter)
         Assert.assertEquals(strRes, expect)
+        conn.close()
     }
 
-    Test
-            fun testEmpty() {
-        run("open{driver:\"org.funql.ri.jsondriver.JsonDriver\","
-        + "text:\"[{key: 25, val: 99}, {key: 26, val: 104}]\"} "
-        + "from top where key > 25 select val",
-                " {val:104}")
+    Test fun lookup() {
+        //run("[{'a':'val1'},{'a':'val2'}]", "link 'other.json' by a as other from top select other['val2']", "[{f:'val2'}]")
+        run("[{'a':'val1'},{'a':'val2'}]", "link 'jsondriver/testresources/other.json' by a.b as other from top select other[a] limit 1", "[{f:[{a:{b:'val1'},c:'result1'}]}]")
+        run("[{'a':'val1','cmp':'result1'},{'a':'val2','cmp':'result2'}]", "link 'jsondriver/testresources/other.json' by a.b as other from top select other[a].c = cmp", "[{f1:true},{f2:true}]")
     }
+
+
 }

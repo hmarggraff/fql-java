@@ -23,123 +23,89 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-public class SimpleTestConnection extends NamedImpl implements FunqlConnectionWithRange
-{
+public class SimpleTestConnection extends NamedImpl implements FunqlConnectionWithRange {
     final Map<String, String> props;
     String prefix = "";
     int factor = 1;
 
-    public SimpleTestConnection(String name, Map<String, String> props)
-    {
-	super(name);
-	this.props = props;
-	if (props.containsKey("prefix"))
-	    prefix = props.get("prefix");
-	if (props.containsKey("factor"))
-	    factor = new Integer(props.get("factor"));
-	if (props.containsKey("testExceptionHandling")) // used to test error handling
-	{
-	    throw new FqlDataException("Testing exception handling");
-	}
+    public SimpleTestConnection(String name, Map<String, String> props) {
+        super(name);
+        this.props = props;
+        if (props.containsKey("prefix"))
+            prefix = props.get("prefix");
+        if (props.containsKey("factor"))
+            factor = new Integer(props.get("factor"));
+        if (props.containsKey("testExceptionHandling")) // used to test error handling
+        {
+            throw new FqlDataException("Testing exception handling");
+        }
     }
 
-    public FqlIterator getIterator(String streamName) throws FqlDataException
-    {
-	if (Character.isJavaIdentifierStart(streamName.charAt(0)) && Character.isDigit(streamName.charAt(1)))
-	{
-	    long count = letterNum(streamName);
-	    return new SimpleTestIterator(this, streamName, (int) count);
-	}
-	throw new FqlDataException("Stream entry point named " + streamName + " does not exist");
+    static int letterNum(String fieldName) {
+        String vTxt = fieldName.substring(1);
+        try {
+            final int ret = Integer.parseInt(vTxt);
+            return ret;
+        } catch (NumberFormatException fex) {
+            throw new FqlDataException("Mockdriver failed to parse long from fieldname. Should be character + value", fex);
+        }
+    }
+
+    public static double getDouble(String fieldName) {
+        String vTxt = fieldName.substring(1);
+        vTxt = vTxt.replace('_', '.');
+        try {
+            final double ret = Double.parseDouble(vTxt);
+            return ret;
+        } catch (NumberFormatException fex) {
+            throw new FqlDataException("Mockdriver failed to parse long from fieldname. Should be 'D'+ value_decimal", fex);
+        }
+    }
+
+    public static Date getTime(String fieldName) {
+        return new Date(letterNum(fieldName));
+    }
+
+    public FqlIterator getIterator(String streamName) throws FqlDataException {
+        if (Character.isJavaIdentifierStart(streamName.charAt(0)) && Character.isDigit(streamName.charAt(1))) {
+            long count = letterNum(streamName);
+            return new SimpleTestIterator(this, streamName, (int) count);
+        }
+        throw new FqlDataException("Stream entry point named " + streamName + " does not exist");
     }
 
     @Override
-    public FqlMultiMapContainer useMultiMap(List<String> fieldpath)
-    {
-	return new SimpleMultiMapContainer(fieldpath, this);
+    public FqlMapContainer useMap(String name, List<String> fieldPath, boolean single) {
+        return new SimpleTestMap(this, name, fieldPath, single);
     }
 
     @Override
-    public FqlMapContainer useMap(List<String> fieldPath)
-    {
-	return new SimpleTestMap(fieldPath);
+    public FqlIterator range(String name, String startKey, String endKey, boolean includeEnd) {
+        return new SimpleTestRange(letterNum(startKey), letterNum(endKey), includeEnd);
     }
 
     @Override
-    public FqlIterator range(String name, String startKey, String endKey, boolean includeEnd)
-    {
-	return new SimpleTestRange(letterNum(startKey), letterNum(endKey), includeEnd);
+    public Object getMember(Object from, String member) {
+        if (member.startsWith("L")) {
+            return letterNum(member) * factor;
+        } else if (member.startsWith("D")) {
+            return getDouble(member) * factor;
+        } else if (member.startsWith("T")) {
+            return getTimeFactored(member);
+        } else if ("yes".equalsIgnoreCase(member)) {
+            return true;
+        } else if ("no".equalsIgnoreCase(member)) {
+            return false;
+        } else {
+            return from.toString() + '.' + member;
+        }
     }
 
-    @Override
-    public Object getMember(Object from, String member)
-    {
-	if (member.startsWith("L"))
-	{
-	    return letterNum(member) * factor;
-	}
-	else if (member.startsWith("D"))
-	{
-	    return getDouble(member) * factor;
-	}
-	else if (member.startsWith("T"))
-	{
-	    return getTimeFactored(member);
-	}
-	else if ("yes".equalsIgnoreCase(member))
-	{
-	    return true;
-	}
-	else if ("no".equalsIgnoreCase(member))
-	{
-	    return false;
-	}
-	else
-	{
-	    return from.toString() + '.' + member;
-	}
+    public Date getTimeFactored(String fieldName) {
+        return new Date(letterNum(fieldName) + 86400000 * (factor - 1));
     }
 
-    static int letterNum(String fieldName)
-    {
-	String vTxt = fieldName.substring(1);
-	try
-	{
-	    final int ret = Integer.parseInt(vTxt);
-	    return ret;
-	}
-	catch (NumberFormatException fex)
-	{
-	    throw new FqlDataException("Mockdriver failed to parse long from fieldname. Should be character + value", fex);
-	}
-    }
-
-    public static double getDouble(String fieldName)
-    {
-	String vTxt = fieldName.substring(1);
-	vTxt = vTxt.replace('_', '.');
-	try
-	{
-	    final double ret = Double.parseDouble(vTxt);
-	    return ret;
-	}
-	catch (NumberFormatException fex)
-	{
-	    throw new FqlDataException("Mockdriver failed to parse long from fieldname. Should be 'D'+ value_decimal", fex);
-	}
-    }
-
-    public static Date getTime(String fieldName)
-    {
-	return new Date(letterNum(fieldName));
-    }
-    public Date getTimeFactored(String fieldName)
-    {
-	return new Date(letterNum(fieldName)+ 86400000 * (factor-1));
-    }
-
-    public void close()
-    {
-	// nothing
+    public void close() {
+        // nothing
     }
 }

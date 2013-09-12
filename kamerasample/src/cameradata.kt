@@ -117,8 +117,9 @@ object CameraData
             }
             got[pp] = true
             val p = products[pp]
-            cost = cost + products[pp].values[3] as Int
-            TestObject(orderItemType, Ref(p, "products"), nextInt(10) + 1, products[pp].values[4])
+            cost = cost + p.values[3] as Int
+            val price = p.values[4]
+            TestObject(orderItemType, Ref(p, "products"), nextInt(10) + 1, price)
         })
         newOrder.values[2] = items
         val margin: Double = nextFloat()

@@ -71,6 +71,9 @@ fun dump(s: Any?, sb: StringBuffer, indent: Int) {
         }
         sb.append("]")
     }
+    else if (s is Int || s is Float || s is Long || s is Double || s is Boolean) {
+        sb.append(s)
+    }
     else {
         sb.append('\'').append(s.toString()).append('\'')
     }
