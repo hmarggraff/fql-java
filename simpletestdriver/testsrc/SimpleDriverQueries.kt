@@ -3,6 +3,7 @@ package org.funql.ri.coretest
 import kotlin.test.assertEquals
 import org.funql.ri.parser.FqlParser
 import org.testng.annotations.Test
+import org.funql.ri.util.SkipTest
 
 class SimpleDriverQueries: SimpleTestDriverBase()
 {
