@@ -30,8 +30,9 @@
         <dependency>
             <groupId>org.funql.ri</groupId>
             <artifactId>funql-kutil</artifactId>
-            <version>${version}</version>
+            <version>${project.version}</version>
         </dependency>
+
     </dependencies>
     <build>
         <plugins>

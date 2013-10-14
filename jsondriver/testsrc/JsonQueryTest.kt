@@ -56,6 +56,8 @@ class JsonQueryTest
     }
     Test fun testApp2() { run("{a: b, c: d}", "from top select a + c", "{f:'bd'}") }
     Test fun testAppFields() { run("[2,3,5,7]", "from top where it > 5 select it", "{f:7}") }
+    Test fun lookup() {
+        run("link 'other.json' by a.b ", "from top where it > 5 select it", "{f:7}") }
     //Test fun testMultiMap() { run("{a: [2,3,5,7]}", "from top select from a where it < 3 select it", 2) }
 
 

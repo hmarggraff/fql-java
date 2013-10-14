@@ -24,7 +24,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <kotlin.version>0.6.602</kotlin.version>
+        <kotlin.version>0.1-SNAPSHOT</kotlin.version>
         <testng.version>6.8</testng.version>
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
@@ -36,20 +36,46 @@
 
     <repositories>
         <repository>
+            <id>sonatype.oss.snapshots</id>
+            <name>Sonatype OSS Snapshot Repository</name>
+            <url>http://oss.sonatype.org/content/repositories/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>sonatype.oss.snapshots</id>
+            <name>Sonatype OSS Snapshot Repository</name>
+            <url>http://oss.sonatype.org/content/repositories/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+    <!--repositories>
+        <repository>
             <id>jetbrains-all</id>
             <url>http://repository.jetbrains.com/all</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
         </repository>
-    </repositories>
+    </repositories-->
 
-    <pluginRepositories>
+    <!--pluginRepositories>
         <pluginRepository>
             <id>jetbrains-all</id>
             <url>http://repository.jetbrains.com/all</url>
         </pluginRepository>
-    </pluginRepositories>
+    </pluginRepositories-->
 
     <dependencyManagement>
         <dependencies>
@@ -76,12 +102,12 @@
         <testSourceDirectory>${project.basedir}/testsrc</testSourceDirectory>
         <resources>
             <resource>
-                <directory>resources</directory>
+                <directory>${project.basedir}/resources</directory>
             </resource>
         </resources>
         <testResources>
             <testResource>
-                <directory>testresources</directory>
+                <directory>${project.basedir}/testresources</directory>
             </testResource>
         </testResources>
 

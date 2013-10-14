@@ -23,7 +23,6 @@ fun getConnections(): List<MutableMap<String, String>> {
             val value: String? = node.get(k, null)
             if (value != null) m.put(k, value)
         }
-
     }
     return ret;
 }

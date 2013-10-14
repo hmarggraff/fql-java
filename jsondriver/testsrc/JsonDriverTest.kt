@@ -15,13 +15,11 @@
 
 package org.funql.ri.jsondriver.test
 
-import kotlin.test.assertEquals
 import org.funql.ri.jsondriver.JsonConnection
 import java.util.HashMap
 import java.util.ArrayList
 import org.funql.ri.data.FqlMapContainer
 import org.funql.ri.data.FqlDataException
-import org.funql.ri.data.FqlMultiMapContainer
 import org.funql.ri.data.FqlIterator
 import org.testng.annotations.Test
 import org.testng.Assert
@@ -42,10 +40,10 @@ class JsonDriverTest
     }
 
     /**
-    * Tests if getList properly returns the entry point of the mock driver
-    *
-    * @throws org.fqlsource.data.FqlDataException Thrown if entry point access fails in driver
-    */
+     * Tests if getList properly returns the entry point of the mock driver
+     *
+     * @throws org.fqlsource.data.FqlDataException Thrown if entry point access fails in driver
+     */
     Test fun testApp()
     {
         val conn = openConnction("[]")
@@ -58,16 +56,20 @@ class JsonDriverTest
      *
      * @throws org.fqlsource.data.FqlDataException Thrown if entry point access fails in driver
      */
-    Test
-            fun testApp3()
+    Test fun testApp3()
     {
-        val conn = openConnction("{a: b, c: d}")
-        val path = ArrayList<String>()
-        path.add("abc")
-        val fieldpath = ArrayList<String>()
-        fieldpath.add("fun")
-        val map: FqlMapContainer = conn.useMap(path)!!
+        val conn = openConnction("[{a: b, c: {d:e}}]")
+        val map: FqlMapContainer = conn.useMap("text", listOf<String>("a"), true)!!
         val lookup = map.lookup("a")
+        Assert.assertEquals(lookup, "b")
+        conn.close()
+
+    }
+    Test fun testNestedLookup()
+    {
+        val conn = openConnction("[{c: {d:e}}]")
+        val map: FqlMapContainer = conn.useMap("text", listOf<String>("c","d"), true)!!
+        val lookup = map.lookup("e")
         Assert.assertEquals(lookup, "b")
         conn.close()
 
@@ -113,23 +115,4 @@ class JsonDriverTest
         Assert.assertEquals(count, 17)
     }
 
-    Test fun testMultiMap()
-    {
-        val conn = openConnction("{a: [2,3,5,7]}")
-        val mmap: FqlMultiMapContainer = conn.useMultiMap(listOf("top"))!!
-
-        val stream: FqlIterator = mmap.lookup("a")!!
-
-        var count: Int = 0
-        while (true)
-        {
-            val it = stream.next()
-
-            if (it == FqlIterator.sentinel) break
-            else if (it is Int) count = count + it
-            else throw ClassCastException("json array iterator returns ${it.javaClass} when Int was expected: ${it.toString()}")
-        }
-        Assert.assertEquals(count, 17)
-    }
-
-    }
+}

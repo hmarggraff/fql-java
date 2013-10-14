@@ -255,21 +255,18 @@ public class FqlParser {
     }
 
     protected void parseLink() throws FqlParseException {
-        Token t;
-        boolean hasString;
-        ArrayList<String> path = new ArrayList<String>();
-        for (; ; ) {
-            Token t1 = nextToken();
-            hasString = t1 == Token.String;
-            String step = name_or_string(t1);
-            path.add(step);
-
+        Token t = nextToken();
+        boolean single = false;
+        if (t == Token.Single){
+            single = true;
             t = nextToken();
-            if (t != Token.Dot)
-                break;
         }
-        final NamedIndex connectionIndex;
 
+        boolean hasString = t == Token.String;
+        String targetName = name_or_string(t);
+
+        final NamedIndex connectionIndex;
+        t = nextToken();
         if (t == Token.In) {
             String connectionName = expect_name("connection");
             connectionIndex = connections.get(connectionName);
@@ -278,7 +275,7 @@ public class FqlParser {
             }
             t = nextToken();
         } else if (connections.size() == 1) {
-            connectionIndex = (NamedIndex) connections.values().toArray()[0];
+            connectionIndex = (NamedIndex) connections.values().toArray()[0]; // use the only existing connection
         } else {
             throw new FqlParseException("Expected 'in connection_name'", this);
         }
@@ -303,15 +300,15 @@ public class FqlParser {
             Token t1 = nextToken();
             entryPointName = name_or_string(t1);
         } else if (!hasString) {
-            entryPointName = path.get(path.size() - 1);
+            entryPointName = targetName;
             lex.pushBack();
         } else
-            throw new FqlParseException("If the last path component in a use clause a string, " +
+            throw new FqlParseException("If the name of the link target is a string, " +
                     "then you must specify an alias with 'as'.", this);
 
         final EntryPointSlot entryPointSlot = new EntryPointSlot(connectionIndex, entryPointName, maps.size());
         maps.put(entryPointName, entryPointSlot);
-        clauses.add(new RefClause(path, entryPointSlot, fieldpath));
+        clauses.add(new RefClause(targetName, entryPointSlot, fieldpath, single));
     }
 
     protected FromClause parseTopLevelFrom() throws FqlParseException {

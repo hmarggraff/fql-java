@@ -86,6 +86,7 @@ public class Lexer {
         RBracket,
         RParen,
         Select,
+        Single,
         Slash,
         Some,
         Star,
@@ -136,6 +137,7 @@ public class Lexer {
         keywords.put("open", Token.Open);
         keywords.put("or", Token.Or);
         keywords.put("select", Token.Select);
+        keywords.put("single", Token.Single);
         keywords.put("some", Token.Some);
         keywords.put("true", Token.True);
         keywords.put("where", Token.Where);
@@ -313,7 +315,7 @@ public class Lexer {
                         throw new FqlParseException("Not a token: '!'. Maybe you meant not.", src, row, col);
                     }
                 }
-                case '"': {
+                case '\'': {
                     return scanString();
                 }
                 case '$': // Query parameters
@@ -414,7 +416,7 @@ public class Lexer {
         StringBuffer b = new StringBuffer();
         while (pos < src.length()) {
             char c = nextChar();
-            if (c == '"') {
+            if (c == '\'') {
                 stringVal = b.toString();
                 return Token.String;
             }

@@ -3,7 +3,6 @@ package org.funql.ri.coretest
 import kotlin.test.assertEquals
 import org.funql.ri.parser.FqlParser
 import org.testng.annotations.Test
-import org.funql.ri.util.SkipTest
 
 class SimpleDriverQueries: SimpleTestDriverBase()
 {
@@ -26,6 +25,8 @@ class SimpleDriverQueries: SimpleTestDriverBase()
         run("from e2 select a,b", "[{a:1_a,b:1_b},{a:2_a,b:2_b}]")
         run("from e2", "[1,2]")
     }
+
+    // select @other.field[herefield]
 
     Test fun RefClauses() {
         run("link x from e1 select x[yes]", "from x where primary=true")

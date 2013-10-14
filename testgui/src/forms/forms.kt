@@ -197,12 +197,13 @@ public open class FormBuilder(val target: JComponent, val cols: Int): GridBagCon
         a(JLabel(s))
     }
 
-    fun textOf(c: JComponent): String? {
-        val v: Any? = when (c){
-            is JTextComponent -> c.getText()
-            is JComboBox<*> -> c.getSelectedItem()
-            is JList<*> -> c.getSelectedValue()
-            is JTree -> c.getSelectionModel()?.getSelectionPath()?.getLastPathComponent()
+
+    fun JComponent.textOf(): String? {
+        val v: Any? = when (this){
+            is JTextComponent -> getText()
+            is JComboBox<*> -> getSelectedItem()
+            is JList<*> -> getSelectedValue()
+            is JTree -> getSelectionModel()?.getSelectionPath()?.getLastPathComponent()
             else -> null
         }
         val string = v?.toString()?.trim()
@@ -212,9 +213,9 @@ public open class FormBuilder(val target: JComponent, val cols: Int): GridBagCon
     }
 
     public fun getStringResults(): MutableMap<String, String> {
-        val ret:HashMap<String, String>  = HashMap<String, String>()
+        val ret: HashMap<String, String> = HashMap<String, String>()
         values.entrySet().forEach{
-            val value = textOf(it.getValue())
+            val value = it.value.textOf()
             if (value != null) ret.put(it.getKey(), value)
         }
         return ret
@@ -264,6 +265,7 @@ public open class FormBuilder(val target: JComponent, val cols: Int): GridBagCon
         }
     }
 }
+
 
 abstract class Validator()
 {
