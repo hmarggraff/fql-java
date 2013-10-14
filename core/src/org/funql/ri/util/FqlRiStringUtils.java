@@ -12,6 +12,8 @@ public class FqlRiStringUtils {
 
     public static StringBuffer joinList(Collection<String> strings, char separator) {
         StringBuffer sb = new StringBuffer();
+        if (strings == null)
+            return sb;
         boolean continuation = false;
 
         for (String s : strings) {

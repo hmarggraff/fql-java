@@ -46,24 +46,21 @@ public class SelectStatement implements FqlStatement {
 
     public FqlIterator execute(final RunEnv env, final FqlIterator precedent) throws FqlDataException {
         return new FqlIterator() {
-            HashSet<String> usednames = new HashSet<>();
 
             @Override
             public Object next() {
                 final Object parent = precedent.next();
                 if (parent == FqlIterator.sentinel)
                     return FqlIterator.sentinel;
-                Object[] fields;
-                fields = new NamedValue[fieldList.size()];
+                Object[] fields = new NamedValue[fieldList.size()];
+                HashSet<String> usednames = new HashSet<>();
 
                 try {
                     env.pushObject(parent);
                     for (int i = 0; i < fieldList.size(); i++) {
                         FqlNodeInterface node = fieldList.get(i);
                         Object value = node.getValue(env, parent);
-                        String result;
-                        result = buildFieldName(node);
-                        String fieldName = result;
+                        String fieldName = buildFieldName(node, usednames);
                         if (value instanceof Integer)
                             fields[i] = new NamedLong(fieldName, ((Integer) value).longValue());
                         else if (value instanceof Long)
@@ -71,7 +68,7 @@ public class SelectStatement implements FqlStatement {
                         else if (value instanceof Float)
                             fields[i] = new NamedDouble(fieldName, ((Float) value).doubleValue());
                         else if (value instanceof Double)
-                            fields[i] = new NamedDouble(fieldName, ((Float) value).doubleValue());
+                            fields[i] = new NamedDouble(fieldName, ((Double) value).doubleValue());
                         else if (value instanceof Boolean)
                             fields[i] = new NamedBoolean(fieldName, ((Boolean) value).booleanValue());
                         else if (value instanceof NamedValue)
@@ -85,7 +82,7 @@ public class SelectStatement implements FqlStatement {
                 return fields;
             }
 
-            private String buildFieldName(FqlNodeInterface node) {
+            private String buildFieldName(FqlNodeInterface node, HashSet<String> usednames) {
                 final String result;
                 int i = 1;
                 String ret;
@@ -108,7 +105,8 @@ public class SelectStatement implements FqlStatement {
                     ret = result + i;
                     i++;
                 }
-                return result;
+                usednames.add(ret);
+                return ret;
             }
 
         };
