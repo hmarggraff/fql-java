@@ -3,6 +3,7 @@ package org.funql.ri.jsondriver
 import org.funql.ri.data.FqlMapContainer
 import java.util.ArrayList
 import org.funql.ri.util.ListFqlIterator
+import org.funql.ri.kotlinutil.KNamedImpl
 
 class JsonListLookup(name: String, val fpath: List<String>, val data: List<Any?>, single: Boolean) : KNamedImpl(name), FqlMapContainer
 {

@@ -21,6 +21,7 @@ import java.util
 import java.util.ArrayList
 import org.funql.ri.util.Named
 import java.sql.ResultSet
+import org.funql.ri.kotlinutil.KNamedImpl
 
 public class SiSqlArrayIterator(name: String, val data: ResultSet): KNamedImpl(name), FqlIterator
 {

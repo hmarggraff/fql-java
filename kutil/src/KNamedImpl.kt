@@ -1,4 +1,4 @@
-package org.funql.ri.sisql
+package org.funql.ri.kotlinutil
 
 import org.funql.ri.util.Named
 

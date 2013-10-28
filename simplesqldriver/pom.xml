@@ -11,7 +11,6 @@
     </parent>
 
 
-
     <artifactId>funql-sisqldriver</artifactId>
     <packaging>jar</packaging>
     <name>Simple Sql Driver</name>
@@ -42,6 +41,18 @@
             <version>2.3.1</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-jdbc</artifactId>
+            <version>${kotlin.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.funql.ri</groupId>
+            <artifactId>funql-camerasample</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
 
     </dependencies>
 

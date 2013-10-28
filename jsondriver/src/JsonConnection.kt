@@ -13,6 +13,7 @@ import org.funql.ri.util.ListFqlIterator
 import java.io.FileReader
 import java.io.File
 import java.io.FileInputStream
+import org.funql.ri.kotlinutil.KNamedImpl
 
 public open class JsonConnection(name: String, propsArg: Map<String, String>?) : KNamedImpl(name), FunqlConnectionWithRange
 {

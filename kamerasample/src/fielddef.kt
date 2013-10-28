@@ -27,6 +27,13 @@ class Ref(val target: Any, val container: String)
 
 class TestObject(val typ: TypeDef, vararg valuesarg: Any?)
 {
+    var genOid: Long = 1
+        get() = $genOid++
+
+    class object {
+    }
+
+
     val values: Array<Any?> = valuesarg
     val oid : Long = genOid
 
@@ -35,10 +42,5 @@ class TestObject(val typ: TypeDef, vararg valuesarg: Any?)
     }
 
     fun get(ix:Int) = values[ix]
-
-    class object {
-        var genOid: Long = 1
-            get() = $genOid++
-    }
 
 }

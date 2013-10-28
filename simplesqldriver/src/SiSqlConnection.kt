@@ -13,6 +13,7 @@ import java.sql.Connection
 import org.funql.ri.data.FunqlConnection
 import java.sql.ResultSet
 import java.sql.PreparedStatement
+import org.funql.ri.kotlinutil.KNamedImpl
 
 public open class SiSqlConnection(name: String, propsArg: Map<String, String>?) : KNamedImpl(name), FunqlConnection
 {

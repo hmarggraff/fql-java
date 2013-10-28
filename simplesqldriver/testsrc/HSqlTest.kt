@@ -18,14 +18,16 @@ package org.funql.ri.sisql.test
 import org.funql.ri.sisql.SiSqlConnection
 import java.util.HashMap
 import org.testng.annotations.Test
-import org.testng.Assert
-import org.testng.Assert.assertEquals
-import org.funql.ri.util.ConfigurationError
+import org.funql.ri.data.FqlIterator
+import java.sql.ResultSet
+import org.funql.ri.test.cameradata.CameraData
+import org.funql.ri.test.genericobject.Types
+import org.funql.ri.util.SkipTest
 
 /**
  * Unit test for simple Sql Driver.
  */
-class SiSqlDriverTest
+class HSqlTest
 {
 
     fun openConnction(name: String): SiSqlConnection
@@ -43,11 +45,21 @@ class SiSqlDriverTest
      * Tests if connection to an in memory db can be made
      *
      */
-    Test fun testCreate()
+    SkipTest fun systemtables()
     {
 
         val conn = openConnction("testdb")
-        Assert.assertNotNull(conn)
+        val fqlIterator = conn.getIterator("INFORMATION_SCHEMA.SYSTEM_TABLES")!!
+        do  {
+            val d = fqlIterator.next()
+            if (d == FqlIterator.sentinel)   break;
+            val rs = d as ResultSet
+            val cols = rs.getColumnNames()
+            for (i in (1 ..13))
+                println(cols[i] + ": " + rs.getObject(i))
+            //cols.forEach { println(it) }
+
+        }   while (true)
         conn.close()
     }
 
@@ -58,36 +70,44 @@ class SiSqlDriverTest
      */
     Test fun testApp()
     {
-        val name = "failing"
-        var conn: SiSqlConnection? = null
-        try {
-            conn = SiSqlConnection(name, mapOf("connection" to "jdbc:hsqldb:mem:" + name, "user" to "SA"))
-        } catch (x: ConfigurationError) {
-            Assert.assertEquals(x.getMessage(), "Simple Sql driver needs properties: connection, user, password, driver_class")
-        }
-        finally {
-            conn?.close()
-        }
+        createtables()
     }
-
-    Test fun listTable()
-    {
-        val name = "failing"
-        var conn: SiSqlConnection? = null
-        try {
-            conn = SiSqlConnection(name, mapOf("connection" to "jdbc:hsqldb:mem:" + name, "user" to "SA"))
-        } catch (x: ConfigurationError) {
-            Assert.assertEquals(x.getMessage(), "Simple Sql driver needs properties: connection, user, password, driver_class")
-        }
-        finally {
-            conn?.close()
-        }
-    }
-
 
 
     fun createtables()
     {
 
+        val b = StringBuilder("create table cameras (\n  id BIGINT")
+        CameraData.cameraFields.fields.withIndices().forEach {
+            b append ",\n  "
+            b append it.second.name
+            b append ' '
+            b append sqltype(it.second.typ)
+        }
+        b append "\n)\n"
+        println(b)
+
+
+
     }
+
+    fun sqltype(t: org.funql.ri.test.genericobject.Types): String{
+        return when (t) {
+            Types.string -> "VARCHAR(8192)"
+            Types.array, Types.obj -> ""
+            Types.float -> "REAL"
+            Types.bool -> "BOOLEAN"
+            Types.obj -> "OTHER"
+            Types.date -> "DATE"
+            Types.int, Types.lid, Types.ref -> "BIGINT"
+            else -> throw IllegalArgumentException(t.toString())
+        }
+    }
+
+    fun ResultSet.getColumnNames(): jet.Array<String> {
+        val meta = getMetaData()
+        return jet.Array<String>(meta.getColumnCount(), { meta.getColumnName(it + 1) ?: it.toString() })
+    }
+
+
 }

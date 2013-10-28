@@ -20,6 +20,7 @@ import org.funql.ri.util.NamedImpl
 import java.util
 import java.util.ArrayList
 import org.funql.ri.util.Named
+import org.funql.ri.kotlinutil.KNamedImpl
 
 public class JsonArrayIterator(name: String, val data: List<Any?>): KNamedImpl(name), FqlIterator
 {
