@@ -11,7 +11,11 @@ import org.funql.ri.test.genericobject.Ref
 import org.funql.ri.mongodriver.workaround.BasicDBObjectWrapper
 import org.funql.ri.test.cameradata.CameraData
 import org.funql.ri.test.genericobject.TestObject
-import org.funql.ri.test.genericobject.Lid
+import org.funql.ri.test.genericobject.Key
+import org.funql.ri.test.genericobject.TypeDef
+import org.funql.ri.test.genericobject.FieldDef
+import org.funql.ri.test.genericobject.Types
+
 
 class TestCameraWrite
 {
@@ -27,6 +31,15 @@ class TestCameraWrite
 
 
     public fun testStoreCameras(): Unit {
+        val literalArrayType = TypeDef("LiteralArray", FieldDef.str("name"), FieldDef.arr("intarray"), FieldDef.arr("stringarray"), FieldDef.key("local_id"))
+
+        val primeNumbers = intArray(2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31)
+        val evenNumbers = intArray(2, 4, 6, 8, 10)
+
+
+        val even: TestObject = TestObject(literalArrayType, "even", evenNumbers, CameraData.orgTypes, CameraData.homeOrg.oid)
+        val primes: TestObject = TestObject(literalArrayType, "primes", primeNumbers, CameraData.countryCodes,even.oid)
+
         println("testStorecameras into funql_test")
 
         println("adding 1 ${CameraData.homeOrg.typ.name} to collection homeOrg")
@@ -34,8 +47,8 @@ class TestCameraWrite
         val homeOrg = db.getCollection("homeOrg")!!
         homeOrg.drop()
         homeOrg.insert(toDBObject(CameraData.homeOrg))
-        homeOrg.insert(toDBObject(CameraData.primes))
-        homeOrg.insert(toDBObject(CameraData.even))
+        homeOrg.insert(toDBObject(primes))
+        homeOrg.insert(toDBObject(even))
         rewriteCollection(productNamespace, org.funql.ri.test.cameradata.CameraData.products)
         rewriteCollection(organisationsNamespace, org.funql.ri.test.cameradata.CameraData.orgs)
         rewriteCollection("orders", org.funql.ri.test.cameradata.CameraData.orders())
@@ -63,7 +76,6 @@ class TestCameraWrite
                     list
                 }
                 is Ref -> DBRef(db, v.container, (v.target as TestObject).oid)
-                is Lid -> (v.target as TestObject).oid
                 else -> v
             }
             doc.put(k,pv);

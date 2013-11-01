@@ -1,9 +1,11 @@
 package org.funql.ri.test.genericobject
 
 
-enum class Types {string; int; float; bool; date; ref; obj; array; lid} // lid == local id. not a full ref, but one wich is relative to some ntry point
+enum class Types {string; int; float; bool; date; ref; obj; array; key} // key == reference into some collection, but not a database ref
 class FieldDef(val name: String, val typ: Types)
 {
+    var refType: TypeDef? = null
+
     class object {
         fun str(name: String) = FieldDef(name, Types.string)
         fun int(name: String) = FieldDef(name, Types.int)
@@ -12,7 +14,7 @@ class FieldDef(val name: String, val typ: Types)
         fun date(name: String) = FieldDef(name, Types.date)
         fun ref(name: String) = FieldDef(name, Types.ref)
         fun obj(name: String) = FieldDef(name, Types.obj)
-        fun id(name: String) = FieldDef(name, Types.lid)
+        fun key(name: String) = FieldDef(name, Types.key)
         fun arr(name: String) = FieldDef(name, Types.array)
     }
 }
@@ -20,17 +22,24 @@ class FieldDef(val name: String, val typ: Types)
 class TypeDef(val name: String, vararg fieldsarg: FieldDef)
 {
     val fields: Array<FieldDef> = fieldsarg
+    fun get(s: String): FieldDef {
+        val ret = fields.find { s == it.name }
+        if (ret == null)
+            throw IllegalArgumentException("field $s not found in type $name")
+        return ret
+    }
 }
 
-class Lid(val target: Any)
-class Ref(val target: Any, val container: String)
+class Key(val target: TestObject)
+class Ref(val target: TestObject, val container: String)
+class FunqlDate(val year: Int, val month: Int, val day: Int)
 
 class TestObject(val typ: TypeDef, vararg valuesarg: Any?)
 {
-    var genOid: Long = 1
-        get() = $genOid++
 
     class object {
+        var genOid: Long = 1
+            get() = $genOid++
     }
 
 

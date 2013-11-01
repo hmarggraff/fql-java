@@ -23,91 +23,40 @@ import java.sql.ResultSet
 import org.funql.ri.test.cameradata.CameraData
 import org.funql.ri.test.genericobject.Types
 import org.funql.ri.util.SkipTest
+import java.sql.Connection
+import java.sql.DriverManager
+import org.funql.ri.test.genericobject.TypeDef
+import org.funql.ri.test.genericobject.FieldDef
+import org.funql.ri.test.genericobject.TestObject
+import org.funql.ri.sisql.InsertStatementBuilder
+import org.testng.Assert
+import kotlin.test.fail
+import org.funql.ri.parser.FqlParser
+
 
 /**
  * Unit test for simple Sql Driver.
  */
-class HSqlTest
+class HSqlQueryTest: HSqlTestBase()
 {
+    Test fun relQuery(){
+        run("from Organisation", "")
 
-    fun openConnction(name: String): SiSqlConnection
-    {
-        val p = HashMap<String, String>()
-        p.put("driver", "org.funql.ri.sisql.SiSqlDriver")
-        p.put("connection", "jdbc:hsqldb:mem:" + name)
-        p.put("user", "SA")
-        p.put("password", "")
-        p.put("driver_class", "org.hsqldb.jdbc.JDBCDriver")
-        return SiSqlConnection("name", p)
+    }
+    Test fun relQuerySel(){
+        run("from Organisation select CITY", "")
+
     }
 
-    /**
-     * Tests if connection to an in memory db can be made
-     *
-     */
-    SkipTest fun systemtables()
+    fun run(q: String, expect: Any)
     {
-
-        val conn = openConnction("testdb")
-        val fqlIterator = conn.getIterator("INFORMATION_SCHEMA.SYSTEM_TABLES")!!
-        do  {
-            val d = fqlIterator.next()
-            if (d == FqlIterator.sentinel)   break;
-            val rs = d as ResultSet
-            val cols = rs.getColumnNames()
-            for (i in (1 ..13))
-                println(cols[i] + ": " + rs.getObject(i))
-            //cols.forEach { println(it) }
-
-        }   while (true)
+        val iter = FqlParser.runQuery(q, null, sisConn)!!
+        val strRes = dump(iter)
+        println(strRes)
+        Assert.assertEquals(strRes, expect)
         conn.close()
     }
 
-    /**
-     * Tests if connection with missing parameters fails
-     *
-     * @throws org.fqlsource.data.FqlDataException Thrown if entry point access fails in driver
-     */
-    Test fun testApp()
-    {
-        createtables()
-    }
-
-
-    fun createtables()
-    {
-
-        val b = StringBuilder("create table cameras (\n  id BIGINT")
-        CameraData.cameraFields.fields.withIndices().forEach {
-            b append ",\n  "
-            b append it.second.name
-            b append ' '
-            b append sqltype(it.second.typ)
-        }
-        b append "\n)\n"
-        println(b)
-
-
-
-    }
-
-    fun sqltype(t: org.funql.ri.test.genericobject.Types): String{
-        return when (t) {
-            Types.string -> "VARCHAR(8192)"
-            Types.array, Types.obj -> ""
-            Types.float -> "REAL"
-            Types.bool -> "BOOLEAN"
-            Types.obj -> "OTHER"
-            Types.date -> "DATE"
-            Types.int, Types.lid, Types.ref -> "BIGINT"
-            else -> throw IllegalArgumentException(t.toString())
-        }
-    }
-
-    fun ResultSet.getColumnNames(): jet.Array<String> {
-        val meta = getMetaData()
-        return jet.Array<String>(meta.getColumnCount(), { meta.getColumnName(it + 1) ?: it.toString() })
-    }
 
 
 }

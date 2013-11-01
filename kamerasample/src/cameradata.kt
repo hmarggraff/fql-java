@@ -1,47 +1,50 @@
 package org.funql.ri.test.cameradata
 
-import java.util.Date
 import org.funql.ri.test.genericobject.TypeDef
 import org.funql.ri.test.genericobject.FieldDef.*
 import org.funql.ri.test.RandomGenerator.*
 import org.funql.ri.test.genericobject.TestObject
 import org.funql.ri.test.genericobject.Ref
-import org.funql.ri.test.genericobject.Lid
+import java.sql.Date
 
 object CameraData
 {
     val employeeType = TypeDef("Employee", str("name"), str("surname"), date("birthDate"), str("job"), str("telno"))
-    val dayFields = TypeDef("Day", int("year"), int("month"), int("day"))
-    val organisationFields = TypeDef("Organisation", str("name"), str("streetAddress"), str("phoneNumber"), str("city"), str("zipCode"), str("customerId"), str("country"), obj("accountManager"), arr("employees"), arr("orgTypes"))
     val cameraFields = TypeDef("Camera", str("name"), float("pixels"), int("wide"), int("tele"), float("price"), int("weight"), str("imagefile"), str("description"))
+    val organisationFields = TypeDef("Organisation", str("name"), str("streetAddress"), str("phoneNumber"), str("city"), str("zipCode"), str("customerId"), str("country"), obj("accountManager"), arr("employees"))
     val orderItemType = TypeDef("OrderItem", ref("product"), int("units"), float("price"))
+    val orderType = TypeDef("Orders", str("orderId"), ref("customer"), arr("items"), float("value"), float("cost"), int("shippingState"), date("date"))
+
+    ;{
+        organisationFields["accountManager"].refType = employeeType
+        organisationFields["employees"].refType = employeeType
+        orderItemType["product"].refType = cameraFields
+        orderType["customer"].refType = organisationFields
+        orderType["items"].refType = orderItemType
+        orderType["items"].refType = orderItemType
+    }
+
     val orgTypes: Array<String> = array("Inc", "SA", "GmbH", "AG", "Ltd", "Oy")
     val countryCodes: Array<String> = array("US", "F", "D", "CH", "GB", "FI")
     val streetTypes: Array<String> = array("Rd", "St", "Ave")
     val countries = array("D", "A", "CH", "F", "B", "NL", "GB", "USA", "CAN", "PL")
-    val primeNumbers = intArray(2,3,5,7,11,13,17,19,23,29,31)
-    val evenNumbers = intArray(2,4,6,8,10)
-    val jobNames = array("CEO", "Programmer", "Assistant", "Hausmeister", "VP Sales", "Accountant", "Scrum master", "Product Owner")
+    val jobNames = array("CEO", "Programmer", "Assistant", "Hausmeister", "VP Sales", "Accountant", "Scrum Master", "Product Owner")
     val shippingStates = array("ordered", "incomplete", "shipped", "paid")
-    val orderType = TypeDef("Order", str("orderId"), ref("customer"), arr("items"), float("value"), float("cost"), int("shippingState"), date("date"))
-    val literalArrayType = TypeDef("LiteralArray", str("name"), arr("intarray"), arr("stringarray"), id("local_id"))
 
 
     fun telno(): String = (100 + nextInt(900)).toString() + " " + (100 + nextInt(900)).toString() + (1000 + nextInt(9000)).toString()
 
-    fun day(y: Int, m: Int, d: Int): Int = y * 10000 + m * 100 + d
-
     public val employees: Array<TestObject> = array(
-            TestObject(employeeType, "Newton", "Helmut", day(1952, 8, 24), "Chief executive officer", telno()),
-            TestObject(employeeType, "Adams", "Ansel", day(1915, 12, 19), "Sales USA West", telno()),
-            TestObject(employeeType, "Ray", "Man", day(1961, 7, 20), "Sales EMEA", telno()),
-            TestObject(employeeType, "Capa", "Robert", day(906, 12, 27), "Vertrieb USA Mitte", telno()),
-            TestObject(employeeType, "Eisenstaedt", "Alfred", day(1898, 6, 12), "Vertrieb USA Ost", telno()),
-            TestObject(employeeType, "Cartier-Bresson", "Henri", day(1940, 10, 9), "Vertrieb Frankreich", telno()),
-            TestObject(employeeType, "Hill", "David Octavius", day(1802, 12, 2), "Founder", telno()),
-            TestObject(employeeType, "Heidersberger", "Heinrich", day(1923, 12, 2), "Programmer", telno())
+            TestObject(employeeType, "Newton", "Helmut", Date(1952, 8, 24), "Chief executive officer", telno()),
+            TestObject(employeeType, "Adams", "Ansel", Date(1915, 12, 19), "Sales USA West", telno()),
+            TestObject(employeeType, "Ray", "Man", Date(1961, 7, 20), "Sales EMEA", telno()),
+            TestObject(employeeType, "Capa", "Robert", Date(906, 12, 27), "Vertrieb USA Mitte", telno()),
+            TestObject(employeeType, "Eisenstaedt", "Alfred", Date(1898, 6, 12), "Vertrieb USA Ost", telno()),
+            TestObject(employeeType, "Cartier-Bresson", "Henri", Date(1940, 10, 9), "Vertrieb Frankreich", telno()),
+            TestObject(employeeType, "Hill", "David Octavius", Date(1802, 12, 2), "Founder", telno()),
+            TestObject(employeeType, "Heidersberger", "Heinrich", Date(1923, 12, 2), "Programmer", telno())
     )
-    public val homeOrg: TestObject = TestObject(organisationFields, "The Hypothetical Camera Shop", "Fichtenstr. 19", "+49 89 89026748", "Germering", "82110", "ThatsUs", "DE", employees[0], employees, orgTypes)
+    public val homeOrg: TestObject = TestObject(organisationFields, "The Hypothetical Camera Shop", "Fichtenstr. 19", "+49 89 89026748", "Germering", "82110", "ThatsUs", "DE", employees[0], employees)
 
     public val products: Array<TestObject> = array(
             TestObject(cameraFields, "Olympus SP-560 UZ", 8.0, 27, 486, 550.00, 445, "pix/cam_002.jpg", "Blitz-Langzeitsynchronisation, Anschluss fuer externen Blitz (Blitzschuh), Videoaufzeichnung 640 x 480 Pixel, Direkt-Druck-Funktion"),
@@ -78,15 +81,13 @@ object CameraData
             TestObject(cameraFields, "Panasonic Lumix DMC-FX100", 12.2, 28, 100, 362.00, 176, "pix/cam_009.jpg", "Blitz-Langzeitsynchronisation, Anschluss fuer externen Blitz (Blitzschuh), Videoaufzeichnung 1280 x 720 Pixel ), Direkt-Druck-Funktion")
     )
 
-    public val even: TestObject = TestObject(literalArrayType, "even", evenNumbers, orgTypes, Lid(homeOrg))
-    public val primes: TestObject = TestObject(literalArrayType, "primes", primeNumbers, countryCodes, Lid(even))
 
 
+    val monthDays = array(31,28,31,30,31,30,31,31,30,31,30,31)
 
     public val orgs: Array<TestObject> = array(org(), org(), org(), org(), org(), org(), org(), org(), org(), org()) // init with closure fails due to a bug in kotlin M4
 
-    fun org(): TestObject {
-        return TestObject(organisationFields, //
+    fun org(): TestObject = TestObject(organisationFields, //
                 string8() + " " + pick(orgTypes), //
                 (nextInt(100) + 1).toString() + " " + string8() + " " + pick(streetTypes), //
                 "" + (nextInt(900) + 100) + " " + (nextInt(900) + 100) + " " + (nextInt(900) + 100), //
@@ -94,20 +95,22 @@ object CameraData
                 pick(countryCodes) + " " + nextInt(10000), "C" + nextInt(10000) + "/" + nextInt(64), //
                 pick(countries), //
                 pick(employees), //
-                array(TestObject(employeeType, array(string8(), makeVorname, day(nextInt(70) + 1920, nextInt(12), nextInt(30)), pick(jobNames), telno())),
-                        TestObject(employeeType, array(string8(), makeVorname, day(nextInt(70) + 1920, nextInt(12), nextInt(30)), pick(jobNames), telno())))
+                array(TestObject(employeeType, string8(), makeVorname, makedate(), pick(jobNames), telno()),
+                        TestObject(employeeType, string8(), makeVorname, makedate(), pick(jobNames), telno()))
         )
 
+    fun makedate():Date{
+        val month = nextInt(12)
+        return Date(nextInt(70) + 1920, month, nextInt(monthDays[month]))
     }
 
 
     public fun orders(): Array<TestObject> = Array<TestObject>(100, { oCnt ->
         var cost: Double = 0.0
         val now = Date(System.currentTimeMillis())
-        val newOrder = TestObject(orderType, "QS." + oCnt, Ref(pick(orgs), "organisations"),
-                null, 0.0, 0.0, nextInt(3),
-                (now.getYear() - 1 - nextInt(5)) * 10000 + (nextInt(12) + 1) * 100 + nextInt(28))
-        val items = Array<TestObject>(nextInt(products.size - 1) + 1, {
+        val month = nextInt(12)
+        val itemCnt = nextInt(products.size - 1) + 1
+        val items = Array<TestObject>(itemCnt, {
             val got = Array<Boolean>(products.size, { false })
             val p0 = nextInt(products.size)
             var pp = (p0 + 1) % products.size
@@ -121,15 +124,21 @@ object CameraData
             val price = p.values[4]
             TestObject(orderItemType, Ref(p, "products"), nextInt(10) + 1, price)
         })
-        newOrder.values[2] = items
+        val margin: Double = nextFloat()
+        val factor: Double = margin + 1
+        val newOrder = TestObject(orderType, "QS." + oCnt, Ref(pick(orgs), "organisations"),
+                items,cost * factor, cost, nextInt(3),
+                Date(now.getYear() - 1 - nextInt(5), (month + 1),nextInt(monthDays[month])))
+        /*
         val margin: Double = nextFloat()
         val factor: Double = margin + 1
         newOrder.values[3] = cost * factor
         newOrder.values[4] = cost
+        */
         newOrder
     })
 
-    fun Array<Any>.sum<T: Any>(a: Array<T>, f: (it: T) -> Double): Double {
+    fun Array<Any>.sum<T : Any>(a: Array<T>, f: (it: T) -> Double): Double {
         var agg: Double = 0.0
         for (el in a) agg += f(el)
         return agg

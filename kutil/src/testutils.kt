@@ -7,16 +7,16 @@ import org.funql.ri.exec.NamedValue
 import org.funql.ri.data.FqlIterator
 
 fun dump(s: Any?): String {
-    val sb = StringBuffer()
+    val sb = StringBuilder()
     dump(s, sb, 0)
     return sb.toString()
 }
-fun dump(s: Any?, sb: StringBuffer, indent: Int) {
+fun dump(s: Any?, sb: StringBuilder, indent: Int) {
     if (s == FqlIterator.sentinel)
         sb.append("|")
     else if (s == null)
         sb.append("~")
-    else if (s is Map<*,*>) {
+    else if (s is Map<*, *>) {
         sb.append('{')
         var cnt = 0
         val entrySet: Set<Map.Entry<Any?, Any?>> = s.entrySet()
@@ -34,9 +34,10 @@ fun dump(s: Any?, sb: StringBuffer, indent: Int) {
         sb.append(s1.getVal())
     }
     else if (s is NamedValue) {
-        dump(s.getVal(), sb, indent+1)
+        dump(s.getVal(), sb, indent + 1)
     }
-    else if (s is Array<Any?>) {  // object returned by select statement
+    else if (s is Array<Any?>) {
+        // object returned by select statement
         if (s is Array<NamedValue?>)
             System.currentTimeMillis()
         sb.append('{');
@@ -75,19 +76,30 @@ fun dump(s: Any?, sb: StringBuffer, indent: Int) {
         sb.append(s.toString())
     }
     else {
-        val s1 = s.toString()
-        if (isIdentifier(s1))
-            sb.append(s1)
-        else
-            sb.append('\'').append(s1).append('\'')
+        dumpString(s, sb)
     }
+
 }
 
-    fun isIdentifier(s:String):Boolean{
-        for (ch in s) {
-            if (!ch.isJavaIdentifierPart())
-                return false
-        }
-        return true
+fun dumpString(s: Any?, sb: StringBuilder) {
+    if (s == null) {
+        sb.append('~')
+        return
     }
+    val s1 = s.toString()
+    if (isIdentifier(s1))
+        sb.append(s1)
+    else
+        sb.append('\'').append(s1).append('\'')
+
+}
+
+
+fun isIdentifier(s: String): Boolean {
+    for (ch in s) {
+        if (!ch.isJavaIdentifierPart())
+            return false
+    }
+    return true
+}
 
