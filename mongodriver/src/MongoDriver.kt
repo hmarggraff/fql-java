@@ -15,6 +15,7 @@ import org.funql.ri.mongodriver.workaround.BasicDBObjectWrapper
 import com.mongodb.DBRef
 import com.mongodb.MongoClient
 import org.funql.ri.util.FqlIterator4Iterable
+import org.funql.ri.exec.Updater
 
 public class MongoDriver : FunqlDriver {
 
@@ -29,6 +30,9 @@ public class MongoDriver : FunqlDriver {
 
 public class FunqlMongoConnection(name: String, val props: Map<String, String?>) : NamedImpl(name), FunqlConnection
 {
+    override fun getUpdater(targetName: String?): Updater? {
+        return null
+    }
     public val dbname: String = props.get("db")?: throw ConfigurationError("missing property db for mongo database.")
     public val mongoConn: MongoClient = createClient(props)
     public val mongoDB: DB = mongoConn.getDB(dbname)?: throw ConfigurationError("Mongo Database named ${dbname} not found.");

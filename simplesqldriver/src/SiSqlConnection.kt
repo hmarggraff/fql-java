@@ -14,6 +14,7 @@ import org.funql.ri.data.FunqlConnection
 import java.sql.ResultSet
 import java.sql.PreparedStatement
 import org.funql.ri.kotlinutil.KNamedImpl
+import org.funql.ri.exec.Updater
 
 public open class SiSqlConnection(name: String, propsArg: Map<String, String>?) : KNamedImpl(name), FunqlConnection
 {
@@ -42,6 +43,8 @@ public open class SiSqlConnection(name: String, propsArg: Map<String, String>?) 
         return SiSqlArrayIterator(streamName, resultSet)
     }
 
+
+    override fun getUpdater(targetName: String?): Updater? = null
     public override fun useMap(name: String?, fieldpath: List<String>?, single: Boolean): FqlMapContainer? {
         val fields = fieldpath!!
         if (fields.size() != 1)

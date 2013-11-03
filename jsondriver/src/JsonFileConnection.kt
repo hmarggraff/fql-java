@@ -16,48 +16,32 @@ import java.io.FileInputStream
 import org.funql.ri.kotlinutil.KNamedImpl
 import org.funql.ri.exec.Updater
 
-public open class JsonConnection(name: String, propsArg: Map<String, String>?) : KNamedImpl(name), FunqlConnectionWithRange
+public open class JsonFileConnection(name: String, propsArg: Map<String, String>?) : KNamedImpl(name), FunqlConnectionWithRange
 {
     val props: Map<String, String> = propsArg!!
 
-    fun open(): String {
-        if (props containsKey "file")
+    fun open(fileName: String): String {
+        var instream: FileReader? = null
+        try
         {
-            val file: String = props.get("file")!!
-            var instream: FileReader? = null
-            try
-            {
-                instream = FileReader(file)
-                val readText = instream?.readText()!!
-                return readText
-            }
-            catch (ex: FileNotFoundException) {
-                throw ConfigurationError("Yaml driver did not find the input file specified in the connection properties: " + file)
-            }
-            finally{
-                instream?.close()
-            }
+            instream = FileReader(fileName)
+            val readText = instream?.readText()!!
+            return readText
         }
-        else if (props containsKey "text")
-        {
-            return props.get("text")!!
+        catch (ex: FileNotFoundException) {
+            throw ConfigurationError("Yaml driver did not find the input file specified in the connection properties: " + file)
         }
-        else
-            throw ConfigurationError("Yaml driver needs a file (name) to read from.")
+        finally{
+            instream?.close()
+        }
     }
-
-
-    public val input: String = open()
-
-
-    val data: Any? = if (props.get("allYamlParts") == "true") Yaml().loadAll(input) else Yaml().load(input)
-
 
 
     //public override fun useIterator(streamName: String?): FqlIterator? {
     public override fun getIterator(p0: String?): FqlIterator? {
-        if (p0 != "top") throw FqlDataException("Entry point for list must be named top not: " + p0)
-        else if (data is Map<*, *>) return JsonArrayIterator(p0, arrayListOf(data))
+        public val input: String = open(p0)
+        val data: Any? = if (props.get("allYamlParts") == "true") Yaml().loadAll(input) else Yaml().load(input)
+        if (data is Map<*, *>) return JsonArrayIterator(p0, arrayListOf(data))
         else if (data is ArrayList<*>) return JsonArrayIterator(p0, data as ArrayList<*>)
         else throw FqlDataException("Entry point is not a list or a map: " + p0)
 
@@ -127,7 +111,13 @@ public open class JsonConnection(name: String, propsArg: Map<String, String>?) :
         else throw FqlDataException("Json data '" + getName() + "' is not a map or list.")
     }
 
-    override fun getUpdater(targetName: String?): Updater? = JsonFileUpdater(data as ArrayList<Any?>, targetName!!)
+    override fun getUpdater(targetName: String?): Updater? {
+        public val input: String = open(p0)
+        val data: Any? = if (props.get("allYamlParts") == "true") Yaml().loadAll(input) else Yaml().load(input)
+        if (data is ArrayList<*>) return JsonArrayIterator(p0, data as ArrayList<*>)
+        else throw FqlDataException("Entry point is not a list: " + targetName)
+        JsonFileUpdater(targetName!!,  data as ArrayList<*>)
+    }
 
     private fun getMappingData(name: String): Any
     {

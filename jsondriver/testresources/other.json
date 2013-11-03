@@ -1,4 +1,4 @@
 [
-{ a: {b: "val1"}, c: "result1"},
-{ a: {b: "val2"}, c: "result2"}
+  { a: {b: "val1"}, c: "result1"},
+  { a: {b: "val2"}, c: "result2"}
 ]

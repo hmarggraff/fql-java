@@ -17,6 +17,7 @@ package org.fqlsource.fqltest.simpletestdriver;
  */
 
 import org.funql.ri.data.*;
+import org.funql.ri.exec.Updater;
 import org.funql.ri.util.NamedImpl;
 
 import java.util.Date;
@@ -107,5 +108,10 @@ public class SimpleTestConnection extends NamedImpl implements FunqlConnectionWi
 
     public void close() {
         // nothing
+    }
+
+    @Override
+    public Updater getUpdater(String targetName) {
+	return null;
     }
 }

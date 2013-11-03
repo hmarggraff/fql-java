@@ -16,6 +16,8 @@ package org.funql.ri.data;
  */
 
 
+import org.funql.ri.exec.Updater;
+
 import java.util.List;
 
 /**
@@ -31,8 +33,10 @@ public interface FunqlConnection
 
     FqlIterator getIterator(String streamName) throws FqlDataException;
 
+    Updater getUpdater(String targetName);
     Object getMember(Object from, String member);
 
     FqlMapContainer useMap(String name, List<String> fieldpath, boolean single);
     String getName();
+
 }
