@@ -9,7 +9,7 @@ import org.funql.ri.test.util.dump
 import org.testng.Assert
 
 open class JsonTestBase {
-    protected fun run(txt: String, q: String, expect: Any)
+    protected fun runQuery(txt: String, q: String, expect: Any)
     {
         val p = HashMap<String, String>()
         p.put("driver", "JsonDriver")

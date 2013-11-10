@@ -28,16 +28,36 @@ import org.testng.Assert
 import org.testng.annotations.AfterClass
 import org.funql.ri.parser.FqlParser
 import org.funql.ri.test.util.dump
+import org.funql.ri.data.FunqlConnection
 
 /**
  * Unit test for simple MockDriver.
  */
-class JsonUpdateTest:JsonTestBase()
+class JsonUpdateTest
 {
+
+    protected fun runQuery(txt: String, q: String): HashMap<String, KTestUpdater>
+    {
+        val p = HashMap<String, String>()
+        p.put("driver", "JsonDriver")
+        p.put("text", txt)
+        val conn = JsonConnection("JsonUpdate", p)
+        val outConn = UpdateTestConnection("Out")
+        val conns:List<FunqlConnection> = listOf(conn,outConn)
+        val iterator = FqlParser.runQuery(q, null, conns)!!
+        do{
+            val el = iterator.next()
+
+        }
+        while(FqlIterator.sentinel != el)
+
+        return outConn.updaters
+    }
 
     Test fun updater()
     {
-        run("[]", "into top put 'x'", FqlIterator.sentinel)
-
+        val out = runQuery("[]", "into Out.test put 'x'")
+        val any = out.get("test")!!.values.get(0)
+        Assert.assertEquals(any, "x")
     }
 }

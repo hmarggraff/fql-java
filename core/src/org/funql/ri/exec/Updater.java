@@ -1,5 +1,6 @@
 package org.funql.ri.exec;
 
+
 /**
  * Created by hmf on 03.11.13.
  */
@@ -11,4 +12,7 @@ public interface Updater {
      * @return the primary key (OID) for this record
      */
     public Object put(String[] fieldNames, Object[] value);
-}
+    public Object put(String[] fieldNames, Object[] value, Object key);
+    public void commit();
+
+    }

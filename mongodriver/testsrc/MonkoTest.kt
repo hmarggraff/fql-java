@@ -95,7 +95,7 @@ MonkoTest
     fun run(query: String): String {
         print("$query --> ")
         val it = FqlParser.runQuery(query, null, conn)!!
-        val sb = StringBuffer()
+        val sb = StringBuilder()
         var cnt = 0
         while (true) {
             val obj = it.next()

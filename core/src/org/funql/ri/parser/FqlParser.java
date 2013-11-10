@@ -77,7 +77,7 @@ public class FqlParser {
     }
 
     public static FqlIterator runQuery(String queryText, Object[] parameterValues,
-				       Iterable<FunqlConnection> conn) throws FqlParseException, FqlDataException {
+				       List<FunqlConnection> conn) throws FqlParseException, FqlDataException {
 	final FqlParser parser = new FqlParser(queryText, conn);
 	final List<FqlStatement> fqlStatements = parser.parseClauses();
 	final RunEnv runEnv = new RunEnv(parser.connections.size(), parser.maps.size(),
@@ -101,7 +101,7 @@ public class FqlParser {
     }
 
     public static FqlIterator runQuery(String queryText) throws FqlParseException, FqlDataException {
-	return runQuery(queryText, null, (Iterable<FunqlConnection>) null);
+	return runQuery(queryText, null, (List<FunqlConnection>) null);
     }
 
     public String getQueryString() {

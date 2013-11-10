@@ -18,7 +18,12 @@ package org.funql.ri.data;
 
 public interface FqlIterator
 {
-    public static final Object sentinel = new Object();
+    public static final Object sentinel = new Object() {
+	@Override
+	public String toString() {
+	    return "-|";
+	}
+    };
 
     /**
      * check and step to next object.
