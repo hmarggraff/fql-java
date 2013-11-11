@@ -57,6 +57,7 @@ public class IntoStatement implements FqlStatement {
 	    String[] fieldNames = buildFieldNames(fieldList);
 	    HashSet<String> usedNames = new HashSet<>();
 	    final Updater updater = checkNull(env.getConnection(connectionSlot.entryPointIndex).getUpdater(containerName));
+	    boolean done = false;
 
 	    private Updater checkNull(Updater updater) {
 		if (updater == null) {
@@ -90,6 +91,7 @@ public class IntoStatement implements FqlStatement {
 		}
 		else // at top
 		{
+		    if (done)
 		    for (int i = 0; i < fieldList.size(); i++) {
 			FqlNodeInterface node = fieldList.get(i);
 			Object value = node.getValue(env, null);
