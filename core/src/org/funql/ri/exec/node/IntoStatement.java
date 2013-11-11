@@ -92,11 +92,14 @@ public class IntoStatement implements FqlStatement {
 		else // at top
 		{
 		    if (done)
+			return FqlIterator.sentinel;
+		    done = true;
 		    for (int i = 0; i < fieldList.size(); i++) {
 			FqlNodeInterface node = fieldList.get(i);
 			Object value = node.getValue(env, null);
 			values[i] = value;
 		    }
+
 		    key = updater.put(fieldNames, values);
 		}
 		return key;
