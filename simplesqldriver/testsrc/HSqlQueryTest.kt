@@ -37,16 +37,17 @@ import org.funql.ri.parser.FqlParser
 /**
  * Unit test for simple Sql Driver.
  */
-class HSqlQueryTest: HSqlTestBase()
+class HSqlQueryTest: HSqlCameraDataBase()
 {
-    Test fun relQuery(){
+    SkipTest fun relQuery(){
         run("from Organisation", "")
 
     }
-    Test fun relQuerySel(){
+    SkipTest fun relQuerySel(){
         run("from Organisation select CITY", "")
-
     }
+
+
 
     fun run(q: String, expect: Any)
     {
@@ -56,6 +57,16 @@ class HSqlQueryTest: HSqlTestBase()
         Assert.assertEquals(strRes, expect)
         conn.close()
     }
+
+    Test fun sequenceAccess() {
+        val st = conn.createStatement()!!;
+        st.executeUpdate("create sequence testseq2 as integer");
+        val res = sisConn.nextSequenceValue("testseq2")
+        Assert.assertEquals(res, 0 as Long)
+        val res2 = sisConn.nextSequenceValue("testseq2")
+        Assert.assertEquals(res2, 1 as Long)
+    }
+
 
 
 

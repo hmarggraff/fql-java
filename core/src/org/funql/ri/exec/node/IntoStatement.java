@@ -54,9 +54,9 @@ public class IntoStatement implements FqlStatement {
 
     public FqlIterator execute(final RunEnv env, final FqlIterator precedent) throws FqlDataException {
 	return new FqlIterator() {
+	    final HashSet<String> usedNames = new HashSet<>();
 	    String[] fieldNames = buildFieldNames(fieldList);
-	    HashSet<String> usedNames = new HashSet<>();
-	    final Updater updater = checkNull(env.getConnection(connectionSlot.entryPointIndex).getUpdater(containerName));
+	    final Updater updater = checkNull(env.getConnection(connectionSlot.getIndex()).getUpdater(containerName));
 	    boolean done = false;
 
 	    private Updater checkNull(Updater updater) {
@@ -109,12 +109,12 @@ public class IntoStatement implements FqlStatement {
 		String[] ret = new String[fieldList.size()];
 		for (int i = 0; i < fieldList.size(); i++) {
 		    FqlNodeInterface node = fieldList.get(i);
-		    ret[i] = buildFieldName(node, usedNames);
+		    ret[i] = buildFieldName(node);
 		}
 		return ret;
 	    }
 
-	    private String buildFieldName(FqlNodeInterface node, HashSet<String> usednames) {
+	    private String buildFieldName(FqlNodeInterface node) {
 		final String baseName;
 		int i = 1;
 		String ret;
@@ -129,11 +129,11 @@ public class IntoStatement implements FqlStatement {
 		    baseName = "f";
 		    ret = baseName + i;
 		}
-		while (usednames.contains(ret)) {
+		while (usedNames.contains(ret)) {
 		    ret = baseName + i;
 		    i++;
 		}
-		usednames.add(ret);
+		usedNames.add(ret);
 		return ret;
 	    }
 

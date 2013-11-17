@@ -355,6 +355,7 @@ public class FqlParser {
 
     private IntoStatement buildIntoClause(String root, NamedIndex connectionIndex, Token t) throws FqlParseException {
 	EntryPointSlot entryPointSlot = new EntryPointSlot(connectionIndex, root, iteratorCount);
+	iteratorStack.push(entryPointSlot);
 	ArrayList<String> names;
 	if (lex.currToken == Token.As) {
 	    names = parseNameList();

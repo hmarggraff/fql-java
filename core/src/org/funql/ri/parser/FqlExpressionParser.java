@@ -28,7 +28,6 @@ package org.funql.ri.parser;
 import org.funql.ri.exec.BuiltIns;
 import org.funql.ri.exec.node.*;
 import org.funql.ri.parser.Lexer.Token;
-import org.funql.ri.util.NamedIndex;
 
 import java.util.ArrayList;
 
@@ -41,7 +40,7 @@ public class FqlExpressionParser {
     }
 
 
-    private FqlNodeInterface parseFunctionCall(String symName) throws FqlParseException {
+    private FqlNodeInterface parseFunctionCall(String symName, EntryPointSlot source) throws FqlParseException {
         final BuiltIns func = BuiltIns.get(symName);
         if (func == null) {
             throw new FqlParseException("Built-in function not found: " + symName, p);
@@ -69,7 +68,7 @@ public class FqlExpressionParser {
         } else {
             argNodes = null;
         }
-        return new FunctionNode(func, argNodes, p.lex.getRow(), p.lex.getCol());
+        return new FunctionNode(func, source, argNodes, p.lex.getRow(), p.lex.getCol());
     }
 
     private FqlNodeInterface parseBracket(FqlNodeInterface left) throws FqlParseException {
@@ -361,10 +360,10 @@ public class FqlExpressionParser {
         String symName = p.lex.nameVal;
         Lexer.Token tok = next();
         FqlNodeInterface left;
-        EntryPointSlot source = p.iteratorStack.peek();
+       EntryPointSlot source = p.iteratorStack.peek();
 
         if (tok == Lexer.Token.LParen) {
-            left = parseFunctionCall(symName);
+            left = parseFunctionCall(symName, source);
             tok = next();
         } else if (tok == Token.LBracket) {
             source = p.maps.get(symName);
@@ -378,7 +377,7 @@ public class FqlExpressionParser {
         } else {
             BuiltIns func = BuiltIns.getParameterless(symName);
             if (func != null)
-                left = new FunctionNode(func, null, p.lex.getRow(), p.lex.getCol());
+                left = new FunctionNode(func, source, null, p.lex.getRow(), p.lex.getCol());
             else
                 left = new MemberNode(symName, source, p.lex.getRow(), p.lex.getCol());
         }

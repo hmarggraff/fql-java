@@ -13,45 +13,49 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.funql.ri.jsondriver.test
+package org.funql.ri.sisql.test
 
-import kotlin.test.assertEquals
-import org.funql.ri.jsondriver.JsonConnection
-import java.util.HashMap
-import java.util.ArrayList
-import org.funql.ri.data.FqlMapContainer
-import org.funql.ri.data.FqlDataException
-import org.funql.ri.data.FqlMultiMapContainer
 import org.funql.ri.data.FqlIterator
-import org.testng.annotations.Test
+import java.sql.ResultSet
+import org.funql.ri.test.cameradata.CameraData
+import org.funql.ri.test.genericobject.Types
+import java.sql.Connection
+import org.funql.ri.test.genericobject.TypeDef
+import org.funql.ri.test.genericobject.FieldDef
+import org.funql.ri.test.genericobject.TestObject
+import org.funql.ri.sisql.InsertStatementBuilder
 import org.testng.Assert
-import org.testng.annotations.AfterClass
-import org.funql.ri.parser.FqlParser
-import org.funql.ri.test.util.dump
+import kotlin.test.fail
+import org.funql.ri.test.util.dumpString
+
 
 /**
- * Unit test for simple MockDriver.
+ * Unit test for simple Sql Driver.
  */
-class JsonQueryTest:JsonTestBase()
+open class HSqlCameraDataBase : HSqlTestBase()
 {
 
-    Test fun updater()
     {
-        runQuery("[]", "into text put 'x'", FqlIterator.sentinel)
+        createTable(CameraData.cameraFields, conn)
+        createTable(CameraData.employeeType, conn)
+        createTable(CameraData.organisationFields, conn)
+        createTable(CameraData.orderItemType, conn)
+        createTable(CameraData.orderType, conn)
+        val rs = conn.createStatement()!!.executeQuery("select * from " + "INFORMATION_SCHEMA.SYSTEM_TABLES")
 
-    }
-    //Test
-            fun testEmpty() {
-        runQuery("[]", "from text", FqlIterator.sentinel)
-    }
-    Test fun oneObject() {
-        runQuery("{a: b, c: d}", "from text select a", "{a:b}")
-    }
-    Test fun testApp2() { runQuery("{a: b, c: d}", "from text select a + c", "{f:bd}") }
-    Test fun testAppFields() { runQuery("[2,3,5,7]", "from text where it > 5 select it", "{f:7}") }
-    Test fun lookup() {
-        runQuery("[1,6]", "link 'other.json' by a.b from text where it > 5 select it", "{f:7}") }
-    //Test fun testMultiMap() { run("{a: [2,3,5,7]}", "from top select from a where it < 3 select it", 2) }
+        while (rs.next()) {
+            if ("PUBLIC" != rs.getString(2)) continue; // SCHEMA
+            val cols = rs.getColumnNames()
+            for (i in (1..4))
+                print("   ${cols[i - 1]}: ${rs.getObject(i)} ")
+            println   ()
+        }
 
-
+        writeChecked(CameraData.orderType, CameraData.orders(), conn)
+        writeChecked(CameraData.cameraFields, CameraData.products, conn)
+        writeChecked(CameraData.employeeType, CameraData.employees, conn)
+        writeChecked(CameraData.organisationFields, CameraData.orgs, conn)
+        val itemCount = count(CameraData.orderItemType.name, conn)
+        Assert.assertEquals(itemCount, 1519)
+    }
 }

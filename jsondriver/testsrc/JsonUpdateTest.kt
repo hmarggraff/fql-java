@@ -60,4 +60,11 @@ class JsonUpdateTest
         val any = out.get("test")!!.values.get(0)
         Assert.assertEquals(any, "x")
     }
+
+    Test fun updater2()
+    {
+        val out = runQuery("[]", "into Out.test put 'x', 3, z: 7.5")
+        val any = out.get("test")!!.values.get(0)
+        Assert.assertEquals(any, "x")
+    }
 }

@@ -23,6 +23,7 @@ import org.funql.ri.util.NamedImpl;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class SimpleTestConnection extends NamedImpl implements FunqlConnectionWithRange {
     final Map<String, String> props;
@@ -113,5 +114,10 @@ public class SimpleTestConnection extends NamedImpl implements FunqlConnectionWi
     @Override
     public Updater getUpdater(String targetName) {
 	return null;
+    }
+
+    @Override
+    public Object nextSequenceValue(String sequenceName) {
+	return UUID.randomUUID();
     }
 }

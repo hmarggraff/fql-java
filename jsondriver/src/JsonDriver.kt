@@ -1,7 +1,6 @@
 package org.funql.ri.jsondriver
 
 import org.funql.ri.data.FunqlDriver
-import java.util
 import org.funql.ri.data.FunqlConnection
 
 /**

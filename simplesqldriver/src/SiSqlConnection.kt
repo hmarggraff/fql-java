@@ -1,22 +1,17 @@
 package org.funql.ri.sisql
 
-import java.util.ArrayList
-import java.util.LinkedHashMap
-import org.funql.ri.data.FunqlConnectionWithRange
 import org.funql.ri.data.FqlDataException
 import org.funql.ri.data.FqlIterator
 import org.funql.ri.data.FqlMapContainer
 import org.funql.ri.util.ConfigurationError
-import org.funql.ri.util.ListFqlIterator
 import java.sql.DriverManager
 import java.sql.Connection
-import org.funql.ri.data.FunqlConnection
 import java.sql.ResultSet
-import java.sql.PreparedStatement
-import org.funql.ri.kotlinutil.KNamedImpl
 import org.funql.ri.exec.Updater
+import org.funql.ri.kotlinutil.KFunqlConnection
+import javax.jws.Oneway
 
-public open class SiSqlConnection(name: String, propsArg: Map<String, String>?) : KNamedImpl(name), FunqlConnection
+public open class SiSqlConnection(name: String, propsArg: Map<String, String>?) : KFunqlConnection(name)
 {
     val props: Map<String, String> = propsArg!!
 
@@ -37,28 +32,42 @@ public open class SiSqlConnection(name: String, propsArg: Map<String, String>?) 
 
     val connection = open()
 
-    public override fun getIterator(streamName: String?): FqlIterator? {
-        val tableName = streamName!!
-        val resultSet = connection.createStatement()!!.executeQuery("select * from " + tableName)
+    public override fun kgetIterator(streamName: String): FqlIterator {
+        val resultSet = connection.createStatement()!!.executeQuery("select * from " + streamName)
         return SiSqlArrayIterator(streamName, resultSet)
     }
 
 
-    override fun getUpdater(targetName: String?): Updater? = null
-    public override fun useMap(name: String?, fieldpath: List<String>?, single: Boolean): FqlMapContainer? {
-        val fields = fieldpath!!
-        if (fields.size() != 1)
+    override fun kgetUpdater(targetName: String): Updater? = SisqlUpdater(targetName, connection)
+
+    public override fun kuseMap(name: String, fieldpath: List<String>, single: Boolean): FqlMapContainer {
+        if (fieldpath.size() != 1)
             throw FqlDataException("The key for a SiSql map must be a single string, not a path: " + fieldpath.makeString("."))
-        val keyField = fields.get(0)
+        val keyField = fieldpath.get(0)
         val statement = connection.prepareStatement("select * from " + name + " where ? = " + keyField)!!
 
-        return SiSqlMapAccess(name!!, statement)
+        return SiSqlMapAccess(name, statement)
     }
 
+
+    override fun krange(name: String, startKey: String, endKey: String, includeEnd: Boolean): FqlIterator {
+        throw UnsupportedOperationException()
+    }
     public override fun close()
     {
         connection.close()
     }
-    public override fun getMember(from: Any?, member: String?): Any? = if (from is ResultSet) from.getObject(member) else null
+    public override fun kgetMember(from: Any?, member: String): Any? = if (from is ResultSet) from.getObject(member) else null
+
+    public override fun nextSequenceValue(sequenceName: String?): Any? {
+        if (connection.javaClass.getName() == "org.hsqldb.jdbc.JDBCConnection")
+        {
+            val rs = connection.createStatement()!!.executeQuery("call NEXT VALUE FOR " + sequenceName)
+            return if (rs.next()) rs.getLong(1) else throw FqlDataException("Cannot retrieve value from sequence: " + sequenceName)
+        }
+        else
+            return 1 as Long
+    }
+
 }
 

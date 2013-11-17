@@ -2,7 +2,8 @@ package org.funql.ri.exec.node;
 
 import org.funql.ri.util.NamedIndex;
 
-/**
+/** Object to find an entry point in the environment.
+ * the base index is the connection and the entry point index, the entry point in the connection
  */
 public class EntryPointSlot extends NamedIndex {
     private final String entryPointName;

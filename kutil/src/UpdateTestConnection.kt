@@ -3,6 +3,7 @@
  */
 
 import org.funql.ri.data.FqlIterator
+import org.funql.ri.kotlinutil.KFunqlConnection
 import org.funql.ri.data.FqlMapContainer
 import org.funql.ri.exec.Updater
 import java.util.HashMap
@@ -44,8 +45,8 @@ class KTestUpdater(val name: String):KUpdater(){
     public val values:LinkedHashMap<Any, Any?> = LinkedHashMap<Any, Any?>()
 
     override fun kput(fieldNames: Array<out String>, value: Array<out Any?>): Any {
-        values.put(values.size, buildMap(fieldNames,value))
-        return values.size-1
+        values.put(values.size(), buildMap(fieldNames,value))
+        return values.size()-1
     }
     override fun kput(fieldNames: Array<out String>, value: Array<out Any?>, key: Any) {
         values.put(key, buildMap(fieldNames,value))

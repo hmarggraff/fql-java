@@ -23,12 +23,15 @@ import org.funql.ri.test.cameradata.CameraData
 import org.funql.ri.test.genericobject.Types
 import java.sql.Connection
 import org.funql.ri.test.genericobject.TypeDef
+import org.funql.ri.kotlinutil.FqlMaterializedQuery
 import org.funql.ri.test.genericobject.FieldDef
 import org.funql.ri.test.genericobject.TestObject
 import org.funql.ri.sisql.InsertStatementBuilder
 import org.testng.Assert
 import kotlin.test.fail
 import org.funql.ri.test.util.dumpString
+import java.util.ArrayList
+import kotlin.jdbc.getValues
 
 
 /**
@@ -38,46 +41,17 @@ open class HSqlTestBase
 {
     val hsqlDriverClassName = "org.hsqldb.jdbc.JDBCDriver"
     val connectionStr = "jdbc:hsqldb:mem:testdb"
-    protected val sisConn: SiSqlConnection = openConnction()
-    val conn: Connection = sisConn.connection
-
-            ;{
-    createtables()
-    usertables()
-
-    writeChecked(CameraData.orderType, CameraData.orders(), conn)
-    writeChecked(CameraData.cameraFields, CameraData.products, conn)
-    writeChecked(CameraData.employeeType, CameraData.employees, conn)
-    writeChecked(CameraData.organisationFields, CameraData.orgs, conn)
-    val itemCount = count(CameraData.orderItemType.name, conn)
-    Assert.assertEquals(itemCount, 1519)
-}
-
-
-    fun openConnction(): SiSqlConnection
-    {
+    protected val sisConn: SiSqlConnection = {
         val p = HashMap<String, String>()
         p.put("driver", "org.funql.ri.sisql.SiSqlDriver")
         p.put("connection", connectionStr)
         p.put("user", "SA")
         p.put("password", "")
         p.put("driver_class", hsqlDriverClassName)
-        return SiSqlConnection("name", p)
-    }
+        SiSqlConnection("name", p)
+    }()
 
-
-    fun usertables()
-    {
-        val rs = conn.createStatement()!!.executeQuery("select * from " + "INFORMATION_SCHEMA.SYSTEM_TABLES")
-
-        while (rs.next()) {
-            if ("PUBLIC" != rs.getString(2)) continue; // SCHEMA
-            val cols = rs.getColumnNames()
-            for (i in (1..4))
-                print("   ${cols[i - 1]}: ${rs.getObject(i)} ")
-            println   ()
-        }
-    }
+    val conn: Connection = sisConn.connection
 
 
     fun writeChecked(typ: TypeDef, data: Array<TestObject>, conn: Connection)
@@ -95,15 +69,6 @@ open class HSqlTestBase
         return -1 // to make the compiler happy
 
 
-    }
-
-    fun createtables()
-    {
-        createTable(CameraData.cameraFields, conn)
-        createTable(CameraData.employeeType, conn)
-        createTable(CameraData.organisationFields, conn)
-        createTable(CameraData.orderItemType, conn)
-        createTable(CameraData.orderType, conn)
     }
 
     fun createTable(typ: TypeDef, conn: Connection) {
@@ -180,7 +145,6 @@ open class HSqlTestBase
         val rs = any as ResultSet
 
         val columnNames = rs.getColumnNames()
-        var row = 0;
         do{
             b.append("{")
 
@@ -194,11 +158,25 @@ open class HSqlTestBase
             b.append("},\n")
 
         } while (rs.next())
-        b.deleteCharAt(b.size-2)
+        b.deleteCharAt(b.size - 2)
         b.append("]\n")
         return b.toString()
 
     }
 
+    fun readAll(sql: String): FqlMaterializedQuery {
+        val st = conn.createStatement()!!;
+        val resultSet = st.executeQuery(sql)
+        val columnNames = resultSet.getColumnNames()
+        val list = ArrayList<Array<Any?>>();
+        while (resultSet.next())
+        {
+            val values = resultSet.getValues(columnNames)
+            list.add(values)
+        }
+        val ret = FqlMaterializedQuery(columnNames, list)
+        return ret
+
+    }
 
 }

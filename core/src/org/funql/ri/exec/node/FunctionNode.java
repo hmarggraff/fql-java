@@ -10,13 +10,16 @@ public class FunctionNode extends FqlNode
 {
     private final FqlBuiltinFunction function;
     private final FqlNodeInterface[] argNodes;
+    private final EntryPointSlot dataSlot;
 
-    public FunctionNode(FqlBuiltinFunction function, FqlNodeInterface[] argNodes, int row, int col)
+
+    public FunctionNode(FqlBuiltinFunction function, EntryPointSlot dataSlot, FqlNodeInterface[] argNodes, int row, int col)
     {
 
         super(row, col);
         this.function = function;
-        this.argNodes = argNodes;
+	this.dataSlot = dataSlot;
+	this.argNodes = argNodes;
     }
 
     public Object getValue(RunEnv env, Object from) throws FqlDataException
@@ -27,7 +30,7 @@ public class FunctionNode extends FqlNode
             argvals[i] = argNodes[i].getValue(env, from);
 
         }
-        return function.val(env, from, argvals);
+        return function.val(env, env.getConnection(dataSlot.entryPointIndex), from, argvals);
     }
 
     public void dump(StringBuffer sb)

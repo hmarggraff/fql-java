@@ -11,13 +11,16 @@ import java.io.File
 import java.io.FileInputStream
 import org.funql.ri.kotlinutil.KNamedImpl
 import org.funql.ri.exec.Updater
+import org.funql.ri.kotlinutil.KFunqlConnection
 
 public open class JsonConnection(name: String, propsArg: Map<String, String>?) : KFunqlConnection(name)
 {
     val props: Map<String, String> = propsArg!!
 
     fun open(fileName: String): Any? {
-        val readText = props.get(fileName)?: File(fileName).readText()
+        val file = File(fileName)
+        val path = file.getAbsolutePath()
+        val readText = props.get(fileName)?: file.readText()
         val data: Any? = if (props.get("allYamlParts") == "true") Yaml().loadAll(readText) else Yaml().load(readText)
         return data
     }
@@ -30,9 +33,9 @@ public open class JsonConnection(name: String, propsArg: Map<String, String>?) :
         else throw FqlDataException("Entry point is not a list or a map: " + streamName)
     }
 
-    override fun krange(fileName: String, startKey: String, endKey: String, includeEnd: Boolean): FqlIterator
+    override fun krange(name: String, startKey: String, endKey: String, includeEnd: Boolean): FqlIterator
     {
-        val data = open(fileName)
+        val data = open(name)
         if (data is List<*>)
         {
             val start = startKey.toInt()
@@ -41,7 +44,7 @@ public open class JsonConnection(name: String, propsArg: Map<String, String>?) :
             return ListFqlIterator(subList)
         }
         else
-            throw FqlDataException("Connection '$fileName' is not a range.")
+            throw FqlDataException("Connection '$name' is not a range.")
     }
 
     override fun kuseMap(name: String, fieldpath: List<String>, single: Boolean): FqlMapContainer? {

@@ -7,23 +7,22 @@ import java.util.Map;
 
 /**
  */
-public class SimpleTestDriver implements FunqlDriver
-{
+public class SimpleTestDriver implements FunqlDriver {
     @Override
-    public FunqlConnection openConnection(String name, Map<String, String> props)
-    {
+    public FunqlConnection openConnection(String name, Map<String, String> props) {
 	return new SimpleTestConnection(name, props);
     }
 
     @Override
-    public boolean supportsRanges()
-    {
+    public boolean supportsRanges() {
 	return true;
     }
 
     @Override
-    public boolean isAdvancedDriver()
-    {
+    public boolean isAdvancedDriver() {
 	return false;
     }
+
+    protected static long sequenceCounter = 0l;
+
 }

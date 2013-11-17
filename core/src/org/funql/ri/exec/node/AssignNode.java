@@ -36,4 +36,9 @@ public class AssignNode extends UnaryNode
         final Object rightValue = operand.getValue(env, from);
         return new NamedObject(var,rightValue);
     }
+
+    @Override
+    public void buildMemberName(StringBuffer target) {
+	target.append(var);
+    }
 }

@@ -14,5 +14,4 @@ public interface Updater {
     public Object put(String[] fieldNames, Object[] value);
     public Object put(String[] fieldNames, Object[] value, Object key);
     public void commit();
-
     }

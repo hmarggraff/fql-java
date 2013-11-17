@@ -16,8 +16,10 @@ package org.funql.ri.data;
  */
 
 
+import com.sun.org.apache.xpath.internal.operations.*;
 import org.funql.ri.exec.Updater;
 
+import java.lang.String;
 import java.util.List;
 
 /**
@@ -38,5 +40,5 @@ public interface FunqlConnection
 
     FqlMapContainer useMap(String name, List<String> fieldpath, boolean single);
     String getName();
-
+    Object nextSequenceValue(String sequenceName);
 }

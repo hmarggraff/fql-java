@@ -21,15 +21,21 @@ public class NamedObject extends NamedValue {
 
     protected final Object val;
 
-    public NamedObject(String var, Object rightValue)
-    {
-        super(var);
-        val = rightValue;
+    public NamedObject(String var, Object rightValue) {
+	super(var);
+	val = rightValue;
     }
 
     @Override
-    public Object getVal()
-    {
-        return val;
+    public Object getVal() {
+	return val;
+    }
+
+    @Override
+    public String toString() {
+	if (val != null)
+	    return val.toString();
+	else
+	    return null;
     }
 }
