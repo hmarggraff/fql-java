@@ -25,6 +25,7 @@ import org.testng.Assert
 import org.testng.Assert.assertEquals
 import java.sql.ResultSet
 import org.funql.ri.data.FqlDataException
+import org.funql.ri.exec.NamedObjectImpl
 
 
 /**
@@ -92,11 +93,12 @@ class HSqlUpdateTest : HSqlTestBase()
     }
 
     Test fun toplevelInsert() {
-        val iterator = run("into target put id:33, f:'x'")
+        val iterator = run("into target put ID:33, f:'x'")
         val any = iterator.next()
-        assertEquals(any, 33 as Long)
+        assertEquals((any as NamedObjectImpl).getVal(), 33 as Long)
         val all = readAll("select * from ${target.name}")
-        assertEquals(all.fields, array("id","f"))
+        val strings = array("ID", "F")
+        assertEquals(all.fields, strings)
         assertEquals(all.values[0], array(33 as Long, "x"))
 
     }

@@ -1,9 +1,9 @@
 package org.funql.ri.test.util
 
-import org.funql.ri.exec.NamedLong
-import org.funql.ri.exec.NamedDouble
-import org.funql.ri.exec.NamedBoolean
-import org.funql.ri.exec.NamedValue
+import org.funql.ri.exec.NamedLongImpl
+import org.funql.ri.exec.NamedDoubleImpl
+import org.funql.ri.exec.NamedBooleanImpl
+import org.funql.ri.exec.NamedValueImpl
 import org.funql.ri.data.FqlIterator
 
 fun dump(s: Any?): String {
@@ -29,23 +29,23 @@ fun dump(s: Any?, sb: StringBuilder, indent: Int) {
         sb.append("}")
 
     }
-    else if (s is NamedLong || s is NamedDouble || s is NamedBoolean) {
-        val s1 = (s as NamedValue)
+    else if (s is NamedLongImpl || s is NamedDoubleImpl || s is NamedBooleanImpl) {
+        val s1 = (s as NamedValueImpl)
         sb.append(s1.getVal())
     }
-    else if (s is NamedValue) {
+    else if (s is NamedValueImpl) {
         dump(s.getVal(), sb, indent + 1)
     }
     else if (s is Array<Any?>) {
         // object returned by select statement
-        if (s is Array<NamedValue?>)
+        if (s is Array<NamedValueImpl?>)
             System.currentTimeMillis()
         sb.append('{');
         var cnt = 0
         s.forEach {
             if (cnt > 0) sb.append(',')
             cnt++
-            sb.append((it as NamedValue).getName()).append(':')
+            sb.append((it as NamedValueImpl).getName()).append(':')
             dump(it, sb, indent + 1)
         }
         sb.append("}")

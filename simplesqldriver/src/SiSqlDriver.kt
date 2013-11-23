@@ -10,9 +10,9 @@ import org.funql.ri.data.FunqlConnection
 public class SiSqlDriver: FunqlDriver
 {
 
-    public override fun openConnection(name: String?, props: Map<String, String>?): FunqlConnection? = SiSqlConnection(name!!, props)
+    public override fun openConnection(name: String?, props: Map<String, String>?): FunqlConnection? = SiSqlConnectionDirect(name!!, props)
 
-    override fun supportsRanges() = true
+    override fun supportsRanges() = false
 
     override fun isAdvancedDriver() = false
 

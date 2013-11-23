@@ -15,12 +15,12 @@
 
 package org.funql.ri.sisql.test
 
-import org.funql.ri.sisql.SiSqlConnection
 import java.util.HashMap
 import org.testng.annotations.Test
 import org.testng.Assert
 import org.testng.Assert.assertEquals
 import org.funql.ri.util.ConfigurationError
+import org.funql.ri.sisql.SiSqlConnectionDirect
 
 /**
  * Unit test for simple Sql Driver.
@@ -28,7 +28,7 @@ import org.funql.ri.util.ConfigurationError
 class SiSqlDriverTest
 {
 
-    fun openConnction(name: String): SiSqlConnection
+    fun openConnction(name: String): SiSqlConnectionDirect
     {
         val p = HashMap<String, String>()
         p.put("driver", "org.funql.ri.sisql.SiSqlDriver")
@@ -36,7 +36,7 @@ class SiSqlDriverTest
         p.put("user", "SA")
         p.put("password", "")
         p.put("driver_class", "org.hsqldb.jdbc.JDBCDriver")
-        return SiSqlConnection("name", p)
+        return SiSqlConnectionDirect("name", p)
     }
 
     /**
@@ -59,9 +59,9 @@ class SiSqlDriverTest
     Test fun testApp()
     {
         val name = "failing"
-        var conn: SiSqlConnection? = null
+        var conn: SiSqlConnectionDirect? = null
         try {
-            conn = SiSqlConnection(name, mapOf("connection" to "jdbc:hsqldb:mem:" + name, "user" to "SA"))
+            conn = SiSqlConnectionDirect(name, mapOf("connection" to "jdbc:hsqldb:mem:" + name, "user" to "SA"))
         } catch (x: ConfigurationError) {
             Assert.assertEquals(x.getMessage(), "Simple Sql driver needs properties: connection, user, password, driver_class")
         }
@@ -73,9 +73,9 @@ class SiSqlDriverTest
     Test fun listTable()
     {
         val name = "failing"
-        var conn: SiSqlConnection? = null
+        var conn: SiSqlConnectionDirect? = null
         try {
-            conn = SiSqlConnection(name, mapOf("connection" to "jdbc:hsqldb:mem:" + name, "user" to "SA"))
+            conn = SiSqlConnectionDirect(name, mapOf("connection" to "jdbc:hsqldb:mem:" + name, "user" to "SA"))
         } catch (x: ConfigurationError) {
             Assert.assertEquals(x.getMessage(), "Simple Sql driver needs properties: connection, user, password, driver_class")
         }

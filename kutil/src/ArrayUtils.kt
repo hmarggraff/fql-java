@@ -4,7 +4,7 @@ package org.funql.ri.kotlinutil
  */
 
 fun Array<out Any?>.indexOf(value: Any?): Int? {
-    for (i in 0..this.size) if (this[i] == value) return i
+    for (i in 0..this.size-1) if (this[i] == value) return i
     return null;
 }
 

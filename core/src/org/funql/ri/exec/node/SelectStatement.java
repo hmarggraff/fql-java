@@ -52,7 +52,7 @@ public class SelectStatement implements FqlStatement {
                 final Object parent = precedent.next();
                 if (parent == FqlIterator.sentinel)
                     return FqlIterator.sentinel;
-                Object[] fields = new NamedValue[fieldList.size()];
+                Object[] fields = new NamedValueImpl[fieldList.size()];
                 HashSet<String> usednames = new HashSet<>();
 
                 try {
@@ -62,19 +62,19 @@ public class SelectStatement implements FqlStatement {
                         Object value = node.getValue(env, parent);
                         String fieldName = buildFieldName(node, usednames);
                         if (value instanceof Integer)
-                            fields[i] = new NamedLong(fieldName, ((Integer) value).longValue());
+                            fields[i] = new NamedLongImpl(fieldName, ((Integer) value).longValue());
                         else if (value instanceof Long)
-                            fields[i] = new NamedLong(fieldName, ((Long) value).longValue());
+                            fields[i] = new NamedLongImpl(fieldName, ((Long) value).longValue());
                         else if (value instanceof Float)
-                            fields[i] = new NamedDouble(fieldName, ((Float) value).doubleValue());
+                            fields[i] = new NamedDoubleImpl(fieldName, ((Float) value).doubleValue());
                         else if (value instanceof Double)
-                            fields[i] = new NamedDouble(fieldName, ((Double) value).doubleValue());
+                            fields[i] = new NamedDoubleImpl(fieldName, ((Double) value).doubleValue());
                         else if (value instanceof Boolean)
-                            fields[i] = new NamedBoolean(fieldName, ((Boolean) value).booleanValue());
-                        else if (value instanceof NamedValue)
+                            fields[i] = new NamedBooleanImpl(fieldName, ((Boolean) value).booleanValue());
+                        else if (value instanceof NamedValueImpl)
                             fields[i] = value;
                         else
-                            fields[i] = new NamedObject(fieldName, value);
+                            fields[i] = new NamedObjectImpl(fieldName, value);
                     }
                 } finally {
                     env.popObject();

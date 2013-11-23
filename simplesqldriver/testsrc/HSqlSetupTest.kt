@@ -15,7 +15,6 @@
 
 package org.funql.ri.sisql.test
 
-import org.funql.ri.sisql.SiSqlConnection
 import java.util.HashMap
 import org.testng.annotations.Test
 import org.funql.ri.data.FqlIterator

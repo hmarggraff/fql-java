@@ -32,7 +32,7 @@
     <profile>
         <id>kotlin-stable</id>
         <properties>
-            <kotlin.version>0.6.1315</kotlin.version>
+            <kotlin.version>0.6.1411</kotlin.version>
         </properties>
     </profile>
 </profiles>

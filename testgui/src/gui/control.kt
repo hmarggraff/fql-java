@@ -8,8 +8,8 @@ import org.funql.ri.jsondriver.JsonConnection
 import java.util.ArrayList
 import org.funql.ri.parser.FqlParser
 import org.funql.ri.mongodriver.FunqlMongoConnection
-import org.funql.ri.exec.NamedValue
-import org.funql.ri.exec.NamedObject
+import org.funql.ri.exec.NamedValueImpl
+import org.funql.ri.exec.NamedObjectImpl
 import com.mongodb.DBRef
 import org.funql.ri.data.FqlIterator
 
@@ -158,9 +158,9 @@ class TestRunnerControl(val view: TestRunnerView) {
             sb.append("}")
 
         }
-        else if (s is NamedValue) {
+        else if (s is NamedValueImpl) {
             if (inObject) sb.append(s.getName()).append(":")
-            if (s is NamedObject) dump(s.getVal(), sb, indent + 1, true)
+            if (s is NamedObjectImpl) dump(s.getVal(), sb, indent + 1, true)
             else sb.append(s.getVal())
         }
         else if (s is Iterable<Any?>) {
@@ -171,7 +171,7 @@ class TestRunnerControl(val view: TestRunnerView) {
                 if (cnt > 0) sb.append(',')
                 cnt++
                 newline(true, indent, sb)
-                //sb.append((it as NamedValue).getName()).append(':')
+                //sb.append((it as NamedValueImpl).getName()).append(':')
                 dump(it, sb, indent + 1, false)
             }
             newline(true, indent, sb)

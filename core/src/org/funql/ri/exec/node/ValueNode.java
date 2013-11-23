@@ -16,7 +16,6 @@ package org.funql.ri.exec.node;
  */
 
 import org.funql.ri.data.FqlDataException;
-import org.funql.ri.exec.NamedObject;
 import org.funql.ri.exec.RunEnv;
 
 /**

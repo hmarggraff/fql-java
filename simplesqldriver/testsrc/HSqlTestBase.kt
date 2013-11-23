@@ -15,7 +15,6 @@
 
 package org.funql.ri.sisql.test
 
-import org.funql.ri.sisql.SiSqlConnection
 import java.util.HashMap
 import org.funql.ri.data.FqlIterator
 import java.sql.ResultSet
@@ -32,6 +31,7 @@ import kotlin.test.fail
 import org.funql.ri.test.util.dumpString
 import java.util.ArrayList
 import kotlin.jdbc.getValues
+import org.funql.ri.sisql.SiSqlConnectionDirect
 
 
 /**
@@ -41,14 +41,14 @@ open class HSqlTestBase
 {
     val hsqlDriverClassName = "org.hsqldb.jdbc.JDBCDriver"
     val connectionStr = "jdbc:hsqldb:mem:testdb"
-    protected val sisConn: SiSqlConnection = {
+    protected val sisConn: SiSqlConnectionDirect = {
         val p = HashMap<String, String>()
         p.put("driver", "org.funql.ri.sisql.SiSqlDriver")
         p.put("connection", connectionStr)
         p.put("user", "SA")
         p.put("password", "")
         p.put("driver_class", hsqlDriverClassName)
-        SiSqlConnection("name", p)
+        SiSqlConnectionDirect("name", p)
     }()
 
     val conn: Connection = sisConn.connection
