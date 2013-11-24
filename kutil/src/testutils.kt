@@ -1,10 +1,7 @@
 package org.funql.ri.test.util
 
-import org.funql.ri.exec.NamedLongImpl
-import org.funql.ri.exec.NamedDoubleImpl
-import org.funql.ri.exec.NamedBooleanImpl
-import org.funql.ri.exec.NamedValueImpl
 import org.funql.ri.data.FqlIterator
+import org.funql.ri.data.NamedValues
 
 fun dump(s: Any?): String {
     val sb = StringBuilder()
@@ -29,36 +26,14 @@ fun dump(s: Any?, sb: StringBuilder, indent: Int) {
         sb.append("}")
 
     }
-    else if (s is NamedLongImpl || s is NamedDoubleImpl || s is NamedBooleanImpl) {
-        val s1 = (s as NamedValueImpl)
-        sb.append(s1.getVal())
-    }
-    else if (s is NamedValueImpl) {
-        dump(s.getVal(), sb, indent + 1)
-    }
-    else if (s is Array<Any?>) {
-        // object returned by select statement
-        if (s is Array<NamedValueImpl?>)
-            System.currentTimeMillis()
-        sb.append('{');
-        var cnt = 0
-        s.forEach {
-            if (cnt > 0) sb.append(',')
-            cnt++
-            sb.append((it as NamedValueImpl).getName()).append(':')
-            dump(it, sb, indent + 1)
+    else if (s is NamedValues) {
+        sb.append('{')
+        for (i in 0 .. s.getNames()!!.size-1){
+            if (i > 0) sb.append(',')
+            sb.append(s.getNames()!![i]).append(':')
+            dump(s.getValues()!![i], sb, indent + 1)
         }
         sb.append("}")
-    }
-    else if (s is List<Any?>) {
-        sb.append('[');
-        var cnt = 0
-        s.forEach {
-            if (cnt > 0) sb.append(',')
-            cnt++
-            dump(it, sb, indent + 1)
-        }
-        sb.append("]")
     }
     else if (s is FqlIterator) {
         sb.append('[');

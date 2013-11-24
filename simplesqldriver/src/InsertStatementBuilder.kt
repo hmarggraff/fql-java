@@ -7,6 +7,7 @@ import java.sql.PreparedStatement
 import org.funql.ri.test.genericobject.Ref
 import org.funql.ri.test.genericobject.Key
 import org.funql.ri.test.genericobject.TestObject
+import java.sql.Statement
 
 /**
  * Created by hmf on 01.11.13.
@@ -20,7 +21,7 @@ public class InsertStatementBuilder(val table: String)
 
     fun add(field: String, value: Any?) {
         if (value is TestObject) {
-            for (i: Int in (0..value.values.size-1)) {
+            for (i: Int in (0..value.values.size - 1)) {
                 val any = value.values[i]
                 val str = value.typ.fields[i].name
                 add(str, any)
@@ -45,7 +46,7 @@ public class InsertStatementBuilder(val table: String)
                 b.append("?")
             }
             b.append(")")
-            statement = conn.prepareStatement(b.toString())!!
+            statement = conn.prepareStatement(b.toString(), Statement.RETURN_GENERATED_KEYS)!!
         }
         putField(statement!!, values)
         try {
@@ -54,9 +55,7 @@ public class InsertStatementBuilder(val table: String)
             x.printStackTrace()
             throw x
         }
-
         values.clear()
-        // insert into Organisation values (?,?,?, ?,?,?, ?,?,?)
     }
 
     fun putField(st: PreparedStatement, vals: List<Any?>) {
@@ -73,7 +72,6 @@ public class InsertStatementBuilder(val table: String)
                 is Key -> st.setLong(cnt, it.target.oid)
                 is TestObject -> {
                     putField(st, it.values.toList())
-
                 }
                 else -> throw IllegalArgumentException("it: " + it.javaClass)
             }
@@ -81,5 +79,16 @@ public class InsertStatementBuilder(val table: String)
         }
     }
 
-    fun executeBatch(): IntArray? = statement!!.executeBatch()
+    fun executeBatch(): Any? {
+
+        statement!!.executeBatch()
+        val rs = statement!!.getGeneratedKeys()!!
+        if (rs.next()) {
+            val resultSetMetaData = rs.getMetaData()
+            val cc = resultSetMetaData.getColumnCount()
+            val res = rs.getObject(1)!!
+            return res
+        }
+        return null;
+    }
 }

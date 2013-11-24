@@ -31,6 +31,7 @@ public class MemberNode extends FqlNode
 
     @Override
     public void buildMemberName(StringBuffer target) {
+	target.setLength(0);
         target.append(memberName);
     }
 

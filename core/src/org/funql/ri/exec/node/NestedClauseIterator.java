@@ -1,6 +1,7 @@
 package org.funql.ri.exec.node;
 
 import org.funql.ri.data.FqlIterator;
+import org.funql.ri.data.NamedValues;
 import org.funql.ri.exec.RunEnv;
 
 /**
@@ -14,7 +15,7 @@ public class NestedClauseIterator implements FqlIterator {
     }
 
     @Override
-    public Object next() {
+    public NamedValues next() {
         return precedent.next();
     }
 }

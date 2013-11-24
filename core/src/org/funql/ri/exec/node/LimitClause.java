@@ -2,6 +2,7 @@ package org.funql.ri.exec.node;
 
 import org.funql.ri.data.FqlDataException;
 import org.funql.ri.data.FqlIterator;
+import org.funql.ri.data.NamedValues;
 import org.funql.ri.exec.FqlStatement;
 import org.funql.ri.exec.RunEnv;
 
@@ -27,7 +28,7 @@ public class LimitClause implements FqlStatement {
         return new FqlIterator() {
             int at = 0;
             @Override
-            public Object next() {
+            public NamedValues next() {
                 if (at >= limit)
                     return FqlIterator.sentinel;
                 at++;

@@ -45,7 +45,6 @@
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-jdbc</artifactId>
             <version>${kotlin.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.funql.ri</groupId>

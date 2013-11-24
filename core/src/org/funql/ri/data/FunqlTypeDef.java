@@ -9,5 +9,5 @@ import java.util.List;
  * Created by hmf on 23.11.13.
  */
 public interface FunqlTypeDef extends Named {
-    List<FunqlField> getMembers();
+    FunqlField getFieldDefAt(int position);
 }

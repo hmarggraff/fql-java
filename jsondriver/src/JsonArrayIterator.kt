@@ -16,20 +16,19 @@
 package org.funql.ri.jsondriver
 
 import org.funql.ri.data.FqlIterator
-import org.funql.ri.util.NamedImpl
-import java.util
-import java.util.ArrayList
-import org.funql.ri.util.Named
 import org.funql.ri.kotlinutil.KNamedImpl
+import org.funql.ri.data.NamedValues
+import org.funql.ri.kotlinutil.NamedValuesKImpl
 
-public class JsonArrayIterator(name: String, val data: List<Any?>): KNamedImpl(name), FqlIterator
+public class JsonArrayIterator(name: String, val data: List<Any?>) : KNamedImpl(name), FqlIterator
 {
     var pos = -1
+    protected val names: Array<String> = array<String>("it")
 
-    override fun next(): Any? {
-        if (pos >= data.size()-1)
+    override fun next(): NamedValues? {
+        if (pos >= data.size() - 1)
             return FqlIterator.sentinel
         pos = pos + 1;
-        return data.get(pos)
+        return NamedValuesKImpl(names, array<Any?>(data.get(pos)))
     }
 }

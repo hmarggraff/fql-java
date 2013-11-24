@@ -2,6 +2,7 @@ package org.funql.ri.exec.node;
 
 import org.funql.ri.data.FqlDataException;
 import org.funql.ri.data.FqlIterator;
+import org.funql.ri.data.NamedValues;
 import org.funql.ri.exec.FqlStatement;
 import org.funql.ri.exec.RunEnv;
 
@@ -14,9 +15,9 @@ public class WhereClause implements FqlStatement {
 
     public FqlIterator execute(final RunEnv env, final FqlIterator precedent) throws FqlDataException {
         return new FqlIterator() {
-            public Object next() throws FqlDataException {
+            public NamedValues next() throws FqlDataException {
                 while (true) {
-                    Object t = precedent.next();
+		    NamedValues t = precedent.next();
                     if (t == FqlIterator.sentinel)
                         return t;
                     try {

@@ -27,12 +27,14 @@
         <id>kotlin-snapshot</id>
         <properties>
             <kotlin.version>0.1-SNAPSHOT</kotlin.version>
+            <kotlin.maven.version>0.1-SNAPSHOT</kotlin.maven.version>
         </properties>
     </profile>
     <profile>
         <id>kotlin-stable</id>
         <properties>
             <kotlin.version>0.6.1411</kotlin.version>
+            <kotlin.maven.version>0.6.1411</kotlin.maven.version>
         </properties>
     </profile>
 </profiles>
@@ -157,7 +159,7 @@
                 <plugin>
                     <artifactId>kotlin-maven-plugin</artifactId>
                     <groupId>org.jetbrains.kotlin</groupId>
-                    <version>${kotlin.version}</version>
+                    <version>${kotlin.maven.version}</version>
 
                     <executions>
                         <execution>

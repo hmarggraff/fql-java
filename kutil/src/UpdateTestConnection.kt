@@ -1,6 +1,9 @@
+package org.funql.ri.kotlinutil
+
 /**
  * Created by hmf on 10.11.13.
  */
+
 
 import org.funql.ri.data.FqlIterator
 import org.funql.ri.kotlinutil.KFunqlConnection
@@ -8,6 +11,8 @@ import org.funql.ri.data.FqlMapContainer
 import org.funql.ri.exec.Updater
 import java.util.HashMap
 import java.util.LinkedHashMap
+import org.funql.ri.data.NamedValues
+import org.funql.ri.util.NamedValuesImpl
 
 /**
  * a connection, that returns updaters for testing
@@ -44,9 +49,9 @@ class UpdateTestConnection(name:String):KFunqlConnection(name){
 class KTestUpdater(val name: String):KUpdater(){
     public val values:LinkedHashMap<Any, Any?> = LinkedHashMap<Any, Any?>()
 
-    override fun kput(fieldNames: Array<out String>, value: Array<out Any?>): Any {
+    override fun kput(fieldNames: Array<out String>, value: Array<out Any?>): NamedValues {
         values.put(values.size(), buildMap(fieldNames,value))
-        return values.size()-1
+        return NamedValuesImpl("id", values.size()-1)
     }
     override fun kput(fieldNames: Array<out String>, value: Array<out Any?>, key: Any) {
         values.put(key, buildMap(fieldNames,value))

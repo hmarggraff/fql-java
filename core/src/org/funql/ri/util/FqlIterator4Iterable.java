@@ -1,24 +1,29 @@
 package org.funql.ri.util;
 
-import org.funql.ri.data.FqlDataException;
 import org.funql.ri.data.FqlIterator;
+import org.funql.ri.data.NamedValues;
 
 import java.util.Iterator;
-import java.util.List;
 
 /**
  */
 public class FqlIterator4Iterable implements FqlIterator {
     protected final Iterator it;
+    protected static String[] names = {"it"};
+
 
     public FqlIterator4Iterable(Iterable data) {
-        it = data.iterator();
+	it = data.iterator();
     }
 
     @Override
-    public Object next() {
-        if (!it.hasNext())
-            return sentinel;
-        return it.next();
+    public NamedValues next() {
+	if (!it.hasNext())
+	    return sentinel;
+	Object next = it.next();
+	if (next instanceof NamedValues)
+	    return (NamedValues) next;
+	else
+	    return new NamedValuesImpl(names, new Object[] {next});
     }
 }

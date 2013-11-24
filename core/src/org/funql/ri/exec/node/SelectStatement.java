@@ -27,7 +27,10 @@ package org.funql.ri.exec.node;
 
 import org.funql.ri.data.FqlDataException;
 import org.funql.ri.data.FqlIterator;
-import org.funql.ri.exec.*;
+import org.funql.ri.data.NamedValues;
+import org.funql.ri.exec.FqlStatement;
+import org.funql.ri.exec.RunEnv;
+import org.funql.ri.util.NamedValuesImpl;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -39,76 +42,65 @@ import java.util.HashSet;
  */
 public class SelectStatement implements FqlStatement {
     private final ArrayList<FqlNodeInterface> fieldList;
+    String[] fieldNames;
+
 
     public SelectStatement(ArrayList<FqlNodeInterface> fieldList) {
-        this.fieldList = fieldList;
+	this.fieldList = fieldList;
+	fieldNames = new String[fieldList.size()];
+	HashSet<String> usednames = new HashSet<>();
+	for (int i = 0; i < fieldList.size(); i++) {
+	    String fieldName = buildFieldName(fieldList.get(i), usednames);
+	    fieldNames[i] = fieldName;
+	}
     }
 
+    private String buildFieldName(FqlNodeInterface node, HashSet<String> usednames) {
+	final String result;
+	int i = 1;
+	String ret;
+	StringBuffer fieldNameBuffer = new StringBuffer();
+	node.buildMemberName(fieldNameBuffer);
+	if (fieldNameBuffer.length() > 0) {
+	    result = fieldNameBuffer.toString();
+	    ret = result;
+	} else if (fieldList.size() == 1)
+	    return "f";
+	else {
+	    result = "f";
+	    ret = result + i;
+	}
+	while (usednames.contains(ret)) {
+	    ret = result + i;
+	    i++;
+	}
+	usednames.add(ret);
+	return ret;
+    }
+
+
     public FqlIterator execute(final RunEnv env, final FqlIterator precedent) throws FqlDataException {
-        return new FqlIterator() {
+	return new FqlIterator() {
 
-            @Override
-            public Object next() {
-                final Object parent = precedent.next();
-                if (parent == FqlIterator.sentinel)
-                    return FqlIterator.sentinel;
-                Object[] fields = new NamedValueImpl[fieldList.size()];
-                HashSet<String> usednames = new HashSet<>();
+	    @Override
+	    public NamedValues next() {
+		final Object parent = precedent.next();
+		if (parent == FqlIterator.sentinel)
+		    return FqlIterator.sentinel;
+		Object[] fields = new Object[fieldList.size()];
 
-                try {
-                    env.pushObject(parent);
-                    for (int i = 0; i < fieldList.size(); i++) {
-                        FqlNodeInterface node = fieldList.get(i);
-                        Object value = node.getValue(env, parent);
-                        String fieldName = buildFieldName(node, usednames);
-                        if (value instanceof Integer)
-                            fields[i] = new NamedLongImpl(fieldName, ((Integer) value).longValue());
-                        else if (value instanceof Long)
-                            fields[i] = new NamedLongImpl(fieldName, ((Long) value).longValue());
-                        else if (value instanceof Float)
-                            fields[i] = new NamedDoubleImpl(fieldName, ((Float) value).doubleValue());
-                        else if (value instanceof Double)
-                            fields[i] = new NamedDoubleImpl(fieldName, ((Double) value).doubleValue());
-                        else if (value instanceof Boolean)
-                            fields[i] = new NamedBooleanImpl(fieldName, ((Boolean) value).booleanValue());
-                        else if (value instanceof NamedValueImpl)
-                            fields[i] = value;
-                        else
-                            fields[i] = new NamedObjectImpl(fieldName, value);
-                    }
-                } finally {
-                    env.popObject();
-                }
-                return fields;
-            }
-
-            private String buildFieldName(FqlNodeInterface node, HashSet<String> usednames) {
-                final String result;
-                int i = 1;
-                String ret;
-                StringBuffer fieldNameBuffer = new StringBuffer();
-                node.buildMemberName(fieldNameBuffer);
-                if (fieldNameBuffer.length() > 0)
-                {
-                    result = fieldNameBuffer.toString();
-                    ret = result;
-                }
-                else if (fieldList.size() == 1)
-                    return "f";
-                else
-                {
-                    result = "f";
-                    ret = result + i;
-                }
-                while (usednames.contains(ret))
-                {
-                    ret = result + i;
-                    i++;
-                }
-                usednames.add(ret);
-                return ret;
-            }
-
-        };
+		try {
+		    env.pushObject(parent);
+		    for (int i = 0; i < fieldList.size(); i++) {
+			FqlNodeInterface node = fieldList.get(i);
+			Object value = node.getValue(env, parent);
+			fields[i] = value;
+		    }
+		} finally {
+		    env.popObject();
+		}
+		return new NamedValuesImpl(fieldNames, fields);
+	    }
+	};
     }
 }

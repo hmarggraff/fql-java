@@ -27,6 +27,7 @@ package org.funql.ri.exec.node;
 
 import org.funql.ri.data.FqlDataException;
 import org.funql.ri.data.FqlIterator;
+import org.funql.ri.data.NamedValues;
 import org.funql.ri.exec.FqlAssertionError;
 import org.funql.ri.exec.FqlStatement;
 import org.funql.ri.exec.RunEnv;
@@ -69,9 +70,9 @@ public class IntoStatement implements FqlStatement {
 
 
 	    @Override
-	    public Object next() {
+	    public NamedValues next() {
 		Object[] values = new Object[fieldNames.length];
-		Object key;
+		NamedValues key;
 		if (precedent != null) {
 		    final Object parent = precedent.next();
 		    if (parent == FqlIterator.sentinel)

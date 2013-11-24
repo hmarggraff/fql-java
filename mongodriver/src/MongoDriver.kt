@@ -2,7 +2,6 @@ package org.funql.ri.mongodriver
 
 import org.funql.ri.data.FunqlDriver
 import org.funql.ri.kotlinutil.KFunqlConnection
-import org.funql.ri.util.NamedImpl
 import org.funql.ri.util.ConfigurationError
 import org.funql.ri.data.FqlIterator
 import org.funql.ri.data.FqlMapContainer
@@ -19,7 +18,9 @@ import org.funql.ri.exec.Updater
 import com.mongodb.WriteConcern
 import java.util.InvalidPropertiesFormatException
 import org.funql.ri.data.FunqlConnection
-import java.util.UUID
+import com.mongodb.DBObject
+import org.funql.ri.data.NamedValues
+import org.funql.ri.kotlinutil.namedValuesKImplSingle
 
 public class MongoDriver : FunqlDriver {
 
@@ -37,7 +38,8 @@ public class FunqlMongoConnection(name: String, val props: Map<String, String?>)
     public val dbname: String = props.get("db")?: throw ConfigurationError("missing property db for mongo database.")
     public val mongoConn: MongoClient = createClient(props)
     public val mongoDB: DB = mongoConn.getDB(dbname)?: throw ConfigurationError("Mongo Database named ${dbname} not found.");
-    public val writeConcern: WriteConcern = { val wc = props.get("writeConcern")
+    public val writeConcern: WriteConcern = {
+        val wc = props.get("writeConcern")
         if (wc != null) WriteConcern.valueOf(wc)?:throw InvalidPropertiesFormatException("No MongoDB write concern named: " + wc)
         else WriteConcern.NORMAL
     }()
@@ -66,7 +68,7 @@ public class FunqlMongoConnection(name: String, val props: Map<String, String?>)
             throw ConfigurationError("Collection with name " + streamName + " not Found")
     }
 
-    override fun kgetUpdater(targetName: String): Updater{
+    override fun kgetUpdater(targetName: String): Updater {
         if (mongoDB.collectionExists(targetName))
             return MongoUpdater(mongoDB.getCollection(getName())!!, writeConcern)
         else
@@ -92,7 +94,7 @@ public class FunqlMongoConnection(name: String, val props: Map<String, String?>)
         else if (from is Map<*, *>) {
             return wrapIfIterable(from[member])
         }
-        else if (from is DBRef){
+        else if (from is DBRef) {
             return wrapIfIterable(from.fetch()?.get(member))
         }
         throw AssertionError("Mongo member access needs a map, but found a " + from.javaClass)
@@ -104,12 +106,25 @@ public class FunqlMongoConnection(name: String, val props: Map<String, String?>)
     public override fun compareTo(s: Named): Int = name1.compareTo(s.getName()!!)
 
 
-
 }
 
 public class FunqlMongoIterator(val data: DBCursor) : FqlIterator
 {
-    public override fun next(): Any? = if (data.hasNext()) data.next() else FqlIterator.sentinel
+    public override fun next(): NamedValues? {
+        if (data.hasNext()) {
+            val nextObj: DBObject = data.next()
+            if (nextObj is Map<*, *>) // most dbobjects are maps
+            {
+                val dbm: Map<String, Any?> = nextObj as Map<String, Any?>
+                return namedValues4Map(dbm)
+            }
+            else {
+                val dbMap = nextObj.toMap() as Map<String, Any?>
+                return namedValues4Map(dbMap)
+            }
+        } else
+            return FqlIterator.sentinel
+    }
 }
 
 class FunqlMongoLookup(val fieldPath: String,

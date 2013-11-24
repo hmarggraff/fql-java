@@ -16,9 +16,10 @@ package org.funql.ri.data;
  */
 
 
-public interface FqlIterator
-{
-    public static final Object sentinel = new Object() {
+import org.funql.ri.util.NamedValuesImpl;
+
+public interface FqlIterator {
+    public static final NamedValues sentinel = new NamedValuesImpl("-|", null) {
 	@Override
 	public String toString() {
 	    return "-|";
@@ -28,7 +29,8 @@ public interface FqlIterator
     /**
      * check and step to next object.
      * If Iterator is at the end, return sentinel
+     *
      * @return next object or sentinel
      */
-    Object next();
+    NamedValues next();
 }

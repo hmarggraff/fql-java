@@ -17,23 +17,27 @@ package org.fqlsource.fqltest.simpletestdriver;
  */
 
 import org.funql.ri.data.FqlIterator;
+import org.funql.ri.data.NamedValues;
 import org.funql.ri.util.NamedImpl;
+import org.funql.ri.util.NamedValuesImpl;
 
 public class SimpleTestIterator extends NamedImpl implements FqlIterator {
     final protected int count;
     final protected SimpleTestConnection connection;
     protected int at = 0;
+    protected static String[] names = {"it"};
+
 
     public SimpleTestIterator(final SimpleTestConnection connection, String name, int count) {
-        super(name);
-        this.connection = connection;
-        this.count = count;
+	super(name);
+	this.connection = connection;
+	this.count = count;
     }
 
-    public Object next() {
-        if (at >= count)
-            return FqlIterator.sentinel;
-        at++;
-        return at;
+    public NamedValues next() {
+	if (at >= count)
+	    return FqlIterator.sentinel;
+	at++;
+	return new NamedValuesImpl(names, new Object[]{at});
     }
 }

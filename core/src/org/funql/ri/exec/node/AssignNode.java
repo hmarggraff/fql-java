@@ -16,7 +16,6 @@ package org.funql.ri.exec.node;
  */
 
 import org.funql.ri.data.FqlDataException;
-import org.funql.ri.exec.NamedObjectImpl;
 import org.funql.ri.exec.RunEnv;
 
 /**
@@ -34,11 +33,12 @@ public class AssignNode extends UnaryNode
     public Object getValue(RunEnv env, Object from) throws FqlDataException
     {
         final Object rightValue = operand.getValue(env, from);
-        return new NamedObjectImpl(var,rightValue);
+        return rightValue;
     }
 
     @Override
     public void buildMemberName(StringBuffer target) {
+	target.setLength(0);
 	target.append(var);
     }
 }
