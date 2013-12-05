@@ -98,6 +98,8 @@ public class SimpleTestConnection extends NamedImpl implements FunqlConnectionWi
             return true;
         } else if ("no".equalsIgnoreCase(member)) {
             return false;
+        } else if (from instanceof NamedValues) {
+            return ((NamedValues) from).getValues()[0].toString() + '_' + member;
         } else {
             return from.toString() + '_' + member;
         }

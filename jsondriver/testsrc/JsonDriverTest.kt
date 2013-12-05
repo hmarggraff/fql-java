@@ -23,6 +23,7 @@ import org.funql.ri.data.FqlDataException
 import org.funql.ri.data.FqlIterator
 import org.testng.annotations.Test
 import org.testng.Assert
+import org.funql.ri.data.NamedValues
 
 /**
  * Unit test for simple MockDriver.
@@ -109,8 +110,8 @@ class JsonDriverTest
             val it = stream.next()
 
             if (it == FqlIterator.sentinel) break
-            else if (it is Int) count = count + it
-            else throw ClassCastException("json array iterator returns ${it.javaClass} when Int was expected: ${it.toString()}")
+            else if (it is NamedValues && it.getValues()!![0] is Int ) count = count + it.getValues()!![0] as Int
+            else throw ClassCastException("json array iterator returns ${it.javaClass} when NamedValues of int was expected: ${it.toString()}")
         }
         Assert.assertEquals(count, 17)
     }

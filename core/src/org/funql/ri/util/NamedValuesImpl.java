@@ -40,4 +40,18 @@ public class NamedValuesImpl implements NamedValues {
     public Object[] getValues() {
 	return values;
     }
+
+    @Override
+    public String toString() {
+	if (names.length== 1 && "it".equals(names[0]))
+	    return FqlRiStringUtils.toString(values[0]);
+	StringBuilder sb = new StringBuilder('{');
+	for (int i = 0; i < names.length-1; i++){
+	    if (i > 0) sb.append(',');
+	    sb.append(names[i]).append(':').append(values[i]);
+	}
+	sb.append("}");
+
+	return super.toString();
+    }
 }

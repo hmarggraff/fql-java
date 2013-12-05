@@ -26,7 +26,7 @@ fun dump(s: Any?, sb: StringBuilder, indent: Int) {
         sb.append("}")
 
     }
-    else if (s is NamedValues) {
+/*    else if (s is NamedValues) {
         sb.append('{')
         for (i in 0 .. s.getNames()!!.size-1){
             if (i > 0) sb.append(',')
@@ -35,6 +35,7 @@ fun dump(s: Any?, sb: StringBuilder, indent: Int) {
         }
         sb.append("}")
     }
+    */
     else if (s is FqlIterator) {
         sb.append('[');
         var cnt = 0

@@ -29,6 +29,8 @@ import org.testng.annotations.AfterClass
 import org.funql.ri.parser.FqlParser
 import org.funql.ri.test.util.dump
 import org.funql.ri.data.FunqlConnection
+import org.funql.ri.kotlinutil.KTestUpdater
+import org.funql.ri.kotlinutil.UpdateTestConnection
 
 /**
  * Unit test for simple MockDriver.

@@ -21,6 +21,7 @@ import org.funql.ri.data.FunqlConnection
 import com.mongodb.DBObject
 import org.funql.ri.data.NamedValues
 import org.funql.ri.kotlinutil.namedValuesKImplSingle
+import org.funql.ri.kotlinutil.namedValues4Map
 
 public class MongoDriver : FunqlDriver {
 

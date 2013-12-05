@@ -21,7 +21,14 @@ class SimpleDriverQueries: SimpleTestDriverBase()
 
     Test fun BasicUseAndFromClauses() {
         skiprun("from e1 select e1", "[1_e1]")
-        run("from e1 select e12", "[1_e12]")
+        skiprun("from e1 select e12", "[{e12:1_e12}]")
+        skiprun("from e2 select a", "[{a:1_a},{a:2_a}]")
+        skiprun("from e2 select a,b", "[{a:1_a,b:1_b},{a:2_a,b:2_b}]")
+        run("from e2", "[1,2]")
+    }
+    Test fun PutClauses() {
+        skiprun("from e1 select e1", "[1_e1]")
+        run("from e1 into e2 put e12", "[1_e12]")
         run("from e2 select a", "[1_a,2_a]")
         run("from e2 select a,b", "[{a:1_a,b:1_b},{a:2_a,b:2_b}]")
         run("from e2", "[1,2]")
