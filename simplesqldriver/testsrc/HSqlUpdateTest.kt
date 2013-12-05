@@ -104,6 +104,19 @@ class HSqlUpdateTest : HSqlTestBase()
         assertEquals(all.values[0], array(33 as Long, "x"))
 
     }
+
+
+    Test(dependsOnMethods=array("toplevelInsert")) fun toplevelUpdate() {
+        println("topLevelUpdate")
+        val iterator = run("into target put ID:33, f:'y'")
+        val any = iterator.next()
+        assertEquals((any as NamedValues).getValues()!![0], 33 as Long)
+        val all = readAll("select * from ${target.name}")
+        val strings = array("ID", "F")
+        assertEquals(all.fields, strings)
+        assertEquals(all.values.size(), 1)
+        assertEquals(all.values[0], array(33 as Long, "y"))
+    }
     fun run(q: String) = FqlParser.runQuery(q, null, sisConn)!!
 
     AfterClass fun close() {

@@ -50,7 +50,7 @@ class SisqlUpdater(val table: String, val conn: Connection) : Updater{
          */
         val pkIx: Int = fieldNames!!.indexOf(primaryKey)
         val statement = conn.createStatement()!!
-        if (pkIx > 0) {
+        if (pkIx >= 0) {
             // could be update
             val resultSet = statement.executeQuery("select count(*) from $table where $primaryKey = ${value!![pkIx]}")
             resultSet.next()
