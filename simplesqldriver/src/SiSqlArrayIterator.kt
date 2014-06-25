@@ -20,7 +20,7 @@ import java.sql.ResultSet
 import org.funql.ri.kotlinutil.KNamedImpl
 import org.funql.ri.data.NamedValues
 import kotlin.jdbc.getColumnNames
-import org.funql.ri.kotlinutil.NamedValuesKImpl
+import org.funql.ri.util.NamedValuesImpl
 
 public class SiSqlArrayIterator(name: String, val data: ResultSet) : KNamedImpl(name), FqlIterator
 {
@@ -31,6 +31,7 @@ public class SiSqlArrayIterator(name: String, val data: ResultSet) : KNamedImpl(
             return FqlIterator.sentinel
         val values = Array<Any?>(names.size) { data.getObject(it) }
 
-        return NamedValuesKImpl(names, values);
+        [suppress("CAST_NEVER_SUCCEEDS")]
+        return NamedValuesImpl(names, values as Array<Any>);
     }
 }

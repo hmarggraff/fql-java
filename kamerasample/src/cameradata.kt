@@ -1,11 +1,8 @@
 package org.funql.ri.test.cameradata
 
-import org.funql.ri.test.genericobject.TypeDef
-import org.funql.ri.test.genericobject.FieldDef.*
-import org.funql.ri.test.RandomGenerator.*
-import org.funql.ri.test.genericobject.TestObject
-import org.funql.ri.test.genericobject.Ref
 import java.sql.Date
+import org.funql.ri.test.genericobject.*
+import org.funql.ri.test.randomstrings.*
 
 object CameraData
 {
@@ -95,8 +92,8 @@ object CameraData
                 pick(countryCodes) + " " + nextInt(10000), "C" + nextInt(10000) + "/" + nextInt(64), //
                 pick(countries), //
                 pick(employees), //
-                array(TestObject(employeeType, string8(), makeVorname, makedate(), pick(jobNames), telno()),
-                        TestObject(employeeType, string8(), makeVorname, makedate(), pick(jobNames), telno()))
+                array(TestObject(employeeType, string8(), makeVorname(), makedate(), pick(jobNames), telno()),
+                        TestObject(employeeType, string8(), makeVorname(), makedate(), pick(jobNames), telno()))
         )
 
     fun makedate():Date{

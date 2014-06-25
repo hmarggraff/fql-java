@@ -25,13 +25,13 @@ import org.funql.ri.test.genericobject.TypeDef
 import org.funql.ri.kotlinutil.FqlMaterializedQuery
 import org.funql.ri.test.genericobject.FieldDef
 import org.funql.ri.test.genericobject.TestObject
-import org.funql.ri.sisql.InsertStatementBuilder
 import org.testng.Assert
 import kotlin.test.fail
 import org.funql.ri.test.util.dumpString
 import java.util.ArrayList
 import kotlin.jdbc.getValues
 import org.funql.ri.sisql.SiSqlConnectionDirect
+import org.funql.ri.sisql.InsertStatementBuilder
 
 
 /**
@@ -80,7 +80,7 @@ open class HSqlTestBase
     }
 
     fun writeFieldDefs(fields: Array<FieldDef>, b: StringBuilder, prefix: String? = null) {
-        fields.forEach {
+        for (it in fields) {
             if (it.typ == Types.obj)
                 writeFieldDefs(it.refType!!.fields, b, it.name)
             else if (it.typ != Types.array){
@@ -91,13 +91,13 @@ open class HSqlTestBase
                 }
                 b append it.name
                 b append ' '
-                b append sqltype(it.typ)
+                b.append(sqltype(it.typ))
             }
         }
     }
 
     fun writeData(typ: TypeDef, data: Array<TestObject>, conn: Connection) {
-        val b: InsertStatementBuilder = InsertStatementBuilder(typ.name)
+        val b: InsertStatementBuilder = InsertStatementBuilder(typ.name, conn)
         for (rowNum:Int in (0..data.size - 1)) {
             val testObject: TestObject = data[rowNum]
 
@@ -114,7 +114,7 @@ open class HSqlTestBase
                     b.add(field.name, cellData)
                 }
             }
-            b.addBatch(conn)
+            b.addBatch()
         }
         b.executeBatch()
     }
@@ -132,9 +132,9 @@ open class HSqlTestBase
         }
     }
 
-    fun ResultSet.getColumnNames(): jet.Array<String> {
+    fun ResultSet.getColumnNames(): Array<String> {
         val meta = getMetaData()
-        return jet.Array<String>(meta.getColumnCount(), { meta.getColumnName(it + 1) ?: it.toString() })
+        return Array<String>(meta.getColumnCount(), { meta.getColumnName(it + 1) ?: it.toString() })
     }
 
     protected fun dump(its: FqlIterator): String {

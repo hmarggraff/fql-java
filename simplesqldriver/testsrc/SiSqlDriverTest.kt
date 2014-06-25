@@ -18,7 +18,6 @@ package org.funql.ri.sisql.test
 import java.util.HashMap
 import org.testng.annotations.Test
 import org.testng.Assert
-import org.testng.Assert.assertEquals
 import org.funql.ri.util.ConfigurationError
 import org.funql.ri.sisql.SiSqlConnectionDirect
 

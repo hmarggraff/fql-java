@@ -1,7 +1,6 @@
 package org.funql.ri.jsondriver
 
 import java.util.ArrayList
-import org.funql.ri.data.FunqlConnectionWithRange
 import org.funql.ri.data.FqlDataException
 import org.funql.ri.data.FqlIterator
 import org.funql.ri.data.FqlMapContainer
@@ -9,7 +8,6 @@ import org.yaml.snakeyaml.Yaml
 import org.funql.ri.util.ListFqlIterator
 import java.io.File
 import java.io.FileInputStream
-import org.funql.ri.kotlinutil.KNamedImpl
 import org.funql.ri.exec.Updater
 import org.funql.ri.kotlinutil.KFunqlConnection
 
@@ -19,7 +17,7 @@ public open class JsonConnection(name: String, propsArg: Map<String, String>?) :
 
     fun open(fileName: String): Any? {
         val file = File(fileName)
-        val path = file.getAbsolutePath()
+        //val path = file.getAbsolutePath()
         val readText = props.get(fileName)?: file.readText()
         val data: Any? = if (props.get("allYamlParts") == "true") Yaml().loadAll(readText) else Yaml().load(readText)
         return data
@@ -63,16 +61,16 @@ public open class JsonConnection(name: String, propsArg: Map<String, String>?) :
         throw FqlDataException("Json data '" + getName() + "' is not a map or list.")
     }
 
-    override fun kgetUpdater(targetName: String): Updater? {
+    override fun kgetUpdater(targetName: String, fieldNames: Array<out String>): Updater {
         val f = File(targetName)
         if (f.exists()){
             val parsedJson = open(targetName)
             if (parsedJson is MutableList<*>)
-                return JsonListUpdater(targetName, parsedJson as MutableList<in Any?>)
-            else return JsonMapUpdater(targetName, parsedJson as MutableMap<in Any, in Any?>)
+                return JsonListUpdater(targetName, fieldNames, parsedJson as MutableList<in Any?>)
+            else return JsonMapUpdater(targetName, fieldNames, parsedJson as MutableMap<in Any, in Any?>)
         }
         else
-            return JsonListUpdater(targetName, ArrayList())
+            return JsonListUpdater(targetName, fieldNames, ArrayList())
     }
 
 

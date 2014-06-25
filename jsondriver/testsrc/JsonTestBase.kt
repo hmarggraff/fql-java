@@ -1,3 +1,4 @@
+package org.funql.ri.jsondriver.test
 /**
  * Created by hmf on 03.11.13.
  */

@@ -15,19 +15,12 @@
 
 package org.funql.ri.jsondriver.test
 
-import kotlin.test.assertEquals
 import org.funql.ri.jsondriver.JsonConnection
 import java.util.HashMap
-import java.util.ArrayList
-import org.funql.ri.data.FqlMapContainer
-import org.funql.ri.data.FqlDataException
-import org.funql.ri.data.FqlMultiMapContainer
 import org.funql.ri.data.FqlIterator
 import org.testng.annotations.Test
 import org.testng.Assert
-import org.testng.annotations.AfterClass
 import org.funql.ri.parser.FqlParser
-import org.funql.ri.test.util.dump
 import org.funql.ri.data.FunqlConnection
 import org.funql.ri.kotlinutil.KTestUpdater
 import org.funql.ri.kotlinutil.UpdateTestConnection
@@ -59,14 +52,14 @@ class JsonUpdateTest
     Test fun updater()
     {
         val out = runQuery("[]", "into Out.test put 'x'")
-        val any = out.get("test")!!.values.get(0)
+        val any = out.get("test")!!.data.get(0)
         Assert.assertEquals(any, "x")
     }
 
     Test fun updater2()
     {
         val out = runQuery("[]", "into Out.test put 'x', 3, z: 7.5")
-        val any = out.get("test")!!.values.get(0)
+        val any = out.get("test")!!.data.get(0)
         Assert.assertEquals(any, "x")
     }
 }

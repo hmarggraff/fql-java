@@ -18,15 +18,13 @@ package org.funql.ri.sisql.test
 import org.testng.annotations.Test
 import org.funql.ri.parser.FqlParser
 import org.funql.ri.test.genericobject.TypeDef
-import org.funql.ri.test.genericobject.FieldDef
 import org.testng.annotations.AfterClass
 import java.util.ArrayList
 import org.testng.Assert
 import org.testng.Assert.assertEquals
 import java.sql.ResultSet
 import org.funql.ri.data.FqlDataException
-import org.funql.ri.data.NamedValues
-import org.funql.ri.test.cameradata.CameraData
+import org.funql.ri.test.genericobject.str
 
 
 /**
@@ -34,7 +32,7 @@ import org.funql.ri.test.cameradata.CameraData
  */
 class HSqlUpdateTest : HSqlTestBase()
 {
-    val target: TypeDef = TypeDef("target", FieldDef.str("f"));
+    val target: TypeDef = TypeDef("target", str("f"));
 
     {
         createTable(target, conn)
@@ -95,13 +93,13 @@ class HSqlUpdateTest : HSqlTestBase()
 
     Test fun toplevelInsert() {
         val iterator = run("into target put ID:33, f:'x'")
-        val any = iterator.next()
-        assertEquals((any as NamedValues).getValues()!![0], 33 as Long)
+        val any = iterator.next()!!
+        assertEquals(any.getValues()!![0], 33L)
         val all = readAll("select * from ${target.name}")
         val strings = array("ID", "F")
         assertEquals(all.fields, strings)
         assertEquals(all.values.size(), 1)
-        assertEquals(all.values[0], array(33 as Long, "x"))
+        assertEquals(all.values[0], array(33L, "x"))
 
     }
 
@@ -109,13 +107,13 @@ class HSqlUpdateTest : HSqlTestBase()
     Test(dependsOnMethods=array("toplevelInsert")) fun toplevelUpdate() {
         println("topLevelUpdate")
         val iterator = run("into target put ID:33, f:'y'")
-        val any = iterator.next()
-        assertEquals((any as NamedValues).getValues()!![0], 33 as Long)
+        val any = iterator.next()!!
+        assertEquals(any.getValues()!![0], 33L)
         val all = readAll("select * from ${target.name}")
         val strings = array("ID", "F")
         assertEquals(all.fields, strings)
         assertEquals(all.values.size(), 1)
-        assertEquals(all.values[0], array(33 as Long, "y"))
+        assertEquals(all.values[0], array(33L, "y"))
     }
     fun run(q: String) = FqlParser.runQuery(q, null, sisConn)!!
 

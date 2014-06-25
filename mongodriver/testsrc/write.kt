@@ -1,9 +1,6 @@
 package org.funql.ri.test.kameratest
 
-import java.util.Date
-import java.util.HashMap
 import com.mongodb.Mongo
-import com.mongodb.DBCollection
 import com.mongodb.DBObject
 import com.mongodb.BasicDBList
 import com.mongodb.DBRef
@@ -11,10 +8,10 @@ import org.funql.ri.test.genericobject.Ref
 import org.funql.ri.mongodriver.workaround.BasicDBObjectWrapper
 import org.funql.ri.test.cameradata.CameraData
 import org.funql.ri.test.genericobject.TestObject
-import org.funql.ri.test.genericobject.Key
 import org.funql.ri.test.genericobject.TypeDef
-import org.funql.ri.test.genericobject.FieldDef
-import org.funql.ri.test.genericobject.Types
+import org.funql.ri.test.genericobject.str
+import org.funql.ri.test.genericobject.arr
+import org.funql.ri.test.genericobject.key
 
 
 class TestCameraWrite
@@ -31,7 +28,7 @@ class TestCameraWrite
 
 
     public fun testStoreCameras(): Unit {
-        val literalArrayType = TypeDef("LiteralArray", FieldDef.str("name"), FieldDef.arr("intarray"), FieldDef.arr("stringarray"), FieldDef.key("local_id"))
+        val literalArrayType = TypeDef("LiteralArray", str("name"), arr("intarray"), arr("stringarray"), key("local_id"))
 
         val primeNumbers = intArray(2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31)
         val evenNumbers = intArray(2, 4, 6, 8, 10)
@@ -75,7 +72,7 @@ class TestCameraWrite
                     for (to in v) list.add(toDBObject(to))
                     list
                 }
-                is Ref -> DBRef(db, v.container, (v.target as TestObject).oid)
+                is Ref -> DBRef(db, v.container, v.target.oid)
                 else -> v
             }
             doc.put(k,pv);

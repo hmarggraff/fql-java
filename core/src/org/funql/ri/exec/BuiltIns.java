@@ -3,10 +3,7 @@ package org.funql.ri.exec;
 import org.funql.ri.data.FqlDataException;
 import org.funql.ri.data.FunqlConnection;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  */
@@ -23,8 +20,10 @@ public enum BuiltIns implements FqlBuiltinFunction, Comparable<BuiltIns> {
 		if (argvals[0] instanceof Number) return new Date(((Number) argvals[0]).longValue());
 		else throw new IllegalArgumentException(badArgs(argvals, name()));
 	    } else if (argvals.length == 3) {
-		if (argvals[0] instanceof Number && argvals[1] instanceof Number && argvals[2] instanceof Number)
-		    return new Date(((Number) argvals[0]).intValue(), ((Number) argvals[1]).intValue(), ((Number) argvals[2]).intValue());
+		if (argvals[0] instanceof Number && argvals[1] instanceof Number && argvals[2] instanceof Number) {
+            Calendar c = new GregorianCalendar(((Number) argvals[0]).intValue(), ((Number) argvals[1]).intValue(), ((Number) argvals[2]).intValue());
+            return c.getTime();
+        }
 		else throw new IllegalArgumentException(badArgs(argvals, name()));
 	    } else throw new IllegalArgumentException(badArgs(argvals, name()));
 	}
@@ -75,7 +74,7 @@ public enum BuiltIns implements FqlBuiltinFunction, Comparable<BuiltIns> {
     };
 
     private static String badArgs(Object[] argvals, String name) {
-	StringBuffer sb = new StringBuffer();
+	StringBuilder sb = new StringBuilder();
 	sb.append("Built in function ").append(name).append("cannot be called with argument types: (");
 	for (int i = 0; i < argvals.length; i++) {
 	    Object argval = argvals[i];

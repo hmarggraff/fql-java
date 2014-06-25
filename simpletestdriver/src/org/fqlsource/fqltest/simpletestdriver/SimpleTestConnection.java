@@ -114,8 +114,8 @@ public class SimpleTestConnection extends NamedImpl implements FunqlConnectionWi
     }
 
     @Override
-    public Updater getUpdater(String targetName) {
-	return null;
+    public Updater getUpdater(String targetName, String[] fieldNames) {
+        return null;
     }
 
     @Override

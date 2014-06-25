@@ -1,23 +1,17 @@
-package kotlin.forms
+package org.funql.ri.gui.swing.forms
 
 import javax.swing.JComponent
-import java.util.SortedMap
 import java.util.HashMap
 import javax.swing.JPanel
 import java.awt.GridBagLayout
 import java.awt.Insets
 import java.awt.GridBagConstraints
 import javax.swing.JLabel
-import kotlin.swing.button
-import kotlin.swing.addActionListener
 import javax.swing.JDialog
 import java.awt.Frame
 import javax.swing.BorderFactory
 import javax.swing.border.BevelBorder
 import kotlin.swing.*
-import kotlin.swing.dialog
-import kotlin.swing.borderPanel
-import javax.swing.JTextField
 import javax.swing.text.JTextComponent
 import javax.swing.JComboBox
 import javax.swing.JList
@@ -25,10 +19,8 @@ import javax.swing.event.DocumentListener
 import javax.swing.event.DocumentEvent
 import javax.swing.JButton
 import javax.swing.JTree
-import javax.swing.JTable
-import javax.swing.JFrame
 import java.util.ArrayList
-import javax.swing.text.Document
+import org.funql.ri.gui.swing.dialog
 
 
 fun form(cols: Int, init: FormBuilder.() -> Unit): FormBuilder {
@@ -64,7 +56,7 @@ fun formDialog(owner: Frame?, title: String, cols: Int, init: FormBuilder.() -> 
     return if (g.ok) g.getStringResults() else null
 }
 
-fun name(c: JComponent, nam: String): JComponent {
+fun nameComponent(c: JComponent, nam: String): JComponent {
     c.setName(nam)
     return c
 }
@@ -244,8 +236,7 @@ public open class FormBuilder(val target: JComponent, val cols: Int): GridBagCon
 
     protected fun record(c: JComponent)
     {
-        if (c.getName() != null)
-            values[c.getName()!!] = c
+            values[c.getName()] = c
     }
 
     protected fun validateAll() {

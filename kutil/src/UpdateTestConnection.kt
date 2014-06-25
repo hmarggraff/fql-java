@@ -6,7 +6,6 @@ package org.funql.ri.kotlinutil
 
 
 import org.funql.ri.data.FqlIterator
-import org.funql.ri.kotlinutil.KFunqlConnection
 import org.funql.ri.data.FqlMapContainer
 import org.funql.ri.exec.Updater
 import java.util.HashMap
@@ -33,11 +32,14 @@ class UpdateTestConnection(name:String):KFunqlConnection(name){
     override fun kgetMember(from: Any?, member: String): Any? {
         throw UnsupportedOperationException()
     }
-    override fun kgetUpdater(targetName: String): Updater? {
-        val ret = KTestUpdater(targetName)
+
+
+    override fun kgetUpdater(targetName: String, fieldNames: Array<out String>): Updater {
+        val ret = KTestUpdater(targetName, fieldNames)
         updaters.put(targetName, ret)
         return ret
     }
+
 
     override fun close() {
     }
@@ -46,15 +48,15 @@ class UpdateTestConnection(name:String):KFunqlConnection(name){
 /**
  * an updater that updates a linkedHashMap for later examination in tests
  */
-class KTestUpdater(val name: String):KUpdater(){
-    public val values:LinkedHashMap<Any, Any?> = LinkedHashMap<Any, Any?>()
+class KTestUpdater(val name: String, fieldNames: Array<out String>):KUpdater(fieldNames){
+    public val data:LinkedHashMap<Any, Any?> = LinkedHashMap<Any, Any?>()
 
-    override fun kput(fieldNames: Array<out String>, value: Array<out Any?>): NamedValues {
-        values.put(values.size(), buildMap(fieldNames,value))
-        return NamedValuesImpl("id", values.size()-1)
+    override fun kput(values: Array<out Any?>): NamedValues {
+        data.put(data.size(), buildMap(values))
+        return NamedValuesImpl("id", data.size()-1)
     }
-    override fun kput(fieldNames: Array<out String>, value: Array<out Any?>, key: Any) {
-        values.put(key, buildMap(fieldNames,value))
+    override fun kput(values: Array<out Any?>, key: Any) {
+        data.put(key, buildMap(values))
     }
     override fun commit() {
     }

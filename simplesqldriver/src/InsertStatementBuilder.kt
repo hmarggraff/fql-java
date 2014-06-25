@@ -13,11 +13,12 @@ import java.sql.Statement
  * Created by hmf on 01.11.13.
  */
 
-public class InsertStatementBuilder(val table: String)
+public class InsertStatementBuilder(val table: String,
+                                    connection: Connection)
 {
     val values: ArrayList<Any?> = ArrayList<Any?>()
     val fields: ArrayList<String> = ArrayList<String>()
-    var statement: PreparedStatement? = null
+    val statement: PreparedStatement = initStatement(connection)
 
     fun add(field: String, value: Any?) {
         if (value is TestObject) {
@@ -33,24 +34,25 @@ public class InsertStatementBuilder(val table: String)
         }
     }
 
-    fun addBatch(conn: Connection) {
-        if (statement == null) {
-            val b: StringBuilder = StringBuilder("insert into $table values (")
-            var comma: Boolean = false;
-            for (i in fields) {
-                if (comma)
-                    b.append(',')
-                else
-                    comma = true
+    fun initStatement(connection: Connection) : PreparedStatement {
+        val b: StringBuilder = StringBuilder("insert into $table values (")
+        var comma: Boolean = false;
+        for (i in fields) {
+            if (comma)
+                b.append(',')
+            else
+                comma = true
 
-                b.append("?")
-            }
-            b.append(")")
-            statement = conn.prepareStatement(b.toString(), Statement.RETURN_GENERATED_KEYS)!!
+            b.append("?")
         }
-        putField(statement!!, values)
+        b.append(")")
+        return connection.prepareStatement(b.toString(), Statement.RETURN_GENERATED_KEYS)!!
+    }
+
+    fun addBatch() {
+        putFields(statement, values)
         try {
-            val res = statement!!.addBatch()
+            statement.addBatch()
         } catch (x: Throwable) {
             x.printStackTrace()
             throw x
@@ -58,7 +60,7 @@ public class InsertStatementBuilder(val table: String)
         values.clear()
     }
 
-    fun putField(st: PreparedStatement, vals: List<Any?>) {
+    fun putFields(st: PreparedStatement, vals: List<Any?>) {
         var cnt: Int = 1
         vals.forEach {
             when (it) {
@@ -71,7 +73,7 @@ public class InsertStatementBuilder(val table: String)
                 is Ref -> st.setLong(cnt, it.target.oid)
                 is Key -> st.setLong(cnt, it.target.oid)
                 is TestObject -> {
-                    putField(st, it.values.toList())
+                    putFields(st, it.values.toList())
                 }
                 else -> throw IllegalArgumentException("it: " + it.javaClass)
             }
@@ -81,11 +83,11 @@ public class InsertStatementBuilder(val table: String)
 
     fun executeBatch(): Any? {
 
-        statement!!.executeBatch()
-        val rs = statement!!.getGeneratedKeys()!!
+        statement.executeBatch()
+        val rs = statement.getGeneratedKeys()!!
         if (rs.next()) {
-            val resultSetMetaData = rs.getMetaData()
-            val cc = resultSetMetaData.getColumnCount()
+            /* val resultSetMetaData = */ rs.getMetaData()
+            //val cc = resultSetMetaData.getColumnCount()
             val res = rs.getObject(1)!!
             return res
         }

@@ -9,11 +9,10 @@ import org.funql.ri.data.NamedValues;
 public interface Updater {
     /**
      * puts the values into the database as one record with the names supplied.
-     * @param fieldNames the list of the names to be stored into
-     * @param value the values for each field
+     * @param values the values for each field
      * @return the primary key (OID) for this record
      */
-    public NamedValues put(String[] fieldNames, Object[] value);
-    public void put(String[] fieldNames, Object[] value, Object key);
+    public NamedValues put(Object[] values);
+    public void put(Object[] value, Object key);
     public void commit();
     }

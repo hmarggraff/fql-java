@@ -20,8 +20,7 @@ import java.util.InvalidPropertiesFormatException
 import org.funql.ri.data.FunqlConnection
 import com.mongodb.DBObject
 import org.funql.ri.data.NamedValues
-import org.funql.ri.kotlinutil.namedValuesKImplSingle
-import org.funql.ri.kotlinutil.namedValues4Map
+import org.funql.ri.util.NamedValuesImpl
 
 public class MongoDriver : FunqlDriver {
 
@@ -69,9 +68,9 @@ public class FunqlMongoConnection(name: String, val props: Map<String, String?>)
             throw ConfigurationError("Collection with name " + streamName + " not Found")
     }
 
-    override fun kgetUpdater(targetName: String): Updater {
+    override fun kgetUpdater(targetName: String, fieldNames: Array<out String>): Updater {
         if (mongoDB.collectionExists(targetName))
-            return MongoUpdater(mongoDB.getCollection(getName())!!, writeConcern)
+            return MongoUpdater(mongoDB.getCollection(getName())!!, fieldNames, writeConcern)
         else
             throw ConfigurationError("Collection with name " + targetName + " not Found")
     }
@@ -104,7 +103,7 @@ public class FunqlMongoConnection(name: String, val props: Map<String, String?>)
     private fun wrapIfIterable(value: Any?): Any? = if (value is Iterable<*>) FqlIterator4Iterable(value) else value
 
 
-    public override fun compareTo(s: Named): Int = name1.compareTo(s.getName()!!)
+    public override fun compareTo(other: Named): Int = name1.compareTo(other.getName()!!)
 
 
 }
@@ -114,15 +113,8 @@ public class FunqlMongoIterator(val data: DBCursor) : FqlIterator
     public override fun next(): NamedValues? {
         if (data.hasNext()) {
             val nextObj: DBObject = data.next()
-            if (nextObj is Map<*, *>) // most dbobjects are maps
-            {
-                val dbm: Map<String, Any?> = nextObj as Map<String, Any?>
-                return namedValues4Map(dbm)
-            }
-            else {
-                val dbMap = nextObj.toMap() as Map<String, Any?>
-                return namedValues4Map(dbMap)
-            }
+            val dbObjMap = if (nextObj is Map<*, *>) nextObj as Map<String, Any> else nextObj.toMap() as Map<String, Any>
+            return NamedValuesImpl(dbObjMap)
         } else
             return FqlIterator.sentinel
     }

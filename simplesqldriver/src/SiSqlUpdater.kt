@@ -1,3 +1,5 @@
+package org.funql.ri.sisql
+
 /**
  * Created by hmf on 16.11.13.
  */
@@ -7,13 +9,12 @@
 
 import java.sql.Connection
 import org.funql.ri.util.ConfigurationError
-import org.funql.ri.kotlinutil.indexOf
-import org.funql.ri.exec.Updater
 import org.funql.ri.data.NamedValues
-import org.funql.ri.kotlinutil.namedValuesKImplSingle
-import org.funql.ri.sisql.InsertStatementBuilder
+import org.funql.ri.kotlinutil.KUpdater
+import org.funql.ri.data.FqlDataException
+import org.funql.ri.util.NamedValuesImpl
 
-class SisqlUpdater(val table: String, val conn: Connection) : Updater{
+class SisqlUpdater(val table: String, val conn: Connection, fieldNames: Array<out String>) : KUpdater(fieldNames) {
 
     val primaryKey: String = {
         val databaseMetaData = conn.getMetaData()!!
@@ -22,8 +23,7 @@ class SisqlUpdater(val table: String, val conn: Connection) : Updater{
 
 
 
-        while (primaryKeys.next())
-        {
+        while (primaryKeys.next()) {
             val pk: String? = primaryKeys.getString("COLUMN_NAME");
             if (pk == null)
                 throw ConfigurationError("The Simple SQL driver could not determine the primary key of table " + table)
@@ -38,8 +38,10 @@ class SisqlUpdater(val table: String, val conn: Connection) : Updater{
             ret!!
     }()
 
+    [suppress("CAST_NEVER_SUCCEEDS")]
+    fun namedValuesSingleton(name: String, value: Any?) = NamedValuesImpl(array(name), array<Any?>(value) as Array<Any>)
 
-    override fun put(fieldNames: Array<out String>?, value: Array<out Any>?): NamedValues? {
+    override fun kput(values: Array<out Any?>): NamedValues {
         /**
          * cases:
          * - insert
@@ -48,11 +50,11 @@ class SisqlUpdater(val table: String, val conn: Connection) : Updater{
          * - update
          *   - when primary key is supplied and exists
          */
-        val pkIx: Int = fieldNames!!.indexOf(primaryKey)
+        val pkIx: Int = fieldNames.indexOf(primaryKey)
         val statement = conn.createStatement()!!
         if (pkIx >= 0) {
             // could be update
-            val resultSet = statement.executeQuery("select count(*) from $table where $primaryKey = ${value!![pkIx]}")
+            val resultSet = statement.executeQuery("select count(*) from $table where $primaryKey = ${values[pkIx]}")
             resultSet.next()
             val count: Int = resultSet.getInt(1)
             if (count == 1) {
@@ -61,35 +63,36 @@ class SisqlUpdater(val table: String, val conn: Connection) : Updater{
                 for (i in (0..fieldNames.size - 1)) {
                     if (i > 0)
                         sql.append(',')
-                    if (value[i] is String)
-                        sql.append("${fieldNames[i]}='${value[i]}'")
+                    if (values[i] is String)
+                        sql.append("${fieldNames[i]}='${values[i]}'")
                     else
-                        sql.append("${fieldNames[i]}=${value[i]}")
+                        sql.append("${fieldNames[i]}=${values[i]}")
                 }
 
                 val sqlText = sql.toString()
                 val cnt = statement.executeUpdate(sqlText)
-                return namedValuesKImplSingle(fieldNames[pkIx], value[pkIx])
+                return namedValuesSingleton(fieldNames[pkIx], values[pkIx])
             } else if (count != 0)
                 throw RuntimeException("Internal Error: Primary key can not have a count of: " + count)
+            // else fall through to insert
         }
-        val ins = InsertStatementBuilder(table)
+        val ins = InsertStatementBuilder(table, conn)
         for (fix in fieldNames.indices) {
-            ins.add(fieldNames[fix], value!![fix])
+            ins.add(fieldNames[fix], values[fix])
         }
-        ins.addBatch(conn)
+        ins.addBatch()
         val pks = ins.executeBatch()
         if (pks == null) {
             if (pkIx >= 0)
-                return namedValuesKImplSingle(fieldNames[pkIx], value!![pkIx])
+                return namedValuesSingleton(fieldNames[pkIx], values[pkIx])
             else
-                return null
-        }
-        else
-            return namedValuesKImplSingle(fieldNames[pkIx], pks)
+                throw FqlDataException("put statement could not retrieve keys.")
+        } else
+            return namedValuesSingleton(primaryKey, pks)
     }
 
-    override fun put(fieldNames: Array<out String>?, value: Array<out Any>?, key: Any?): Unit {
+
+    override fun kput(values: Array<out Any?>, key: Any) {
         throw ConfigurationError("Sql does not support external keys.")
     }
     override fun commit() {

@@ -22,7 +22,7 @@ fun List<String?>?.dotJoin(role: String) :String {
     return ret.toString()
 }
 
-public inline fun <K,V> javaHashMap(vararg values: Pair<K, V>): HashMap<K,V> {
+public fun <K,V> javaHashMap(vararg values: Pair<K, V>): HashMap<K,V> {
     val answer = HashMap<K,V>(values.size)
     for (v in values) {
         answer.put(v.first, v.second)

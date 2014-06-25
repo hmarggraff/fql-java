@@ -15,23 +15,7 @@
 
 package org.funql.ri.sisql.test
 
-import java.util.HashMap
 import org.testng.annotations.Test
-import org.funql.ri.data.FqlIterator
-import java.sql.ResultSet
-import org.funql.ri.test.cameradata.CameraData
-import org.funql.ri.test.genericobject.Types
-import org.funql.ri.util.SkipTest
-import java.sql.Connection
-import java.sql.DriverManager
-import org.funql.ri.test.genericobject.TypeDef
-import org.funql.ri.test.genericobject.FieldDef
-import org.funql.ri.test.genericobject.TestObject
-import org.funql.ri.sisql.InsertStatementBuilder
-import org.testng.Assert
-import kotlin.test.fail
-import org.funql.ri.parser.FqlParser
-import org.funql.ri.test.util.dump
 
 
 /**

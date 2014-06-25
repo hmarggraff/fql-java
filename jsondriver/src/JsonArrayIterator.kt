@@ -18,7 +18,7 @@ package org.funql.ri.jsondriver
 import org.funql.ri.data.FqlIterator
 import org.funql.ri.kotlinutil.KNamedImpl
 import org.funql.ri.data.NamedValues
-import org.funql.ri.kotlinutil.NamedValuesKImpl
+import org.funql.ri.util.NamedValuesImpl
 
 public class JsonArrayIterator(name: String, val data: List<Any?>) : KNamedImpl(name), FqlIterator
 {
@@ -29,6 +29,7 @@ public class JsonArrayIterator(name: String, val data: List<Any?>) : KNamedImpl(
         if (pos >= data.size() - 1)
             return FqlIterator.sentinel
         pos = pos + 1;
-        return NamedValuesKImpl(names, array<Any?>(data.get(pos)))
+        [suppress("CAST_NEVER_SUCCEEDS")]
+        return NamedValuesImpl(names, array(data.get(pos)) as Array<Any>)
     }
 }

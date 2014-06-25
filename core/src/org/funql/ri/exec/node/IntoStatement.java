@@ -48,96 +48,94 @@ public class IntoStatement implements FqlStatement {
 
 
     public IntoStatement(String containerName, EntryPointSlot connectionSlot, ArrayList<FqlNodeInterface> fieldList) {
-	this.containerName = containerName;
-	this.connectionSlot = connectionSlot;
-	this.fieldList = fieldList;
+        this.containerName = containerName;
+        this.connectionSlot = connectionSlot;
+        this.fieldList = fieldList;
     }
 
     public FqlIterator execute(final RunEnv env, final FqlIterator precedent) throws FqlDataException {
-	return new FqlIterator() {
-	    final HashSet<String> usedNames = new HashSet<>();
-	    String[] fieldNames = buildFieldNames(fieldList);
-	    final Updater updater = checkNull(env.getConnection(connectionSlot.getIndex()).getUpdater(containerName));
-	    boolean done = false;
+        return new FqlIterator() {
+            final HashSet<String> usedNames = new HashSet<>();
+            String[] fieldNames = buildFieldNames(fieldList);
+            final Updater updater = checkNull(env.getConnection(connectionSlot.getIndex()).getUpdater(containerName, fieldNames));
+            boolean done = false;
 
-	    private Updater checkNull(Updater updater) {
-		if (updater == null) {
-		    FqlNodeInterface node = fieldList.get(0);
-		    throw new FqlAssertionError("The driver for " + containerName + " does not yet support updates", node.getRow(), node.getCol());
-		}
-		return updater;
-	    }
+            private Updater checkNull(Updater updater) {
+                if (updater == null) {
+                    FqlNodeInterface node = fieldList.get(0);
+                    throw new FqlAssertionError("The driver for " + containerName + " does not yet support updates", node.getRow(), node.getCol());
+                }
+                return updater;
+            }
 
 
-	    @Override
-	    public NamedValues next() {
-		Object[] values = new Object[fieldNames.length];
-		NamedValues key;
-		if (precedent != null) {
-		    final Object parent = precedent.next();
-		    if (parent == FqlIterator.sentinel)
-			return FqlIterator.sentinel;
+            @Override
+            public NamedValues next() {
+                Object[] values = new Object[fieldNames.length];
+                NamedValues key;
+                if (precedent != null) {
+                    final Object parent = precedent.next();
+                    if (parent == FqlIterator.sentinel)
+                        return FqlIterator.sentinel;
 
-		    try {
-			env.pushObject(parent);
-			for (int i = 0; i < fieldList.size(); i++) {
-			    FqlNodeInterface node = fieldList.get(i);
-			    Object value = node.getValue(env, parent);
-			    values[i] = value;
-			}
-			key = updater.put(fieldNames, values);
-		    } finally {
-			env.popObject();
-		    }
-		}
-		else // at top
-		{
-		    if (done)
-			return FqlIterator.sentinel;
-		    done = true;
-		    for (int i = 0; i < fieldList.size(); i++) {
-			FqlNodeInterface node = fieldList.get(i);
-			Object value = node.getValue(env, null);
-			values[i] = value;
-		    }
+                    try {
+                        env.pushObject(parent);
+                        for (int i = 0; i < fieldList.size(); i++) {
+                            FqlNodeInterface node = fieldList.get(i);
+                            Object value = node.getValue(env, parent);
+                            values[i] = value;
+                        }
+                        key = updater.put(values);
+                    } finally {
+                        env.popObject();
+                    }
+                } else { // at top
+                    if (done)
+                        return FqlIterator.sentinel;
+                    done = true;
+                    for (int i = 0; i < fieldList.size(); i++) {
+                        FqlNodeInterface node = fieldList.get(i);
+                        Object value = node.getValue(env, null);
+                        values[i] = value;
+                    }
 
-		    key = updater.put(fieldNames, values);
-		}
-		return key;
-	    }
+                    key = updater.put(values);
+                }
+                return key;
+            }
 
-	    private String[] buildFieldNames(ArrayList<FqlNodeInterface> fieldList) {
-		String[] ret = new String[fieldList.size()];
-		for (int i = 0; i < fieldList.size(); i++) {
-		    FqlNodeInterface node = fieldList.get(i);
-		    ret[i] = buildFieldName(node);
-		}
-		return ret;
-	    }
+            private String[] buildFieldNames(ArrayList<FqlNodeInterface> fieldList) {
+                String[] ret = new String[fieldList.size()];
+                for (int i = 0; i < fieldList.size(); i++) {
+                    FqlNodeInterface node = fieldList.get(i);
+                    ret[i] = buildFieldName(node);
+                }
+                return ret;
+            }
 
-	    private String buildFieldName(FqlNodeInterface node) {
-		final String baseName;
-		int i = 1;
-		String ret;
-		StringBuffer fieldNameBuffer = new StringBuffer();
-		node.buildMemberName(fieldNameBuffer);
-		if (fieldNameBuffer.length() > 0) {
-		    baseName = fieldNameBuffer.toString();
-		    ret = baseName;
-		} else if (fieldList.size() == 1)
-		    return "f";
-		else {
-		    baseName = "f";
-		    ret = baseName + i;
-		}
-		while (usedNames.contains(ret)) {
-		    ret = baseName + i;
-		    i++;
-		}
-		usedNames.add(ret);
-		return ret;
-	    }
+            private String buildFieldName(FqlNodeInterface node) {
+                final String baseName;
+                int i = 1;
+                String ret;
+                StringBuffer fieldNameBuffer = new StringBuffer();
+                node.buildMemberName(fieldNameBuffer);
+                if (fieldNameBuffer.length() > 0) {
+                    baseName = fieldNameBuffer.toString();
+                    ret = baseName;
+                } else if (fieldList.size() == 1)
+                    return "f";
+                else {
+                    baseName = "f";
+                    ret = baseName + i;
+                }
+                while (usedNames.contains(ret)) {
+                    ret = baseName + i;
+                    i++;
+                }
+                usedNames.add(ret);
+                return ret;
+            }
 
-	};
+        };
     }
 }

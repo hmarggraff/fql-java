@@ -1,8 +1,20 @@
-package kotlin.swing
+package org.funql.ri.gui.swing
 
 import javax.swing.*
 import java.awt.event.*
 import java.awt.*
+
+
+fun dialog(owner: Frame?, title : String, init : JDialog.() -> Unit) : JDialog {
+  val result = JDialog(owner,title)
+  result.init()
+  return result
+}
+fun dialog(owner: Dialog?, title : String, init : JDialog.() -> Unit) : JDialog {
+  val result = JDialog(owner,title)
+  result.init()
+  return result
+}
 
 public fun toolbar(init: JToolBar.() -> Unit): JToolBar {
     val answer = JToolBar()
@@ -34,7 +46,3 @@ fun JToolBar.button(icon: Icon, toolTip: String? = null, fn: (ActionEvent) -> Un
     add(answer)
     return answer
 }
-
-
-
-

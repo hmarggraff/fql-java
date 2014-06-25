@@ -9,7 +9,6 @@ import java.sql.Connection
 import java.sql.ResultSet
 import org.funql.ri.exec.Updater
 import org.funql.ri.kotlinutil.KFunqlConnection
-import javax.jws.Oneway
 
 public open class SiSqlConnection(name: String, propsArg: Map<String, String>?) : KFunqlConnection(name)
 {
@@ -40,10 +39,7 @@ public open class SiSqlConnection(name: String, propsArg: Map<String, String>?) 
     }
 
 
-    override fun getUpdater(targetName: String?): Updater? {
-        return SisqlUpdater(targetName!!, connection)
-    }
-    override fun kgetUpdater(targetName: String): Updater? = SisqlUpdater(targetName, connection)
+    override fun kgetUpdater(targetName: String, fieldNames: Array<out String>): Updater = SisqlUpdater(targetName, connection, fieldNames)
 
     public override fun kuseMap(name: String, fieldpath: List<String>, single: Boolean): FqlMapContainer {
         if (fieldpath.size() != 1)
@@ -71,7 +67,7 @@ public open class SiSqlConnection(name: String, propsArg: Map<String, String>?) 
             return if (rs.next()) rs.getLong(1) else throw FqlDataException("Cannot retrieve value from sequence: " + sequenceName)
         }
         else
-            return 1 as Long
+            return 1L
     }
 
 }

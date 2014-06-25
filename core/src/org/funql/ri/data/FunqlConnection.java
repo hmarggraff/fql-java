@@ -16,10 +16,8 @@ package org.funql.ri.data;
  */
 
 
-import com.sun.org.apache.xpath.internal.operations.*;
 import org.funql.ri.exec.Updater;
 
-import java.lang.String;
 import java.util.List;
 
 /**
@@ -35,7 +33,13 @@ public interface FunqlConnection
 
     FqlIterator getIterator(String streamName) throws FqlDataException;
 
-    Updater getUpdater(String targetName);
+    /**
+     * Create an updater for the target data sink (table/collection/container)
+     * @param targetName The name of the target container to be updated
+     * @param fieldNames list of field names collected by the parser (may not be null)
+     * @return an Updater using this connection
+     */
+    Updater getUpdater(String targetName, String[] fieldNames);
     Object getMember(Object from, String member);
 
     FqlMapContainer useMap(String name, List<String> fieldpath, boolean single);

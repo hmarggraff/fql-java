@@ -2,30 +2,23 @@ package org.funql.ri.gui
 
 import javax.swing.*
 import kotlin.swing.*
-import kotlin.forms.formDialog
-import kotlin.forms.name
 import java.awt.Desktop
 import java.net.URI
 import java.awt.event.ActionEvent
-import java.io.BufferedReader
-import java.io.FileReader
-import java.io.FileWriter
 import java.io.File
-import java.util.Date
 import javax.swing.event.MenuListener
 import javax.swing.event.MenuEvent
 import org.funql.ri.data.FunqlConnection
-import java.awt.event.ActionListener
-import java.util.HashMap
-import org.funql.ri.gui.SwingView.Reopener
 import java.awt.event.KeyEvent
 import java.awt.event.InputEvent
 import java.net.URL
-import java.awt.event.WindowListener
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 import java.awt.Insets
 import java.awt.Image
+import org.funql.ri.gui.swing.toolbar
+import org.funql.ri.gui.swing.forms.formDialog
+import org.funql.ri.gui.swing.forms.nameComponent
 
 fun main(args: Array<String>): Unit {
     val v = SwingView()
@@ -155,7 +148,7 @@ public class SwingView: TestRunnerView
         ret.setBorder(null)
         ret.setMargin(Insets(1,1,1,1))
         ret.setHideActionText(true)
-        ret.setBackground(null)
+        //ret.setBackground(null)
         return ret
     }
 
@@ -200,7 +193,7 @@ public class SwingView: TestRunnerView
         val values = formDialog(owner, "Use Json Text for a Connection", 2) {
             a("Connection Name", nonEmpty(JTextField(), control.conNameKey))
             a("Json Text")
-            a(1, name(JTextArea(), control.textKey), 1.0, 1.0)
+            a(1, nameComponent(JTextArea(), control.textKey), 1.0, 1.0)
         }
         return values;
     }
@@ -222,8 +215,8 @@ public class SwingView: TestRunnerView
         val values = formDialog(owner, "Connect to a MongoDB", 2) {
             a("Connection Name", 2, nonEmpty(JTextField(), control.conNameKey), 1.0)
             a("Database Name", nonEmpty(JTextField(), control.dbKey), 1.0)
-            a("Host Name", name(JTextField(), control.hostKey), 1.0)
-            a("Port Number", name(JTextField(), control.portKey), 1.0)
+            a("Host Name", nameComponent(JTextField(), control.hostKey), 1.0)
+            a("Port Number", nameComponent(JTextField(), control.portKey), 1.0)
         }
         return values;
     }

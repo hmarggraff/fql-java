@@ -8,8 +8,6 @@ import java.sql.DriverManager
 import java.sql.Connection
 import java.sql.ResultSet
 import org.funql.ri.exec.Updater
-import org.funql.ri.kotlinutil.KFunqlConnection
-import javax.jws.Oneway
 import org.funql.ri.data.FunqlConnection
 import org.funql.ri.util.NameableImpl
 
@@ -41,9 +39,8 @@ public open class SiSqlConnectionDirect(name: String, propsArg: Map<String, Stri
     }
 
 
-    override fun getUpdater(targetName: String?): Updater? {
-        return SisqlUpdater(targetName!!, connection)
-    }
+
+    override fun getUpdater(targetName: String?, fieldNames: Array<out String>?): Updater = SisqlUpdater(targetName!!, connection, fieldNames!!)
 
     public override fun useMap(name: String?, fieldpath: List<String>?, single: Boolean): FqlMapContainer {
         if (fieldpath!!.size() != 1)
@@ -58,7 +55,7 @@ public open class SiSqlConnectionDirect(name: String, propsArg: Map<String, Stri
     {
         connection.close()
     }
-    public override fun getMember(from: Any?, member: String?): Any? = if (from is ResultSet) from.getObject(member) else null
+    public override fun getMember(from: Any?, member: String?): Any? = if (from is ResultSet) from.getObject(member!!) else null
 
     public override fun nextSequenceValue(sequenceName: String?): Any? {
         if (connection.javaClass.getName() == "org.hsqldb.jdbc.JDBCConnection")
@@ -67,7 +64,7 @@ public open class SiSqlConnectionDirect(name: String, propsArg: Map<String, Stri
             return if (rs.next()) rs.getLong(1) else throw FqlDataException("Cannot retrieve value from sequence: " + sequenceName)
         }
         else
-            return 1 as Long
+            return 1L
     }
 
 }

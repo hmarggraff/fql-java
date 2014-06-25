@@ -15,21 +15,9 @@
 
 package org.funql.ri.sisql.test
 
-import java.util.HashMap
 import org.testng.annotations.Test
-import org.funql.ri.data.FqlIterator
-import java.sql.ResultSet
-import org.funql.ri.test.cameradata.CameraData
-import org.funql.ri.test.genericobject.Types
 import org.funql.ri.util.SkipTest
-import java.sql.Connection
-import java.sql.DriverManager
-import org.funql.ri.test.genericobject.TypeDef
-import org.funql.ri.test.genericobject.FieldDef
-import org.funql.ri.test.genericobject.TestObject
-import org.funql.ri.sisql.InsertStatementBuilder
 import org.testng.Assert
-import kotlin.test.fail
 import org.funql.ri.parser.FqlParser
 
 
@@ -61,9 +49,9 @@ class HSqlQueryTest: HSqlCameraDataBase()
         val st = conn.createStatement()!!;
         st.executeUpdate("create sequence testseq2 as integer");
         val res = sisConn.nextSequenceValue("testseq2")
-        Assert.assertEquals(res, 0 as Long)
+        Assert.assertEquals(res, 0L)
         val res2 = sisConn.nextSequenceValue("testseq2")
-        Assert.assertEquals(res2, 1 as Long)
+        Assert.assertEquals(res2, 1L)
     }
 
 
