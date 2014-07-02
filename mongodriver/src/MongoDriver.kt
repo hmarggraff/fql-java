@@ -103,7 +103,7 @@ public class FunqlMongoConnection(name: String, val props: Map<String, String?>)
     private fun wrapIfIterable(value: Any?): Any? = if (value is Iterable<*>) FqlIterator4Iterable(value) else value
 
 
-    public override fun compareTo(other: Named): Int = name1.compareTo(other.getName()!!)
+    //public override fun compareTo(other: Named): Int = name1.compareTo(other.getName()!!)
 
 
 }

@@ -21,6 +21,7 @@ public abstract class KFunqlConnection(name: String): FunqlConnectionWithRange, 
     abstract fun krange(name: String, startKey: String, endKey: String, includeEnd: Boolean): FqlIterator
 
 
+    override fun toString() = getName()
     abstract fun kuseMap(name: String, fieldpath: List<String>, single: Boolean): FqlMapContainer?
     abstract fun kgetMember(from: Any?, member: String): Any?
     abstract fun kgetUpdater(targetName: String, fieldNames: Array<out String>): Updater?

@@ -21,6 +21,7 @@ import javax.swing.JButton
 import javax.swing.JTree
 import java.util.ArrayList
 import org.funql.ri.gui.swing.dialog
+import org.funql.ri.util.KotlinWorkarounds
 
 
 fun form(cols: Int, init: FormBuilder.() -> Unit): FormBuilder {
@@ -120,7 +121,10 @@ public open class FormBuilder(val target: JComponent, val cols: Int): GridBagCon
         addinternal(1, c, wh)
         adjustcoords()
     }
-    public fun a(spanh: Int, c: JComponent, wh: Double, key: String) {
+    public fun a(spanh: Int,
+                 c: JComponent,
+                 key: String,
+                 wh: Double = 1.0) {
         values[key] = c
         addinternal(spanh, c, wh)
         adjustcoords()
@@ -145,6 +149,11 @@ public open class FormBuilder(val target: JComponent, val cols: Int): GridBagCon
         a(spanh, c, wh)
     }
     public fun a(label: String, c: JComponent, wh: Double) {
+        a(JLabel(label))
+        a(1, c, wh)
+    }
+    public fun a(label: String, c: JComponent, key: String, wh: Double) {
+        values[key] = c
         a(JLabel(label))
         a(1, c, wh)
     }
@@ -225,6 +234,11 @@ public open class FormBuilder(val target: JComponent, val cols: Int): GridBagCon
         return c
     }
 
+    public fun selection(values: Array<out Any>):JComboBox<Any>{
+        val combo = JComboBox(values)
+        return combo;
+    }
+
 
     protected fun addinternal(spanh: Int, c: JComponent, wh: Double) {
         weightx = wh
@@ -236,7 +250,9 @@ public open class FormBuilder(val target: JComponent, val cols: Int): GridBagCon
 
     protected fun record(c: JComponent)
     {
-            values[c.getName()] = c
+        val s: String? = KotlinWorkarounds.getComponentName(c)
+        if (s != null)
+            values[s] = c
     }
 
     protected fun validateAll() {

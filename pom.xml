@@ -77,22 +77,6 @@
             </snapshots>
         </pluginRepository>
     </pluginRepositories>
-    <!--repositories>
-        <repository>
-            <id>jetbrains-all</id>
-            <url>http://repository.jetbrains.com/all</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories-->
-
-    <!--pluginRepositories>
-        <pluginRepository>
-            <id>jetbrains-all</id>
-            <url>http://repository.jetbrains.com/all</url>
-        </pluginRepository>
-    </pluginRepositories-->
 
     <dependencyManagement>
         <dependencies>
@@ -105,13 +89,19 @@
                 <groupId>org.testng</groupId>
                 <artifactId>testng</artifactId>
                 <version>${testng.version}</version>
-                <!--scope>test</scope-->
+                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.yaml</groupId>
                 <artifactId>snakeyaml</artifactId>
-                <version>1.12</version>
+                <version>1.13</version>
             </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-jdbc</artifactId>
+                <version>${kotlin.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
     <build>
@@ -153,8 +143,6 @@
 
 
         <pluginManagement>
-
-
             <plugins>
                 <plugin>
                     <artifactId>kotlin-maven-plugin</artifactId>

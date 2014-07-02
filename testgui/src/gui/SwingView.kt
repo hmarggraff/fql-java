@@ -29,17 +29,7 @@ fun main(args: Array<String>): Unit {
 public enum class UserAnswer {yes; no; cancel
 }
 
-public trait TestRunnerView{
-    fun askForSave(): UserAnswer;
-    fun setQueryText(text: String);
-    fun setResultText(text: String);
-    fun getQueryText(): String
-    fun getResultText(): String
-    fun showSaveDialog(title: String): File?
-    fun showOpenDialog(title: String): File?
-    fun error(text: String);
-    fun setTitle(text: String);
-}
+
 public class SwingView: TestRunnerView
 {
     val edQuery = JTextArea("Edit")
@@ -85,6 +75,11 @@ public class SwingView: TestRunnerView
                         val props = mongoDriver(guiFrame)
                         if (props != null)
                             control.createMongoConnection(props)
+                    })
+                    add(action("Relational ...") {
+                        val props = jdbcDriver(guiFrame)
+                        if (props != null)
+                            control.createJdbcConnection(props)
                     })
                 }
                 menu("Edit") { }
@@ -217,6 +212,16 @@ public class SwingView: TestRunnerView
             a("Database Name", nonEmpty(JTextField(), control.dbKey), 1.0)
             a("Host Name", nameComponent(JTextField(), control.hostKey), 1.0)
             a("Port Number", nameComponent(JTextField(), control.portKey), 1.0)
+        }
+        return values;
+    }
+    public fun jdbcDriver(owner: JFrame): MutableMap<String, String>? {
+        val values = formDialog(owner, "Connect to a Relational Database", 2) {
+            a("Connection Name", 2, nonEmpty(JTextField(), control.conNameKey), 1.0)
+            a("Driver", selection(control.getJdbcDrivers()), control.driverKey, 1.0)
+            a("Connection URL", nonEmpty(JTextField(), control.connectionUrlKey), 1.0)
+            a("User name", nameComponent(JTextField(), control.userKey), 1.0)
+            a("Password", nameComponent(JTextField(), control.passwdKey), 1.0)
         }
         return values;
     }
