@@ -30,11 +30,11 @@ public enum class UserAnswer {yes; no; cancel
 }
 
 
-public class SwingView: TestRunnerView
+public class SwingView: RunnerView
 {
     val edQuery = JTextArea("Edit")
     val edResult = JTextArea("Result")
-    val control = TestRunnerControl(this)
+    val control = RunnerControl(this)
     val closemenu = JMenu("Close");
     val runAction = action("Run", "Run the query under the cursor", null, icon("media_play_green.png")) { run() }
     val openAction = action("Open", "Open a file with queries", null, icon("folder_out.png")) { control.openFile() }

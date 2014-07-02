@@ -1,3 +1,0 @@
-Hsql:
- class: org.hsqldb.jdbc.JDBCDriver
- jar: C:\Users\hans_m\.m2\repository\org\hsqldb\hsqldb\2.3.1\hsqldb-2.3.1.jar

@@ -21,7 +21,7 @@ import java.util.SortedMap
 import java.util.TreeMap
 import com.sun.javafx.collections.transformation.SortedList
 
-class TestRunnerControl(val view: TestRunnerView) {
+class RunnerControl(val view: RunnerView) {
 
     public final val conNameKey: String = "conName"
     public final val textKey: String = "text"

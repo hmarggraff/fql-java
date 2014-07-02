@@ -19,7 +19,7 @@
         <module>simpletestdriver</module>
         <module>kamerasample</module>
         <module>mongodriver</module>
-        <module>testgui</module>
+        <module>ui</module>
     </modules>
 
 <profiles>
