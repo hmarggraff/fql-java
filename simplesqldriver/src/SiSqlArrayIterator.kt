@@ -29,7 +29,7 @@ public class SiSqlArrayIterator(name: String, val data: ResultSet) : KNamedImpl(
     override fun next(): NamedValues? {
         if (!data.next())
             return FqlIterator.sentinel
-        val values = Array<Any?>(names.size) { data.getObject(it) }
+        val values = Array<Any?>(names.size) { data.getObject(it+1) }
 
         [suppress("CAST_NEVER_SUCCEEDS")]
         return NamedValuesImpl(names, values as Array<Any>);

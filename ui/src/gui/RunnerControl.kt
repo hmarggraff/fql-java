@@ -241,5 +241,7 @@ class RunnerControl(val view: RunnerView) {
         yaml.dump(_jdbcDrivers, FileWriter("drivers.yaml"))
     }
 
-    public fun removeDriver(name:String){ _jdbcDrivers.remove(name)}
+    public fun removeDriver(name:String){
+        if (_jdbcDrivers != null) _jdbcDrivers!!.remove(name)
+    }
 }

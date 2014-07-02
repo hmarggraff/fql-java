@@ -136,13 +136,13 @@ Aggregations are created with the aggregation operators: sum, min, max, avg, fir
 
 All fields may be assigned to chosen names by writing: name '=' expression.
 
-The default names for the group key is 'key', for the groups values it is 'values'. The default names of aggregations only exists for simple aggregations. (I.e. aggregations of a single field. For these simple aggregations the defult name is the name of the aggregation operator followed by an underscore character ('_') and the name of the field.
+The default names for the group key is 'key', for the groups values it is 'values'. The default names of aggregations only exists for simple aggregations. (I.e. aggregations of a single field. For these simple aggregations the default name is the name of the aggregation operator followed by an underscore character ('_') and the name of the field.
 
 Formulas may be expressed based on the key (and its dependent fields) and aggregations. Formulas have no default name, so a name must always be chosen.
 
 The fields named in the group clause form the scope for subsequent clauses.
 
-A where clause after the group clause references the scope created by the group clause. It behaves like the 'having' clause in SQL.
+A where clause after the group clause references the scope created by the group clause. It is compareable to the 'having' clause in SQL.
 
 The aggregations are operators in FQL and not functions. Thus it is possible to omit the parentheses.
 

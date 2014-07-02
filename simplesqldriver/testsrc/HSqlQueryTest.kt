@@ -26,12 +26,12 @@ import org.funql.ri.parser.FqlParser
  */
 class HSqlQueryTest: HSqlCameraDataBase()
 {
-    SkipTest fun relQuery(){
+    Test fun relQuery(){
         run("from Organisation", "")
 
     }
     SkipTest fun relQuerySel(){
-        run("from Organisation select CITY", "")
+        run("from Organisation select city", "")
     }
 
 
