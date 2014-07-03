@@ -33,8 +33,8 @@
     <profile>
         <id>kotlin-stable</id>
         <properties>
-            <kotlin.version>0.7.270</kotlin.version>
-            <kotlin.maven.version>0.7.270</kotlin.maven.version>
+            <kotlin.version>0.8.11</kotlin.version>
+            <kotlin.maven.version>0.8.11</kotlin.maven.version>
         </properties>
     </profile>
 </profiles>

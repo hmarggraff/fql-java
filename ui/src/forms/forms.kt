@@ -22,6 +22,7 @@ import javax.swing.JTree
 import java.util.ArrayList
 import org.funql.ri.gui.swing.dialog
 import org.funql.ri.util.KotlinWorkarounds
+import java.awt.Color
 
 
 fun form(cols: Int, init: FormBuilder.() -> Unit): FormBuilder {
@@ -172,6 +173,13 @@ public open class FormBuilder(val target: JComponent, val cols: Int): GridBagCon
         a(cols - gridx, c, 1.0)
         row()
     }
+    public fun row(label: String, c: JComponent, key: String) {
+        values[key] = c
+        addinternal(1, JLabel(label), 0.0)
+        adjustcoords()
+        a(cols - gridx, c, 1.0)
+        row()
+    }
 
     public fun row() {
         gridwidth = 1
@@ -228,6 +236,7 @@ public open class FormBuilder(val target: JComponent, val cols: Int): GridBagCon
     }
 
     public fun nonEmpty(c: JTextComponent): JTextComponent {
+        c.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(Color.blue),c.getBorder()))
         okButton.setEnabled(c.getDocument()!!.getLength() > 0)
         c.getDocument()!!.addDocumentListener(validateDocumentChangeListener)
         validators.add(NonEmptyTextValidator(c))

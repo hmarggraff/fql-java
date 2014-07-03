@@ -23,7 +23,7 @@ import com.sun.javafx.collections.transformation.SortedList
 
 class RunnerControl(val view: RunnerView) {
 
-    public final val conNameKey: String = "conName"
+    public final val nameKey: String = "conName"
     public final val textKey: String = "text"
     public final val fileKey: String = "file"
     public final val dbKey: String = "db"
@@ -92,13 +92,13 @@ class RunnerControl(val view: RunnerView) {
             view.error("File ${file} could not be opened.")
     }
     public fun createJsonConnection(props: MutableMap<String, String>): Unit {
-        val ret = JsonConnection(props[conNameKey]!!, props)
+        val ret = JsonConnection(props[nameKey]!!, props)
         connections.add(ret)
         props.set("driverType", "json")
         org.funql.ri.gui.prefs.saveConnection(props)
     }
     public fun createMongoConnection(props: MutableMap<String, String>): Unit {
-        val ret = FunqlMongoConnection(props[conNameKey]!!, props)
+        val ret = FunqlMongoConnection(props[nameKey]!!, props)
         connections.add(ret)
         props.set("driverType", "mongo")
 
@@ -106,7 +106,7 @@ class RunnerControl(val view: RunnerView) {
     }
 
     public fun createJdbcConnection(props: MutableMap<String, String>): Unit {
-        val ret = SiSqlConnection(props[conNameKey]!!, props)
+        val ret = SiSqlConnection(props[nameKey]!!, props)
         connections.add(ret)
         props.set("driverType", "jdbc")
 
@@ -209,9 +209,11 @@ class RunnerControl(val view: RunnerView) {
     public fun getJdbcDrivers(): Array<NamedStringPair> {
         if (_jdbcDrivers == null) {
             val file = File("drivers.yaml")
+            //val path = file.getAbsolutePath()
+            if (!file.exists())
+                extractDriversFromResourcesToFile()
             [suppress("CAST_NEVER_SUCCEEDS")]
             if (file.exists()) {
-                val path = file.getAbsolutePath()
                 _jdbcDrivers = Yaml().load(FileInputStream(file)) as MutableMap<String, Map<String, String>>
                 val driverMap = _jdbcDrivers!!
                 val iterator = driverMap.iterator()
@@ -241,5 +243,11 @@ class RunnerControl(val view: RunnerView) {
         yaml.dump(_jdbcDrivers, FileWriter("drivers.yaml"))
     }
 
-    public fun removeDriver(name:String){ _jdbcDrivers.remove(name)}
+    public fun removeDriver(name:String){ _jdbcDrivers?.remove(name)}
+
+    public fun extractDriversFromResourcesToFile(){
+        val driversUrl = javaClass.getResource("/drivers.yaml")
+        val readBytes = driversUrl!!.readBytes()
+        File("drivers.yaml").writeBytes(readBytes)
+    }
 }
