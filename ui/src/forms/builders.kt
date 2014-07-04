@@ -5,44 +5,64 @@ import java.awt.event.*
 import java.awt.*
 
 
-fun dialog(owner: Frame?, title : String, init : JDialog.() -> Unit) : JDialog {
-  val result = JDialog(owner,title)
-  result.init()
-  return result
+fun dialog(owner: Frame?, title: String, init: JDialog.() -> Unit): JDialog {
+    val ret = JDialog(owner, title)
+    ret.init()
+    return ret
 }
-fun dialog(owner: Dialog?, title : String, init : JDialog.() -> Unit) : JDialog {
-  val result = JDialog(owner,title)
-  result.init()
-  return result
+fun dialog(owner: Dialog?, title: String, init: JDialog.() -> Unit): JDialog {
+    val ret = JDialog(owner, title)
+    ret.init()
+    return ret
 }
 
 public fun toolbar(init: JToolBar.() -> Unit): JToolBar {
-    val answer = JToolBar()
-    answer.setFloatable(false)
-    answer.setLayout(FlowLayout(FlowLayout.LEFT, 5, 0))
+    val ret = JToolBar()
+    ret.setFloatable(false)
+    ret.setLayout(FlowLayout(FlowLayout.LEFT, 5, 0))
 
-    answer.init()
-    return answer;
+    ret.init()
+    return ret;
 }
 
 fun JToolBar.toolbarButton(icon: Icon, toolTip: String? = null, action: Action): JButton {
-    val answer = JButton(icon)
-    if (toolTip != null) answer.setToolTipText(toolTip)
-    answer.setAction(action)
-    add(answer)
-    return answer
+    val ret = JButton(icon)
+    if (toolTip != null) ret.setToolTipText(toolTip)
+    ret.setAction(action)
+    add(ret)
+    return ret
 }
 
 fun JToolBar.button(icon: Icon, toolTip: String? = null, fn: (ActionEvent) -> Unit): JButton {
-    val answer = JButton(icon)
-    if (toolTip != null) answer.setToolTipText(toolTip)
+    val ret = JButton(icon)
+    if (toolTip != null) ret.setToolTipText(toolTip)
 
-    val action = object: AbstractAction() {
+    val action = object : AbstractAction() {
         public override fun actionPerformed(p0: ActionEvent) {
             fn(p0)
         }
     }
-    answer.setAction(action)
-    add(answer)
-    return answer
+    ret.setAction(action)
+    add(ret)
+    return ret
+}
+
+fun button(icon: Icon, toolTip: String? = null, fn: (ActionEvent) -> Unit): JButton {
+
+    val action = object : AbstractAction() {
+        public override fun actionPerformed(p0: ActionEvent) {
+            fn(p0)
+        }
+    }
+    val ret = JButton(action)
+    ret.setIcon(icon)
+    ret.setOpaque(false);
+    ret.setContentAreaFilled(false);
+    ret.setBorderPainted(false);
+    if (toolTip != null) ret.setToolTipText(toolTip)
+    ret.setBorder(null)
+    ret.setMargin(Insets(1, 1, 1, 1))
+
+
+    return ret
 }

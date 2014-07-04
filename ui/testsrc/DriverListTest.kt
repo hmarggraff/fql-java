@@ -30,9 +30,6 @@ class DriverListTest {
     }
 
     Test fun testDriverLoadBasic(){
-        val driversUrl = javaClass.getResource("/drivers.yaml")
-        val readBytes = driversUrl!!.readBytes()
-        val file = File("drivers.yaml").writeBytes(readBytes)
         val view: RunnerView = mock(javaClass<RunnerView>())!!
         val t = RunnerControl(view)
         val drivers = t.getJdbcDrivers()

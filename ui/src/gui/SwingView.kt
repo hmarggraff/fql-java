@@ -19,6 +19,7 @@ import java.awt.Image
 import org.funql.ri.gui.swing.toolbar
 import org.funql.ri.gui.swing.forms.formDialog
 import org.funql.ri.gui.swing.forms.nameComponent
+import org.funql.ri.gui.swing.button
 
 fun main(args: Array<String>): Unit {
     val v = SwingView()
@@ -88,9 +89,9 @@ public class SwingView: RunnerView
              }
             menu("Help") {
                 add(action("Web Help") {
-                    val desktop: Desktop = (if (Desktop.isDesktopSupported()) Desktop.getDesktop() else throw Error("Desktop access not possible to launch web help"))
+                    val desktop: Desktop? = (if (Desktop.isDesktopSupported()) Desktop.getDesktop() else throw Error("Desktop access not possible to launch web help"))
                     try {
-                        desktop.browse(URI("http://www.funql.org/funqlrunner/help"))
+                        desktop?.browse(URI("http://www.funql.org/funqlrunner/help"))
                     } catch (e: Exception) {
                         e.printStackTrace();
                     }
@@ -100,11 +101,11 @@ public class SwingView: RunnerView
 
         }
         north = toolbar(){
-            add(toolbarbutton(openAction))
-            add(toolbarbutton(saveQueryAction))
-            add(toolbarbutton(saveQueryAsAction))
-            add(toolbarbutton(saveResultsAsAction))
-            add(toolbarbutton(runAction))
+            add(iconbutton(openAction))
+            add(iconbutton(saveQueryAction))
+            add(iconbutton(saveQueryAsAction))
+            add(iconbutton(saveResultsAsAction))
+            add(iconbutton(runAction))
         }
         val splitPane = JSplitPane(JSplitPane.HORIZONTAL_SPLIT, JScrollPane(edQuery), JScrollPane(edResult))
         splitPane.setDividerLocation(400)
@@ -129,7 +130,8 @@ public class SwingView: RunnerView
         defineShortcutkey(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.CTRL_MASK), runAction)
         guiFrame.addWindowListener(object: WindowAdapter() {
 
-            public override fun windowClosing(p0: WindowEvent) {
+
+            override fun windowClosing(e: WindowEvent) {
                 control.windowClosing()
             }
         })
@@ -138,12 +140,14 @@ public class SwingView: RunnerView
     }
 
 
-    fun toolbarbutton(action: Action): JButton{
+    fun iconbutton(action: Action): JButton{
         val ret = JButton(action)
         ret.setBorder(null)
         ret.setMargin(Insets(1,1,1,1))
         ret.setHideActionText(true)
-        //ret.setBackground(null)
+        ret.setOpaque(false);
+        ret.setContentAreaFilled(false);
+        ret.setBorderPainted(false);
         return ret
     }
 
@@ -186,7 +190,7 @@ public class SwingView: RunnerView
 
     public fun jsonDriverText(owner: JFrame): MutableMap<String, String>? {
         val values = formDialog(owner, "Use Json Text for a Connection", 2) {
-            a("Connection Name", nonEmpty(JTextField(), control.conNameKey))
+            a("Connection Name", nonEmpty(JTextField(), control.nameKey))
             a("Json Text")
             a(1, nameComponent(JTextArea(), control.textKey), 1.0, 1.0)
         }
@@ -194,7 +198,7 @@ public class SwingView: RunnerView
     }
     public fun jsonDriverFile(owner: JFrame): MutableMap<String, String>? {
         val values = formDialog(owner, "Use Json Text for a Connection", 3) {
-            a("Connection Name", 2, nonEmpty(JTextField(), control.conNameKey), 1.0)
+            a("Connection Name", 2, nonEmpty(JTextField(), control.nameKey), 1.0)
             val edname = nonEmpty(JTextField(), control.fileKey)
             a("Json File", edname, 1.0)
             a(button("..") {
@@ -208,7 +212,7 @@ public class SwingView: RunnerView
 
     public fun mongoDriver(owner: JFrame): MutableMap<String, String>? {
         val values = formDialog(owner, "Connect to a MongoDB", 2) {
-            a("Connection Name", 2, nonEmpty(JTextField(), control.conNameKey), 1.0)
+            a("Connection Name", 2, nonEmpty(JTextField(), control.nameKey), 1.0)
             a("Database Name", nonEmpty(JTextField(), control.dbKey), 1.0)
             a("Host Name", nameComponent(JTextField(), control.hostKey), 1.0)
             a("Port Number", nameComponent(JTextField(), control.portKey), 1.0)
@@ -216,12 +220,22 @@ public class SwingView: RunnerView
         return values;
     }
     public fun jdbcDriver(owner: JFrame): MutableMap<String, String>? {
-        val values = formDialog(owner, "Connect to a Relational Database", 2) {
-            a("Connection Name", 2, nonEmpty(JTextField(), control.conNameKey), 1.0)
+        val values = formDialog(owner, "Connect to a Relational Database", 3) {
+            row("Connection Name", nonEmpty(JTextField(), control.nameKey))
             a("Driver", selection(control.getJdbcDrivers()), control.driverKey, 1.0)
-            a("Connection URL", nonEmpty(JTextField(), control.connectionUrlKey), 1.0)
-            a("User name", nameComponent(JTextField(), control.userKey), 1.0)
-            a("Password", nameComponent(JTextField(), control.passwdKey), 1.0)
+            a(button(icon("add.png"), "Add a jar file with a Jdbc Driver") { addJdbcDriver(owner) })
+            row("Connection URL", nonEmpty(JTextField(), control.connectionUrlKey))
+            row("User name", nameComponent(JTextField(), control.userKey))
+            row("Password", nameComponent(JTextField(), control.passwdKey))
+        }
+        return values;
+    }
+    public fun addJdbcDriver(owner: JFrame): MutableMap<String, String>? {
+        val values = formDialog(owner, "Load a Jdbc Driver", 3) {
+            row("Driver Name", nonEmpty(JTextField(), control.nameKey))
+            row("Driver Class", nonEmpty(JTextField(), control.driverKey))
+            a("Jar File", nameComponent(JTextField(), control.fileKey), 1.0)
+            a(button(icon("folder_out.png"), "Select jar file") {showOpenDialog("Jar File")})
         }
         return values;
     }
@@ -291,13 +305,14 @@ public class SwingView: RunnerView
     override fun setTitle(text: String) = guiFrame.setTitle(text)
     inner class ConnectionCloser(val conn: FunqlConnection): AbstractAction(conn.getName()) {
 
-        public override fun actionPerformed(p0: ActionEvent) {
+
+        override fun actionPerformed(e: ActionEvent) {
             control.close(conn)
         }
     }
     inner class Reopener(val conn: MutableMap<String,String>): AbstractAction(conn[Keys.conName.toString()]!!) {
 
-        public override fun actionPerformed(p0: ActionEvent) {
+        override fun actionPerformed(e: ActionEvent) {
             control.createConnection(conn)
         }
     }
