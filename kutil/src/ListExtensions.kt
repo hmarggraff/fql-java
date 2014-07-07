@@ -1,4 +1,4 @@
-package org.funql.ri.kotlinutil
+package org.funql.ri.kotlinutil.listextensions
 
 import java.util.HashMap
 import java.util.ArrayList

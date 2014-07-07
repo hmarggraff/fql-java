@@ -12,6 +12,8 @@ import java.io.File
 import java.io.FileOutputStream
 import org.funql.ri.kotlinutil.NamedStringPair
 import kotlin.test.assertEquals
+import gui.DriverInfo
+import org.yaml.snakeyaml.Yaml
 
 class DriverListTest {
 
@@ -37,14 +39,16 @@ class DriverListTest {
     }
     Test fun testSaveDrivers(){
         val view: RunnerView = mock(javaClass<RunnerView>())!!
-        val td = array<NamedStringPair>(NamedStringPair("a", "b", "c"), NamedStringPair("1", "2", "3"))
         val t = RunnerControl(view)
+        t.putDriver("1", "2", "3")
+        t.putDriver("a", "b", "c")
+
         t.saveJdbcDrivers()
         val drivers = t.getJdbcDrivers()
         assert(drivers.size == 2)
         assert("1".equals(drivers[0].getName()))
         assert("a".equals(drivers[1].getName()))
-        assert("b".equals(drivers[1].value))
+        assert("b".equals(drivers[1].className))
     }
 
     Test fun testAddDriver(){
@@ -55,8 +59,14 @@ class DriverListTest {
         val found = drivers.first() {
             "a1".equals(it.getName())
         }
-        assertEquals("b2", found.value)
-        assertEquals("c3",found.value2)
+        assertEquals("b2", found.className)
+        assertEquals("c3",found.jar)
+    }
+   Test fun testYaml(){
+       val drivers = array(DriverInfo("a1", "b2", "c3"), DriverInfo("a", "b", "c"))
+       val y = Yaml()
+       val s = y.dump(drivers[0].asMap())
+       assertEquals("{jar: c3, name: a1, class: b2}\n", s)
     }
 
 }

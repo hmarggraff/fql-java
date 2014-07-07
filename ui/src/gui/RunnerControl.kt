@@ -10,35 +10,32 @@ import org.funql.ri.parser.FqlParser
 import org.funql.ri.mongodriver.FunqlMongoConnection
 import com.mongodb.DBRef
 import org.funql.ri.data.FqlIterator
-import org.funql.ri.data.NamedValues
 import org.yaml.snakeyaml.Yaml
-import org.funql.ri.kotlinutil.NamedString
 import org.funql.ri.sisql.SiSqlConnection
 import java.io.FileInputStream
-import org.funql.ri.kotlinutil.NamedStringPair
 import java.util.HashMap
-import java.util.SortedMap
-import java.util.TreeMap
-import com.sun.javafx.collections.transformation.SortedList
+import org.funql.ri.classloading.JarClassLoader
 
 class RunnerControl(val view: RunnerView) {
 
-    public final val nameKey: String = "conName"
+    public final val nameKey: String = "name"
+    public final val driverKey: String = "driver"
+    public final val infoKey: String = "info"
     public final val textKey: String = "text"
     public final val fileKey: String = "file"
     public final val dbKey: String = "db"
     public final val hostKey: String = "host"
     public final val portKey: String = "port"
     public final val userKey: String = "user"
-    public final val passwdKey: String = "password"
-    public final val driverKey: String = "driver_class"
-    public final val connectionUrlKey: String = "connection"
+    public final val passwdKey: String = "pwd"
+    public final val classKey: String = "class"
+    public final val driverClassKey: String = "driver_class"
+    public final val connKey: String = "connection"
 
     var textChanged = false;
     var funqlFile: File? = null;
     val connections = ArrayList<FunqlConnection>()
-    private var _jdbcDrivers: MutableMap<String, Map<String,String>>? = null
-
+    private var _jdbcDrivers: MutableMap<String, Map<String, String>>? = null
 
 
     fun writeFile(file: File, text: String) {
@@ -106,9 +103,18 @@ class RunnerControl(val view: RunnerView) {
     }
 
     public fun createJdbcConnection(props: MutableMap<String, String>): Unit {
+        val className: String = props[classKey]!!
+        val jarFile = props[fileKey]!!
+        try {
+            JarClassLoader.loadClassFromJar(className, jarFile)
+            saveJdbcDrivers()
+        } catch (ex: ClassNotFoundException) {
+            view.error("Class $className not found or invalid in jar: $jarFile.")
+            return
+        }
+        props.set("driverType", "jdbc")
         val ret = SiSqlConnection(props[nameKey]!!, props)
         connections.add(ret)
-        props.set("driverType", "jdbc")
 
         org.funql.ri.gui.prefs.saveConnection(props)
     }
@@ -204,9 +210,9 @@ class RunnerControl(val view: RunnerView) {
     }
 
     fun startUi() {
-        view.setQueryText(prefs.getQueryText()?:"")
+        view.setQueryText(prefs.getQueryText() ?: "")
     }
-    public fun getJdbcDrivers(): Array<NamedStringPair> {
+    public fun getJdbcDrivers(): Array<Map<String, String>> {
         if (_jdbcDrivers == null) {
             val file = File("drivers.yaml")
             //val path = file.getAbsolutePath()
@@ -215,24 +221,19 @@ class RunnerControl(val view: RunnerView) {
             [suppress("CAST_NEVER_SUCCEEDS")]
             if (file.exists()) {
                 _jdbcDrivers = Yaml().load(FileInputStream(file)) as MutableMap<String, Map<String, String>>
-                val driverMap = _jdbcDrivers!!
-                val iterator = driverMap.iterator()
-                val driverArray = Array<NamedStringPair>(driverMap.size) {
-                    val at = iterator.next();
-                    NamedStringPair(at.key, at.value["class"]!!, at.value["jar"]!!)
-                }
-                driverArray.sort()
-                return driverArray
-            }
+            } else
+                _jdbcDrivers = HashMap<String, Map<String, String>>()
         }
-        return arrayOfNulls<NamedStringPair>(0) as Array<NamedStringPair>
+
+        val driverArray = _jdbcDrivers!!.values().copyToArray()
+        driverArray.sort()
+        return driverArray
     }
-    public fun putDriver(name: String, klass: String, jar: String) {
-        val new = NamedStringPair(name, klass, jar)
+    public fun putDriver(driverInfo: Map<String, String>) {
         if (_jdbcDrivers == null)
             _jdbcDrivers = HashMap<String, Map<String, String>>()
 
-        _jdbcDrivers!!.put(name,hashMapOf<String, String>(Pair<String, String>("class", klass), Pair("jar",jar)))
+        _jdbcDrivers!!.put(driverInfo[driverKey]!!, driverInfo)
         saveJdbcDrivers()
     }
 
@@ -243,9 +244,11 @@ class RunnerControl(val view: RunnerView) {
         yaml.dump(_jdbcDrivers, FileWriter("drivers.yaml"))
     }
 
-    public fun removeDriver(name:String){ _jdbcDrivers?.remove(name)}
+    public fun removeDriver(name: String) {
+        _jdbcDrivers?.remove(name)
+    }
 
-    public fun extractDriversFromResourcesToFile(){
+    public fun extractDriversFromResourcesToFile() {
         val driversUrl = javaClass.getResource("/drivers.yaml")
         val readBytes = driversUrl!!.readBytes()
         File("drivers.yaml").writeBytes(readBytes)

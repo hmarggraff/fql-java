@@ -23,6 +23,7 @@ import java.util.ArrayList
 import org.funql.ri.gui.swing.dialog
 import org.funql.ri.util.KotlinWorkarounds
 import java.awt.Color
+import org.funql.ri.kotlinutil.mapextensions.toStringMap
 
 
 fun form(cols: Int, init: FormBuilder.() -> Unit): FormBuilder {
@@ -32,7 +33,7 @@ fun form(cols: Int, init: FormBuilder.() -> Unit): FormBuilder {
     return g
 }
 
-fun formDialog(owner: Frame?, title: String, cols: Int, init: FormBuilder.() -> Unit): MutableMap<String, String>? {
+fun formDialog(owner: Frame?, title: String, cols: Int, init: FormBuilder.() -> Unit): MutableMap<String, Any>? {
     val p = JPanel(GridBagLayout())
     val g = FormBuilder(p, cols)
     g.init()
@@ -55,8 +56,10 @@ fun formDialog(owner: Frame?, title: String, cols: Int, init: FormBuilder.() -> 
     }
     dialog.south = buttons
     dialog.setVisible(true)
-    return if (g.ok) g.getStringResults() else null
+    return if (g.ok) g.getResults() else null
 }
+
+fun formDialogStrings(owner: Frame?, title: String, cols: Int, init: FormBuilder.() -> Unit): MutableMap<String, String>? = toStringMap(formDialog(owner,title,cols,init))
 
 fun nameComponent(c: JComponent, nam: String): JComponent {
     c.setName(nam)
@@ -207,7 +210,7 @@ public open class FormBuilder(val target: JComponent, val cols: Int): GridBagCon
     }
 
 
-    fun JComponent.textOf(): String? {
+    fun JComponent.extract(): Any? {
         val v: Any? = when (this){
             is JTextComponent -> getText()
             is JComboBox<*> -> getSelectedItem()
@@ -215,16 +218,13 @@ public open class FormBuilder(val target: JComponent, val cols: Int): GridBagCon
             is JTree -> getSelectionModel()?.getSelectionPath()?.getLastPathComponent()
             else -> null
         }
-        val string = v?.toString()?.trim()
-        if (string != null && string.size > 0)
-            return string;
-        return null
+        return v
     }
 
-    public fun getStringResults(): MutableMap<String, String> {
-        val ret: HashMap<String, String> = HashMap<String, String>()
+    public fun getResults(): MutableMap<String, Any> {
+        val ret = HashMap<String, Any>()
         values.entrySet().forEach{
-            val value = it.value.textOf()
+            val value = it.value.extract()
             if (value != null) ret.put(it.getKey(), value)
         }
         return ret
@@ -241,11 +241,6 @@ public open class FormBuilder(val target: JComponent, val cols: Int): GridBagCon
         c.getDocument()!!.addDocumentListener(validateDocumentChangeListener)
         validators.add(NonEmptyTextValidator(c))
         return c
-    }
-
-    public fun selection(values: Array<out Any>):JComboBox<Any>{
-        val combo = JComboBox(values)
-        return combo;
     }
 
 

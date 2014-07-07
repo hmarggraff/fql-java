@@ -47,6 +47,17 @@ fun JToolBar.button(icon: Icon, toolTip: String? = null, fn: (ActionEvent) -> Un
     return ret
 }
 
+public fun selection(values: Array<out Any>):JComboBox<Any>{
+    val combo = JComboBox(values)
+    return combo;
+}
+public fun selection<T>(model: ComboBoxModel<T>):JComboBox<T>{
+    val combo = JComboBox<T>(model)
+    return combo;
+}
+
+
+
 fun button(icon: Icon, toolTip: String? = null, fn: (ActionEvent) -> Unit): JButton {
 
     val action = object : AbstractAction() {
@@ -66,3 +77,5 @@ fun button(icon: Icon, toolTip: String? = null, fn: (ActionEvent) -> Unit): JBut
 
     return ret
 }
+
+

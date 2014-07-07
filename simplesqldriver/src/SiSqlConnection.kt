@@ -9,6 +9,7 @@ import java.sql.Connection
 import java.sql.ResultSet
 import org.funql.ri.exec.Updater
 import org.funql.ri.kotlinutil.KFunqlConnection
+import org.funql.ri.classloading.JarClassLoader
 
 public open class SiSqlConnection(name: String, propsArg: Map<String, String>?) : KFunqlConnection(name)
 {
@@ -23,7 +24,7 @@ public open class SiSqlConnection(name: String, propsArg: Map<String, String>?) 
         val driver_classStr = props.get("driver_class")
         if (connectionStr != null && userStr != null && passwdStr != null && driver_classStr != null)
         {
-            Class.forName(driver_classStr)
+            JarClassLoader.loadClass(driver_classStr)
             return DriverManager.getConnection(connectionStr, userStr, passwdStr)
         }
         else

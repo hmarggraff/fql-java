@@ -44,7 +44,6 @@ object JarClassLoader {
             ret[depth + i] = urls[i].getFile()!!
         return ret
     }
-
 }
 
 

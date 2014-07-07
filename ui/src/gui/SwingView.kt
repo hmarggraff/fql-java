@@ -19,7 +19,11 @@ import java.awt.Image
 import org.funql.ri.gui.swing.toolbar
 import org.funql.ri.gui.swing.forms.formDialog
 import org.funql.ri.gui.swing.forms.nameComponent
+import org.funql.ri.gui.swing.selection
 import org.funql.ri.gui.swing.button
+import org.funql.ri.kotlinutil.mapextensions.toStringMap
+import org.funql.ri.gui.swing.forms.formDialogStrings
+import java.util.HashMap
 
 fun main(args: Array<String>): Unit {
     val v = SwingView()
@@ -31,8 +35,7 @@ public enum class UserAnswer {yes; no; cancel
 }
 
 
-public class SwingView: RunnerView
-{
+public class SwingView : RunnerView {
     val edQuery = JTextArea("Edit")
     val edResult = JTextArea("Result")
     val control = RunnerControl(this)
@@ -50,7 +53,7 @@ public class SwingView: RunnerView
         exitOnClose()
         setIconImage(image("transform2.png"))
 
-        jmenuBar = menuBar{
+        jmenuBar = menuBar {
             menu("File") {
                 add(openAction)
                 add(previous())
@@ -63,7 +66,7 @@ public class SwingView: RunnerView
             menu("Connections") {
                 menu("Open") {
                     add(action("Open Json Text ...") {
-                        val props: MutableMap<String, String>? = jsonDriverText(guiFrame)
+                        val props = jsonDriverText(guiFrame)
                         if (props != null)
                             control.createJsonConnection(props)
                     })
@@ -73,20 +76,21 @@ public class SwingView: RunnerView
                             control.createJsonConnection(props)
                     })
                     add(action("MongoDB ...") {
-                        val props = mongoDriver(guiFrame)
-                        if (props != null)
-                            control.createMongoConnection(props)
+                        val mprops = mongoDriver(guiFrame)
+                        if (mprops != null)
+                            control.createMongoConnection(mprops)
                     })
                     add(action("Relational ...") {
-                        val props = jdbcDriver(guiFrame)
-                        if (props != null)
-                            control.createJdbcConnection(props)
+                        val relprops: MutableMap<String, String>? = jdbcDriver(guiFrame)
+                        if (relprops != null) {
+                            control.createJdbcConnection(relprops)
+                        }
                     })
                 }
                 menu("Edit") { }
 
                 add(closemenu)
-             }
+            }
             menu("Help") {
                 add(action("Web Help") {
                     val desktop: Desktop? = (if (Desktop.isDesktopSupported()) Desktop.getDesktop() else throw Error("Desktop access not possible to launch web help"))
@@ -100,7 +104,7 @@ public class SwingView: RunnerView
 
 
         }
-        north = toolbar(){
+        north = toolbar() {
             add(iconbutton(openAction))
             add(iconbutton(saveQueryAction))
             add(iconbutton(saveQueryAsAction))
@@ -112,23 +116,25 @@ public class SwingView: RunnerView
         center = splitPane
     };
     {
-        closemenu.addMenuListener(object: MenuListener {
+        closemenu.addMenuListener(object : MenuListener {
 
             public override fun menuSelected(p0: MenuEvent?) {
                 closemenu.removeAll()
-                control.connections.forEach{
+                control.connections.forEach {
                     closemenu.add(ConnectionCloser(it))
                 }
             }
-            public override fun menuDeselected(p0: MenuEvent?) { }
-            public override fun menuCanceled(p0: MenuEvent?) { }
+            public override fun menuDeselected(p0: MenuEvent?) {
+            }
+            public override fun menuCanceled(p0: MenuEvent?) {
+            }
         })
-        defineShortcutkey(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_MASK), action("Search") {showsearch()})
+        defineShortcutkey(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_MASK), action("Search") { showsearch() })
         defineShortcutkey(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK), openAction)
         defineShortcutkey(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK), saveQueryAction)
         defineShortcutkey(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK or InputEvent.SHIFT_MASK), saveQueryAsAction)
         defineShortcutkey(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.CTRL_MASK), runAction)
-        guiFrame.addWindowListener(object: WindowAdapter() {
+        guiFrame.addWindowListener(object : WindowAdapter() {
 
 
             override fun windowClosing(e: WindowEvent) {
@@ -140,10 +146,10 @@ public class SwingView: RunnerView
     }
 
 
-    fun iconbutton(action: Action): JButton{
+    fun iconbutton(action: Action): JButton {
         val ret = JButton(action)
         ret.setBorder(null)
-        ret.setMargin(Insets(1,1,1,1))
+        ret.setMargin(Insets(1, 1, 1, 1))
         ret.setHideActionText(true)
         ret.setOpaque(false);
         ret.setContentAreaFilled(false);
@@ -152,11 +158,10 @@ public class SwingView: RunnerView
     }
 
 
-
-    public fun defineShortcutkey(key : KeyStroke?, action : Action?) : Unit {
-        var im : InputMap? = guiFrame.getRootPane()?.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+    public fun defineShortcutkey(key: KeyStroke?, action: Action?): Unit {
+        var im: InputMap? = guiFrame.getRootPane()?.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
         im?.put(key, action)
-        var am : ActionMap? = guiFrame.getRootPane()?.getActionMap()
+        var am: ActionMap? = guiFrame.getRootPane()?.getActionMap()
         am?.put(action, action)
     }
 
@@ -164,7 +169,7 @@ public class SwingView: RunnerView
     }
 
 
-        fun previous():JMenu{
+    fun previous(): JMenu {
         val connections = org.funql.ri.gui.prefs.getConnections()
         val ret = JMenu("Reopen ..")
         connections.forEach {
@@ -175,21 +180,19 @@ public class SwingView: RunnerView
 
     fun run() {
         var sel: String? = edQuery.getSelectedText()
-        val q = if (sel == null || sel?.length == 0)
-        {
+        val q = if (sel == null || sel?.length == 0) {
             val query: String = edQuery.getText()!!
             val pos = edQuery.getCaretPosition()
             val start = query.lastIndexOf("\n\n", pos)
             val end = query.indexOf("\n\n", pos)
-            query.substring(if(start >= 0) start + 2 else 0, if (end >= 0) end else query.length)
-        }
-        else
+            query.substring(if (start >= 0) start + 2 else 0, if (end >= 0) end else query.length)
+        } else
             sel
         control.run(q!!)
     }
 
     public fun jsonDriverText(owner: JFrame): MutableMap<String, String>? {
-        val values = formDialog(owner, "Use Json Text for a Connection", 2) {
+        val values = formDialogStrings(owner, "Use Json Text for a Connection", 2) {
             a("Connection Name", nonEmpty(JTextField(), control.nameKey))
             a("Json Text")
             a(1, nameComponent(JTextArea(), control.textKey), 1.0, 1.0)
@@ -197,7 +200,7 @@ public class SwingView: RunnerView
         return values;
     }
     public fun jsonDriverFile(owner: JFrame): MutableMap<String, String>? {
-        val values = formDialog(owner, "Use Json Text for a Connection", 3) {
+        val values = formDialogStrings(owner, "Use Json Text for a Connection", 3) {
             a("Connection Name", 2, nonEmpty(JTextField(), control.nameKey), 1.0)
             val edname = nonEmpty(JTextField(), control.fileKey)
             a("Json File", edname, 1.0)
@@ -211,7 +214,7 @@ public class SwingView: RunnerView
     }
 
     public fun mongoDriver(owner: JFrame): MutableMap<String, String>? {
-        val values = formDialog(owner, "Connect to a MongoDB", 2) {
+        val values = formDialogStrings(owner, "Connect to a MongoDB", 2) {
             a("Connection Name", 2, nonEmpty(JTextField(), control.nameKey), 1.0)
             a("Database Name", nonEmpty(JTextField(), control.dbKey), 1.0)
             a("Host Name", nameComponent(JTextField(), control.hostKey), 1.0)
@@ -220,24 +223,44 @@ public class SwingView: RunnerView
         return values;
     }
     public fun jdbcDriver(owner: JFrame): MutableMap<String, String>? {
-        val values = formDialog(owner, "Connect to a Relational Database", 3) {
+        val comboBoxModel = DefaultComboBoxModel<Map<String, String>>(control.getJdbcDrivers())
+
+        val from = formDialog(owner, "Connect to a Relational Database", 3) {
             row("Connection Name", nonEmpty(JTextField(), control.nameKey))
-            a("Driver", selection(control.getJdbcDrivers()), control.driverKey, 1.0)
-            a(button(icon("add.png"), "Add a jar file with a Jdbc Driver") { addJdbcDriver(owner) })
-            row("Connection URL", nonEmpty(JTextField(), control.connectionUrlKey))
+            a("Driver", selection(comboBoxModel), control.infoKey, 1.0)
+            a(button(icon("add.png"), "Add a jar file with a Jdbc Driver") {
+                val jdbcDriverInfo = addJdbcDriver(owner)
+                if (jdbcDriverInfo != null) comboBoxModel.addElement(jdbcDriverInfo)
+                comboBoxModel.setSelectedItem(jdbcDriverInfo)
+            })
+            row("Connection URL", nonEmpty(JTextField(), control.connKey))
             row("User name", nameComponent(JTextField(), control.userKey))
             row("Password", nameComponent(JTextField(), control.passwdKey))
         }
-        return values;
+        if (from != null) {
+            val ret: MutableMap<String, String> = HashMap<String, String>()
+            from.entrySet().forEach {
+                val value = it.value
+                if (value is String) ret.put(it.getKey(), value)
+            }
+            val driverInfo = from[control.infoKey] as Map<String, String>
+            ret.putAll(driverInfo)
+            return ret
+        } else return null
     }
-    public fun addJdbcDriver(owner: JFrame): MutableMap<String, String>? {
-        val values = formDialog(owner, "Load a Jdbc Driver", 3) {
-            row("Driver Name", nonEmpty(JTextField(), control.nameKey))
-            row("Driver Class", nonEmpty(JTextField(), control.driverKey))
-            a("Jar File", nameComponent(JTextField(), control.fileKey), 1.0)
-            a(button(icon("folder_out.png"), "Select jar file") {showOpenDialog("Jar File")})
+
+    public fun addJdbcDriver(owner: JFrame): Map<String, String>? {
+        val fileField = JTextField()
+        val values = formDialogStrings(owner, "Load a Jdbc Driver", 3) {
+            row("Driver Name", nonEmpty(JTextField(), control.driverKey))
+            row("Driver Class", nonEmpty(JTextField(), control.driverClassKey))
+            a("Jar File", nameComponent(fileField, control.fileKey), 1.0)
+            a(button(icon("folder_out.png"), "Select jar file") {
+                val file: File? = showOpenDialog("Jar File")
+                fileField.setText(file?.getAbsolutePath())
+            })
         }
-        return values;
+        return values
     }
 
     override fun askForSave(): UserAnswer {
@@ -250,40 +273,33 @@ public class SwingView: RunnerView
         val fc = JFileChooser()
         fc.setDialogTitle(title)
         val ret = fc.showSaveDialog(guiFrame)
-        if (ret == JFileChooser.APPROVE_OPTION)
-        {
+        if (ret == JFileChooser.APPROVE_OPTION) {
             return fc.getSelectedFile()
         }
         return null;
     }
 
-    protected fun icon(name : String) : Icon {
-        try
-        {
-            val u : URL? = javaClass<SwingView>().getResource("icons/" + name)
-            if (u == null)
-            {
+    protected fun icon(name: String): Icon {
+        try {
+            val u: URL? = javaClass<SwingView>().getResource("icons/" + name)
+            if (u == null) {
                 System.out.println("Icon " + name + " not found.")
-                return javax.swing.plaf.metal.MetalIconFactory.getRadioButtonIcon()!!
-            }
-            else
+                return javax.swing.plaf.metal.MetalIconFactory.getFileChooserHomeFolderIcon()!!
+            } else
                 return ImageIcon(u)
-        }
-        catch (ex : Exception) {
+        } catch (ex: Exception) {
             System.out.println("Icon " + name + " could not be read.")
-            return javax.swing.plaf.metal.MetalIconFactory.getRadioButtonIcon()!!
+            return javax.swing.plaf.metal.MetalIconFactory.getFileChooserHomeFolderIcon()!!
 
         }
 
     }
 
-    protected fun image(name : String) : Image? {
-        try
-        {
-            val u : URL? = javaClass<SwingView>().getResource("icons/" + name)
+    protected fun image(name: String): Image? {
+        try {
+            val u: URL? = javaClass<SwingView>().getResource("icons/" + name)
             if (u != null) return ImageIcon(u).getImage()
-        }
-        catch (ex : Exception) {
+        } catch (ex: Exception) {
             System.out.println("Icon " + name + " could not be read.")
         }
         return null
@@ -303,14 +319,14 @@ public class SwingView: RunnerView
     }
     override fun error(text: String) = JOptionPane.showMessageDialog(guiFrame, text)
     override fun setTitle(text: String) = guiFrame.setTitle(text)
-    inner class ConnectionCloser(val conn: FunqlConnection): AbstractAction(conn.getName()) {
+    inner class ConnectionCloser(val conn: FunqlConnection) : AbstractAction(conn.getName()) {
 
 
         override fun actionPerformed(e: ActionEvent) {
             control.close(conn)
         }
     }
-    inner class Reopener(val conn: MutableMap<String,String>): AbstractAction(conn[Keys.conName.toString()]!!) {
+    inner class Reopener(val conn: MutableMap<String, String>) : AbstractAction(conn[Keys.conName.toString()]!!) {
 
         override fun actionPerformed(e: ActionEvent) {
             control.createConnection(conn)
