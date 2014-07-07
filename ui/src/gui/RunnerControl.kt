@@ -16,8 +16,7 @@ import java.io.FileInputStream
 import java.util.HashMap
 import org.funql.ri.classloading.JarClassLoader
 
-class RunnerControl(val view: RunnerView) {
-
+object GuiKeys {
     public final val nameKey: String = "name"
     public final val driverKey: String = "driver"
     public final val infoKey: String = "info"
@@ -31,7 +30,9 @@ class RunnerControl(val view: RunnerView) {
     public final val classKey: String = "class"
     public final val driverClassKey: String = "driver_class"
     public final val connKey: String = "connection"
+}
 
+class RunnerControl(val view: RunnerView) {
     var textChanged = false;
     var funqlFile: File? = null;
     val connections = ArrayList<FunqlConnection>()
@@ -89,13 +90,13 @@ class RunnerControl(val view: RunnerView) {
             view.error("File ${file} could not be opened.")
     }
     public fun createJsonConnection(props: MutableMap<String, String>): Unit {
-        val ret = JsonConnection(props[nameKey]!!, props)
+        val ret = JsonConnection(props[GuiKeys.nameKey]!!, props)
         connections.add(ret)
         props.set("driverType", "json")
         org.funql.ri.gui.prefs.saveConnection(props)
     }
     public fun createMongoConnection(props: MutableMap<String, String>): Unit {
-        val ret = FunqlMongoConnection(props[nameKey]!!, props)
+        val ret = FunqlMongoConnection(props[GuiKeys.nameKey]!!, props)
         connections.add(ret)
         props.set("driverType", "mongo")
 
@@ -103,8 +104,8 @@ class RunnerControl(val view: RunnerView) {
     }
 
     public fun createJdbcConnection(props: MutableMap<String, String>): Unit {
-        val className: String = props[classKey]!!
-        val jarFile = props[fileKey]!!
+        val className: String = props[GuiKeys.classKey]!!
+        val jarFile = props[GuiKeys.fileKey]!!
         try {
             JarClassLoader.loadClassFromJar(className, jarFile)
             saveJdbcDrivers()
@@ -113,7 +114,7 @@ class RunnerControl(val view: RunnerView) {
             return
         }
         props.set("driverType", "jdbc")
-        val ret = SiSqlConnection(props[nameKey]!!, props)
+        val ret = SiSqlConnection(props[GuiKeys.nameKey]!!, props)
         connections.add(ret)
 
         org.funql.ri.gui.prefs.saveConnection(props)
@@ -233,7 +234,7 @@ class RunnerControl(val view: RunnerView) {
         if (_jdbcDrivers == null)
             _jdbcDrivers = HashMap<String, Map<String, String>>()
 
-        _jdbcDrivers!!.put(driverInfo[driverKey]!!, driverInfo)
+        _jdbcDrivers!!.put(driverInfo[GuiKeys.driverKey]!!, driverInfo)
         saveJdbcDrivers()
     }
 
@@ -241,7 +242,7 @@ class RunnerControl(val view: RunnerView) {
         if (_jdbcDrivers == null) return;
         val drivers = _jdbcDrivers!!
         val yaml = Yaml()
-        yaml.dump(_jdbcDrivers, FileWriter("drivers.yaml"))
+        yaml.dump(_jdbcDrivers, FileWriter(Factory.str("drivers.yaml", "driversTest.yaml")))
     }
 
     public fun removeDriver(name: String) {

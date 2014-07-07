@@ -31,11 +31,3 @@ object Factory {
     val prefKey = str("funqlrunner", "funqlrunnertest")
 }
 
-enum class Keys {
-    conName
-    text
-    file
-    db
-    host
-    port
-}
