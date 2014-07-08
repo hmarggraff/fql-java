@@ -1,0 +1,3 @@
+drivername:
+ class: driverclass
+ file: c:\bla.jar

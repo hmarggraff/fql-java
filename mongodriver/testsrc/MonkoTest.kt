@@ -5,7 +5,6 @@ import kotlin.test.assertNotNull
 import org.testng.annotations.DataProvider
 import org.funql.ri.data.FqlIterator
 import org.funql.ri.parser.FqlParser
-import org.funql.ri.kotlinutil.javaHashMap
 import org.funql.ri.data.FunqlConnection
 import org.testng.annotations.BeforeClass
 import org.testng.annotations.AfterClass
@@ -24,7 +23,7 @@ MonkoTest
 
     BeforeClass public fun mongoconnection() {
         val driver = MongoDriver()
-        val kmap: Map<String, String> = javaHashMap("db" to dbName)
+        val kmap: Map<String, String> = hashMapOf("db" to dbName)
         println("got driver ${driver}")
         conn = driver.openConnection(dbName, kmap) //as FqlMongoConnectionKt
         assertNotNull(conn, "Connection $dbName could not be created.")

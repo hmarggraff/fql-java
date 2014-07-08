@@ -10,21 +10,25 @@ import java.sql.ResultSet
 import org.funql.ri.exec.Updater
 import org.funql.ri.kotlinutil.KFunqlConnection
 import org.funql.ri.classloading.JarClassLoader
+import org.funql.ri.util.Keys
+import java.util.UUID
+import java.util.logging.Logger
+
+val log = Logger.getLogger("drivers.jdbc.sisql")
 
 public open class SiSqlConnection(name: String, propsArg: Map<String, String>?) : KFunqlConnection(name)
 {
     val props: Map<String, String> = propsArg!!
 
     fun open(): Connection {
-        println("Sisql connection opened")
-
-        val connectionStr: String? = props.get("connection")
-        val userStr: String? = props.get("user")
-        val passwdStr: String? = props.get("password")
-        val driver_classStr = props.get("driver_class")
+        val connectionStr: String? = props.get(Keys.connection)
+        val userStr: String? = props.get(Keys.user)
+        val passwdStr: String? = props.get(Keys.passwd)
+        val driver_classStr = props[Keys.klass]
+        log config "Sisql connection open(conn=$connectionStr,user=$userStr,class=$driver_classStr,pwdlen=${passwdStr?.length})"
         if (connectionStr != null && userStr != null && passwdStr != null && driver_classStr != null)
         {
-            JarClassLoader.loadClass(driver_classStr)
+            JarClassLoader loadClass driver_classStr
             return DriverManager.getConnection(connectionStr, userStr, passwdStr)
         }
         else
@@ -68,7 +72,7 @@ public open class SiSqlConnection(name: String, propsArg: Map<String, String>?) 
             return if (rs.next()) rs.getLong(1) else throw FqlDataException("Cannot retrieve value from sequence: " + sequenceName)
         }
         else
-            return 1L
+            return UUID.randomUUID()
     }
 
 }

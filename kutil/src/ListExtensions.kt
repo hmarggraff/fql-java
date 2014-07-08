@@ -22,14 +22,6 @@ fun List<String?>?.dotJoin(role: String) :String {
     return ret.toString()
 }
 
-public fun <K,V> javaHashMap(vararg values: Pair<K, V>): HashMap<K,V> {
-    val answer = HashMap<K,V>(values.size)
-    for (v in values) {
-        answer.put(v.first, v.second)
-    }
-    return answer
-}
-
 fun Map<String?, String?>?.check(): Map<String, String?> {
     if (this == null) throw AssertionError("The checked map may not be null")
     val ret = HashMap<String, String?>()

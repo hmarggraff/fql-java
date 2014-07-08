@@ -9,10 +9,11 @@ enum class RunMode {
     test
 }
 
-var mode = RunMode.run // default
 
 
 object Factory {
+    var mode = RunMode.run // default
+
     fun any(run:  Any, test:Any): Any {
        when(mode){
            RunMode.run -> return run
@@ -27,7 +28,9 @@ object Factory {
        }
         return run  // nor required, but compiler doesn't know
     }
-    { println ("RunMode = $mode")}
+    //{ println ("RunMode = $mode")}
     val prefKey = str("funqlrunner", "funqlrunnertest")
+
+    fun testMode() {mode = RunMode.test}
 }
 

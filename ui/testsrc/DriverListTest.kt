@@ -9,26 +9,38 @@ import org.funql.ri.gui.RunnerView
 import org.funql.ri.gui.RunnerControl
 import org.mockito.Mockito.*;
 import java.io.File
-import java.io.FileOutputStream
-import org.funql.ri.kotlinutil.NamedStringPair
 import kotlin.test.assertEquals
 import org.yaml.snakeyaml.Yaml
-import org.funql.ri.util.SkipTest
-import org.funql.ri.gui.GuiKeys
+import org.funql.ri.util.Keys
+import org.testng.annotations.BeforeSuite
+import org.funql.ri.gui.Factory
+import org.funql.ri.kotlinutil.logger
+import java.math.BigDecimal
+import org.apache.logging.log4j.LogManager
+
+val log = logger("drivers.jdbc")
 
 class DriverListTest {
 
-    Test fun testYaml(){
-        val drivers = array(hashMapOf(GuiKeys.driverKey to "1", GuiKeys.driverClassKey to "2", GuiKeys.fileKey to "3"))
+    BeforeSuite fun setTestMode() {
+        Factory.testMode()
+        log.info("Runmode= ${Factory.mode}")
+    }
+
+
+    Test fun testYaml() {
+        val loggerContext = LogManager.getContext()
+        log info "testYaml"
+        val drivers = array(hashMapOf(Keys.driver to "1", Keys.klass to "2", Keys.file to "3"))
         val y = Yaml()
         val s = y.dump(drivers)
-        assertEquals("- {file: '3', driver: '1', driver_class: '2'}\n", s)
+        assertEquals("- {class: '2', file: '3', driver: '1'}\n", s)
     }
 
     /**
      * tests if clearing the controller properly calls the view
      */
-    Test fun testControlClear(){
+    Test fun testControlClear() {
         val view: RunnerView = mock(javaClass<RunnerView>())!!
         val t = RunnerControl(view)
         t.clear()
@@ -37,14 +49,20 @@ class DriverListTest {
     }
 
 
-    SkipTest fun testDriverLoadEmpty(){
+    Test fun testDriverLoadEmpty() {
         val view: RunnerView = mock(javaClass<RunnerView>())!!
+        val file = File("driversTest.yaml")
+        if (file.exists()) file.delete()
         val t = RunnerControl(view)
         val drivers = t.getJdbcDrivers()
-        assert(drivers.size == 0)
+        assert(drivers.size == 1)
+        assert("drivername".equals(drivers[0][Keys.driver]))
+        assert("driverclass".equals(drivers[0][Keys.klass]))
+        assert("c:\\bla.jar".equals(drivers[0][Keys.file]))
+
     }
 
-    Test fun testDriverLoadBasic(){
+    Test fun testDriverLoadBasic() {
         val view: RunnerView = mock(javaClass<RunnerView>())!!
         val t = RunnerControl(view)
         t.extractDriversFromResourcesToFile()
@@ -54,30 +72,29 @@ class DriverListTest {
 
 
     //control.driverKey, control.driverClassKey, control.fileKey
-    Test fun testSaveDrivers(){
+    Test fun testSaveDrivers() {
         val view: RunnerView = mock(javaClass<RunnerView>())!!
         val t = RunnerControl(view)
-        t.putDriver(hashMapOf(GuiKeys.driverKey to "1", GuiKeys.driverClassKey to "2", GuiKeys.fileKey to "3"))
-        t.putDriver(hashMapOf(GuiKeys.driverKey to "a", GuiKeys.driverClassKey to "b", GuiKeys.fileKey to "c"))
+        t.putDriver(hashMapOf(Keys.driver to "1", Keys.klass to "2", Keys.file to "3"))
+        t.putDriver(hashMapOf(Keys.driver to "a", Keys.klass to "b", Keys.file to "c"))
 
         t.saveJdbcDrivers()
         val drivers: Array<Map<String, String>> = t.getJdbcDrivers()
         assert(drivers.size == 3)
-        assert("1".equals(drivers[0][GuiKeys.driverKey]))
-        assert("a".equals(drivers[1][GuiKeys.driverKey]))
-        assert("b".equals(drivers[1][GuiKeys.driverClassKey]))
+        assert("1".equals(drivers[0][Keys.driver]))
+        assert("a".equals(drivers[1][Keys.driver]))
+        assert("b".equals(drivers[1][Keys.klass]))
     }
 
-    Test fun testAddDriver(){
+    Test fun testAddDriver() {
         val view: RunnerView = mock(javaClass<RunnerView>())!!
         val t = RunnerControl(view)
-        t.putDriver(hashMapOf(GuiKeys.driverKey to "a1", GuiKeys.driverClassKey to "b2", GuiKeys.fileKey to "c3"))
+        t.putDriver(hashMapOf(Keys.driver to "a1", Keys.klass to "b2", Keys.file to "c3"))
         val drivers = t.getJdbcDrivers()
         val found = drivers.first() {
-            "a1".equals(it[GuiKeys.driverKey])
+            "a1".equals(it[Keys.driver])
         }
-        assertEquals("b2", found[GuiKeys.driverClassKey])
-        assertEquals("c3",found[GuiKeys.fileKey])
+        assertEquals("b2", found[Keys.klass])
+        assertEquals("c3", found[Keys.file])
     }
-
 }
