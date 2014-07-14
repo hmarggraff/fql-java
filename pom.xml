@@ -36,6 +36,9 @@
             <kotlin.version>0.8.11</kotlin.version>
             <kotlin.maven.version>0.8.11</kotlin.maven.version>
         </properties>
+        <activation>
+            <activeByDefault>true</activeByDefault>
+        </activation>
     </profile>
 </profiles>
 

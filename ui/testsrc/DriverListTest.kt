@@ -17,6 +17,7 @@ import org.funql.ri.gui.Factory
 import org.funql.ri.kotlinutil.logger
 import java.math.BigDecimal
 import org.apache.logging.log4j.LogManager
+import java.util.Date
 
 val log = logger("drivers.jdbc")
 
@@ -24,12 +25,12 @@ class DriverListTest {
 
     BeforeSuite fun setTestMode() {
         Factory.testMode()
+        log.info("Start: ${Date()}")
         log.info("Runmode= ${Factory.mode}")
     }
 
 
     Test fun testYaml() {
-        val loggerContext = LogManager.getContext()
         log info "testYaml"
         val drivers = array(hashMapOf(Keys.driver to "1", Keys.klass to "2", Keys.file to "3"))
         val y = Yaml()
