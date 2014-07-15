@@ -16,6 +16,8 @@ import java.io.FileInputStream
 import java.util.HashMap
 import org.funql.ri.classloading.JarClassLoader
 import org.funql.ri.util.Keys
+import java.util.Arrays
+import java.util.Comparator
 
 class RunnerControl(val view: RunnerView) {
     var textChanged = false;
@@ -220,7 +222,12 @@ class RunnerControl(val view: RunnerView) {
             map.put(Keys.driver, entry.key);
             map
         }
-        driverArray.sort()
+        Arrays.sort(driverArray, object: Comparator<Map<String, String>> {
+            override fun compare(o1: Map<String, String>, o2: Map<String, String>): Int {
+                return o1[Keys.driver]!!.compareToIgnoreCase(o2[Keys.driver]!!)
+            }
+
+        })
         return driverArray
     }
     public fun putDriver(driverInfo: Map<String, String>) {

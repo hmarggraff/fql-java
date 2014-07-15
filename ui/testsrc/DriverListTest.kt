@@ -14,12 +14,11 @@ import org.yaml.snakeyaml.Yaml
 import org.funql.ri.util.Keys
 import org.testng.annotations.BeforeSuite
 import org.funql.ri.gui.Factory
-import org.funql.ri.kotlinutil.logger
 import java.math.BigDecimal
 import org.apache.logging.log4j.LogManager
 import java.util.Date
 
-val log = logger("drivers.jdbc")
+val log = LogManager.getLogger("drivers.jdbc")!!
 
 class DriverListTest {
 
@@ -32,10 +31,10 @@ class DriverListTest {
 
     Test fun testYaml() {
         log info "testYaml"
-        val drivers = array(hashMapOf(Keys.driver to "1", Keys.klass to "2", Keys.file to "3"))
+        val drivers = array(sortedMapOf(Keys.driver to "1", Keys.klass to "2", Keys.file to "3"))
         val y = Yaml()
         val s = y.dump(drivers)
-        assertEquals("- {class: '2', file: '3', driver: '1'}\n", s)
+        assertEquals("- {class: '2', driver: '1', file: '3'}\n", s)
     }
 
     /**
@@ -76,12 +75,12 @@ class DriverListTest {
     Test fun testSaveDrivers() {
         val view: RunnerView = mock(javaClass<RunnerView>())!!
         val t = RunnerControl(view)
-        t.putDriver(hashMapOf(Keys.driver to "1", Keys.klass to "2", Keys.file to "3"))
         t.putDriver(hashMapOf(Keys.driver to "a", Keys.klass to "b", Keys.file to "c"))
+        t.putDriver(hashMapOf(Keys.driver to "1", Keys.klass to "2", Keys.file to "3"))
 
         t.saveJdbcDrivers()
         val drivers: Array<Map<String, String>> = t.getJdbcDrivers()
-        assert(drivers.size == 3)
+        assert(drivers.size == 2)
         assert("1".equals(drivers[0][Keys.driver]))
         assert("a".equals(drivers[1][Keys.driver]))
         assert("b".equals(drivers[1][Keys.klass]))
