@@ -25,6 +25,8 @@ import org.funql.ri.kotlinutil.mapextensions.toStringMap
 import org.funql.ri.gui.swing.forms.formDialogStrings
 import java.util.HashMap
 import org.funql.ri.util.Keys
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.MarkerManager
 
 fun main(args: Array<String>): Unit {
     val v = SwingView()
@@ -34,6 +36,9 @@ fun main(args: Array<String>): Unit {
 }
 public enum class UserAnswer {yes; no; cancel
 }
+
+val log = LogManager.getLogger("runner.view")!!
+val startup = MarkerManager.getMarker("funqlrunner.startup")!!
 
 
 public class SwingView : RunnerView {
@@ -284,7 +289,7 @@ public class SwingView : RunnerView {
         try {
             val u: URL? = javaClass<SwingView>().getResource("icons/" + name)
             if (u == null) {
-                System.out.println("Icon " + name + " not found.")
+                log.warn(startup,"Icon " + name + " not found.")
                 return javax.swing.plaf.metal.MetalIconFactory.getFileChooserHomeFolderIcon()!!
             } else
                 return ImageIcon(u)
