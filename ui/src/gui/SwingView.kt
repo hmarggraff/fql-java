@@ -233,7 +233,7 @@ public class SwingView : RunnerView {
 
         val from = formDialog(owner, "Connect to a Relational Database", 3) {
             row("Connection Name", nonEmpty(JTextField(), Keys.name))
-            a("Driver", selection(comboBoxModel), Keys.info, 1.0)
+            a("Driver", selection(comboBoxModel, ComboBoxRenderer4Map(Keys.driver)), Keys.info, 1.0)
             a(button(icon("add.png"), "Add a jar file with a Jdbc Driver") {
                 val jdbcDriverInfo = addJdbcDriver(owner)
                 if (jdbcDriverInfo != null) comboBoxModel.addElement(jdbcDriverInfo)

@@ -1,0 +1,26 @@
+status: info # log level of log4j itself when configuring
+appenders: # it is a map of appender types
+    Console: # appender type - a list of appender configurations
+      - name: info # name to use in logger references
+        ThresholdFilter: # filters out error messages
+          level: error
+          onMatch: deny # hide error level
+          onMismatch: accept # show others
+        PatternLayout: { pattern: "%5p %m%n" } # short pattern
+      - name: err # the next list entry is indivcated by the dash
+        ThresholdFilter:
+          level: error # show for error
+        PatternLayout: { pattern: "%5p %msg @%l%n" } # pattern with source code location (%l}
+loggers:
+    root: {level: error} # like the default, but to keep log4j from complaining # level off does not work in R2.02
+    logger: # logger is a list of loggers configurations
+      - name: driver
+        appender-ref: # a list of appenders. All messages
+          - ref: err
+          - ref: info
+      - name: runner # another logger
+        level: info
+        appender-ref:
+          - ref: err
+          - ref: info
+

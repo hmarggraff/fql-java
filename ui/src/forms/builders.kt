@@ -51,8 +51,9 @@ public fun selection(values: Array<out Any>):JComboBox<Any>{
     val combo = JComboBox(values)
     return combo;
 }
-public fun selection<T>(model: ComboBoxModel<T>):JComboBox<T>{
+public fun selection<T>(model: ComboBoxModel<T>, renderer: ListCellRenderer<T>? = null):JComboBox<T>{
     val combo = JComboBox<T>(model)
+    if (renderer != null) combo.setRenderer(renderer)
     return combo;
 }
 
