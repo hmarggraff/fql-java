@@ -12,15 +12,15 @@ object JarClassLoader {
     private var current: ClassLoader = thisClass.getClassLoader()!!
     private var top: ClassLoader = current
 
-    fun loadClassFromJar(classname: String, jar: String): Class<out Any?>? {
+    fun loadClassFromJar(classname: String, jar: String): Class<out Any?> {
         try {
-            val loadedClass: Class<out Any?>? = current.loadClass(classname)
-            return loadedClass
+            val loadedClass: Class<out Any?>? = current.loadClass(classname)!!
+            return loadedClass!!
         } catch(ex: ClassNotFoundException) {
             val newLoader = URLClassLoader(array(URL("file:" + jar)), current)
-            val loadedClass: Class<out Any?>? = newLoader.loadClass(classname)
+            val loadedClass: Class<out Any?>? = newLoader.loadClass(classname)!!
             current = newLoader
-            return loadedClass
+            return loadedClass!!
         }
     }
     fun loadClass(classname: String): Class<out Any?>? = current.loadClass(classname)
@@ -44,6 +44,8 @@ object JarClassLoader {
             ret[depth + i] = urls[i].getFile()!!
         return ret
     }
+
+    fun forName(name: String):Class<out Any?>  = Class.forName(name, true, current)
 }
 
 

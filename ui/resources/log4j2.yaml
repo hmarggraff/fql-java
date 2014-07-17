@@ -3,7 +3,7 @@ appenders: # it is a map of appender types
     Console: # appender type - a list of appender configurations
       - name: info # name to use in logger references
         ThresholdFilter: # filters out error messages
-          level: error
+          level: all
           onMatch: deny # hide error level
           onMismatch: accept # show others
         PatternLayout: { pattern: "%5p %m%n" } # short pattern
@@ -12,9 +12,19 @@ appenders: # it is a map of appender types
           level: error # show for error
         PatternLayout: { pattern: "%5p %msg @%l%n" } # pattern with source code location (%l}
 loggers:
-    root: {level: error} # like the default, but to keep log4j from complaining # level off does not work in R2.02
+    root:
+      level: info # like the default, but to keep log4j from complaining # level off does not work in R2.02
+      appender-ref: # a list of appenders. All messages
+        - ref: err
+        - ref: info
     logger: # logger is a list of loggers configurations
       - name: driver
+        appender-ref: # a list of appenders. All messages
+          - ref: err
+          - ref: info
+    logger: # logger is a list of loggers configurations
+      - name: config
+        level: all
         appender-ref: # a list of appenders. All messages
           - ref: err
           - ref: info

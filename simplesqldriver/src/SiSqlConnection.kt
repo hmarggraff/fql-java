@@ -12,9 +12,11 @@ import org.funql.ri.kotlinutil.KFunqlConnection
 import org.funql.ri.classloading.JarClassLoader
 import org.funql.ri.util.Keys
 import java.util.UUID
-import java.util.logging.Logger
+import org.apache.logging.log4j.LogManager
+import java.util.Properties
 
-val log = Logger.getLogger("drivers.jdbc.sisql")
+
+val configLog = LogManager.getLogger("config")!!
 
 public open class SiSqlConnection(name: String, propsArg: Map<String, String>?) : KFunqlConnection(name)
 {
@@ -25,14 +27,20 @@ public open class SiSqlConnection(name: String, propsArg: Map<String, String>?) 
         val userStr: String? = props.get(Keys.user)
         val passwdStr: String? = props.get(Keys.passwd)
         val driver_classStr = props[Keys.klass]
-        log config "Sisql connection open(conn=$connectionStr,user=$userStr,class=$driver_classStr,pwdlen=${passwdStr?.length})"
-        if (connectionStr != null && userStr != null && passwdStr != null && driver_classStr != null)
+        val jar = props[Keys.file]
+        configLog.info("Sisql connection open(conn=$connectionStr,user=$userStr,class=$driver_classStr,pwdlen=${passwdStr?.length})")
+        if (connectionStr != null && userStr != null && passwdStr != null && driver_classStr != null && jar != null)
         {
-            JarClassLoader loadClass driver_classStr
-            return DriverManager.getConnection(connectionStr, userStr, passwdStr)
+            val clazz: Class<out Any?> = JarClassLoader.loadClassFromJar(driver_classStr, jar)
+            val driver = clazz.newInstance() as java.sql.Driver
+            val p = Properties()
+            p.put("user", userStr)
+            p.put("password", passwdStr)
+            val connection = driver.connect(connectionStr, p)!!
+            return connection
         }
         else
-            throw ConfigurationError("Simple Sql driver needs properties: connection, user, password, driver_class")
+            throw ConfigurationError("Simple Sql driver needs properties: connection, user, password, driver_class, jar")
     }
 
 

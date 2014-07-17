@@ -12,7 +12,7 @@ appenders: # it is a map of appender types
           level: error # show for error
         PatternLayout: { pattern: "err %p %l %msg%n" } # pattern with source code location (%l}
 loggers:
-    root: {level: error} # like the default, but to keep log4j from complaining # level off does not work in R2.02
+    root: {level: warn, appender-ref: err} # like the default, but to keep log4j from complaining # level off does not work in R2.02
     logger: # logger is a list of loggers configurations
       - name: driver
         level: trace # general level for this logger, further restricted in the appenders

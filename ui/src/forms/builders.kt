@@ -3,6 +3,9 @@ package org.funql.ri.gui.swing
 import javax.swing.*
 import java.awt.event.*
 import java.awt.*
+import javax.swing.text.JTextComponent
+import javax.swing.event.DocumentListener
+import javax.swing.event.DocumentEvent
 
 
 fun dialog(owner: Frame?, title: String, init: JDialog.() -> Unit): JDialog {
@@ -57,6 +60,21 @@ public fun selection<T>(model: ComboBoxModel<T>, renderer: ListCellRenderer<T>? 
     return combo;
 }
 
+fun JButton.enabledBy(vararg nonEmptyTextComponents:JTextComponent){
+    fun validateAll() {
+        this.setEnabled(nonEmptyTextComponents.all { it.getDocument()!!.getLength() > 0 })
+    }
+
+    val validateDocumentChangeListener = object : DocumentListener{
+        public override fun insertUpdate(p0: DocumentEvent) = validateAll()
+        public override fun removeUpdate(p0: DocumentEvent) = validateAll()
+        public override fun changedUpdate(p0: DocumentEvent) = validateAll()
+    }
+
+    for (c in nonEmptyTextComponents)
+        c.getDocument()!!.addDocumentListener(validateDocumentChangeListener)
+    validateAll()
+}
 
 
 fun button(icon: Icon, toolTip: String? = null, fn: (ActionEvent) -> Unit): JButton {

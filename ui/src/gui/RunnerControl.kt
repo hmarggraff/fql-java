@@ -18,6 +18,7 @@ import org.funql.ri.classloading.JarClassLoader
 import org.funql.ri.util.Keys
 import java.util.Arrays
 import java.util.Comparator
+import org.funql.ri.data.NamedValues
 
 class RunnerControl(val view: RunnerView) {
     var textChanged = false;
@@ -101,17 +102,17 @@ class RunnerControl(val view: RunnerView) {
             return
         }
         props.set("driverType", "jdbc")
+        org.funql.ri.gui.prefs.saveConnection(props)
         val ret = SiSqlConnection(props[Keys.name]!!, props)
         connections.add(ret)
 
-        org.funql.ri.gui.prefs.saveConnection(props)
     }
 
     public fun createConnection(props: MutableMap<String, String>): Unit {
-        val drivertype = props["driverType"]
-        if ("json".equals(drivertype)) createJsonConnection(props)
-        else if ("mongo".equals(drivertype)) createMongoConnection(props)
-        else if ("jdbc".equals(drivertype)) createJdbcConnection(props)
+        val drivertype = props[Keys.typ]
+        if (DriverTypes.json.equals(drivertype)) createJsonConnection(props)
+        else if (DriverTypes.mongo.equals(drivertype)) createMongoConnection(props)
+        else if (DriverTypes.relational.equals(drivertype)) createJdbcConnection(props)
     }
 
     public fun run(q: String) {
@@ -149,7 +150,6 @@ class RunnerControl(val view: RunnerView) {
     }
 
     fun dump(s: Any?, sb: StringBuffer, indent: Int, inObject: Boolean) {
-
         //newline(neednewline, indent, sb)
         if (s is Map<*, *>) {
             newline(s.size > 2, indent, sb)
@@ -164,6 +164,17 @@ class RunnerControl(val view: RunnerView) {
             }
             sb.append("}")
 
+        } else if (s is NamedValues) {
+            val values = s.getValues()!!
+            val names = s.getNames()!!
+            newline(values.size > 2, indent, sb)
+            sb.append("{")
+            for (cnt in 0 .. values.size-1) {
+                if (cnt > 0) sb.append(',')
+                sb.append(names[cnt]).append(':')
+                dump(values[cnt], sb, indent + 1, true)
+            }
+            sb.append("}")
         } else if (s is Iterable<Any?>) {
             val arr: Iterable<Any?> = s
             sb.append('[');

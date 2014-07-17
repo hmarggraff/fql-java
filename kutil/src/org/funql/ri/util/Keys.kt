@@ -12,5 +12,6 @@ object Keys {
     public final val user: String = "user"
     public final val passwd: String = "pwd"
     public final val klass: String = "class"
+    public final val typ: String = "type"
     public final val connection: String = "connection"
 }

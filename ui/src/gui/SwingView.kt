@@ -27,6 +27,9 @@ import java.util.HashMap
 import org.funql.ri.util.Keys
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.MarkerManager
+import org.funql.ri.classloading.JarClassLoader
+import org.funql.ri.gui.swing.enabledBy
+import org.funql.ri.gui.swing.forms.Validator
 
 fun main(args: Array<String>): Unit {
     val v = SwingView()
@@ -71,27 +74,10 @@ public class SwingView : RunnerView {
             }
             menu("Connections") {
                 menu("Open") {
-                    add(action("Open Json Text ...") {
-                        val props = jsonDriverText(guiFrame)
-                        if (props != null)
-                            control.createJsonConnection(props)
-                    })
-                    add(action("Json File ...") {
-                        val props = jsonDriverFile(guiFrame)
-                        if (props != null)
-                            control.createJsonConnection(props)
-                    })
-                    add(action("MongoDB ...") {
-                        val mprops = mongoDriver(guiFrame)
-                        if (mprops != null)
-                            control.createMongoConnection(mprops)
-                    })
-                    add(action("Relational ...") {
-                        val relprops: MutableMap<String, String>? = jdbcDriver(guiFrame)
-                        if (relprops != null) {
-                            control.createJdbcConnection(relprops)
-                        }
-                    })
+                    add(action("Open Json Text ...") { jsonConnectionInlineText(guiFrame) })
+                    add(action("Json File ...") { jsonConnectionDatafile(guiFrame) })
+                    add(action("MongoDB ...") { mongoConnection(guiFrame) })
+                    add(action("Relational ...") { jdbcConnection(guiFrame) })
                 }
                 menu("Edit") { }
 
@@ -197,15 +183,15 @@ public class SwingView : RunnerView {
         control.run(q!!)
     }
 
-    public fun jsonDriverText(owner: JFrame): MutableMap<String, String>? {
+    public fun jsonConnectionInlineText(owner: JFrame) {
         val values = formDialogStrings(owner, "Use Json Text for a Connection", 2) {
             a("Connection Name", nonEmpty(JTextField(), Keys.name))
             a("Json Text")
             a(1, nameComponent(JTextArea(), Keys.text), 1.0, 1.0)
         }
-        return values;
+        openConnectionChecked(values, DriverTypes.json)
     }
-    public fun jsonDriverFile(owner: JFrame): MutableMap<String, String>? {
+    public fun jsonConnectionDatafile(owner: JFrame) {
         val values = formDialogStrings(owner, "Use Json Text for a Connection", 3) {
             a("Connection Name", 2, nonEmpty(JTextField(), Keys.name), 1.0)
             val edname = nonEmpty(JTextField(), Keys.file)
@@ -216,19 +202,20 @@ public class SwingView : RunnerView {
                     edname.setText(f.getAbsolutePath())
             })
         }
-        return values;
+        openConnectionChecked(values, DriverTypes.json)
     }
 
-    public fun mongoDriver(owner: JFrame): MutableMap<String, String>? {
+    public fun mongoConnection(owner: JFrame) {
         val values = formDialogStrings(owner, "Connect to a MongoDB", 2) {
             a("Connection Name", 2, nonEmpty(JTextField(), Keys.name), 1.0)
             a("Database Name", nonEmpty(JTextField(), Keys.db), 1.0)
             a("Host Name", nameComponent(JTextField(), Keys.host), 1.0)
             a("Port Number", nameComponent(JTextField(), Keys.port), 1.0)
         }
-        return values;
+        openConnectionChecked(values, DriverTypes.mongo)
     }
-    public fun jdbcDriver(owner: JFrame): MutableMap<String, String>? {
+
+    public fun jdbcConnection(owner: JFrame){
         val comboBoxModel = DefaultComboBoxModel<Map<String, String>>(control.getJdbcDrivers())
 
         val from = formDialog(owner, "Connect to a Relational Database", 3) {
@@ -236,35 +223,61 @@ public class SwingView : RunnerView {
             a("Driver", selection(comboBoxModel, ComboBoxRenderer4Map(Keys.driver)), Keys.info, 1.0)
             a(button(icon("add.png"), "Add a jar file with a Jdbc Driver") {
                 val jdbcDriverInfo = addJdbcDriver(owner)
-                if (jdbcDriverInfo != null) comboBoxModel.addElement(jdbcDriverInfo)
-                comboBoxModel.setSelectedItem(jdbcDriverInfo)
+                if (jdbcDriverInfo != null) {
+                    control.putDriver(jdbcDriverInfo)
+                    comboBoxModel.addElement(jdbcDriverInfo)
+                    comboBoxModel.setSelectedItem(jdbcDriverInfo)
+                }
             })
             row("Connection URL", nonEmpty(JTextField(), Keys.connection))
             row("User name", nameComponent(JTextField(), Keys.user))
             row("Password", nameComponent(JTextField(), Keys.passwd))
         }
-        if (from != null) {
-            val ret: MutableMap<String, String> = HashMap<String, String>()
-            from.entrySet().forEach {
-                val value = it.value
-                if (value is String) ret.put(it.getKey(), value)
-            }
-            val driverInfo = from[Keys.info] as Map<String, String>
-            ret.putAll(driverInfo)
-            return ret
-        } else return null
+        if (from == null) return
+        val ret = HashMap<String, String>()
+        from.entrySet().forEach {
+            val value = it.value
+            if (value is String) ret.put(it.getKey(), value)
+        }
+        val driverInfo = from[Keys.info] as Map<String, String>
+        ret.putAll(driverInfo)
+        openConnectionChecked(ret, DriverTypes.relational)
     }
 
     public fun addJdbcDriver(owner: JFrame): Map<String, String>? {
         val fileField = JTextField()
+        val classField = JTextField()
         val values = formDialogStrings(owner, "Load a Jdbc Driver", 3) {
             row("Driver Name", nonEmpty(JTextField(), Keys.driver))
-            row("Driver Class", nonEmpty(JTextField(), Keys.klass))
-            a("Jar File", nameComponent(fileField, Keys.file), 1.0)
+            row("Driver Class", nonEmpty(classField, Keys.klass))
+            a("Jar File", nonEmpty(fileField, Keys.file), 1.0)
             a(button(icon("folder_out.png"), "Select jar file") {
                 val file: File? = showOpenDialog("Jar File")
                 fileField.setText(file?.getAbsolutePath())
             })
+            var isChecked: Boolean = false
+            val doCheck = button("Check") {
+                val className = classField.getText()!!
+                val fileName = fileField.getText()!!
+                try {
+                    val driverClass = JarClassLoader.loadClassFromJar(className, fileName)
+                    val driverInterface = javaClass<java.sql.Driver>()
+                    isChecked = driverInterface.isAssignableFrom(driverClass)
+                    if (isChecked) {
+                        JOptionPane.showMessageDialog(owner, "Class $className loaded. You can now use the driver in your connection spec.")
+                        validateAll()
+                    } else
+                        JOptionPane.showMessageDialog(owner, "Class $className is not a java.sql.Driver. Please check your class name and jar file.")
+
+                } catch(ex: ClassNotFoundException) {
+                    JOptionPane.showMessageDialog(owner, "Cannot load $className from $fileName")
+                }
+            }
+            doCheck.enabledBy(fileField, classField)
+            addButton(doCheck)
+            addValidatorForOk {
+                isChecked
+            }
         }
         return values
     }
@@ -289,7 +302,7 @@ public class SwingView : RunnerView {
         try {
             val u: URL? = javaClass<SwingView>().getResource("icons/" + name)
             if (u == null) {
-                log.warn(startup,"Icon " + name + " not found.")
+                log.warn(startup, "Icon " + name + " not found.")
                 return javax.swing.plaf.metal.MetalIconFactory.getFileChooserHomeFolderIcon()!!
             } else
                 return ImageIcon(u)
@@ -332,10 +345,24 @@ public class SwingView : RunnerView {
             control.close(conn)
         }
     }
-    inner class Reopener(val conn: MutableMap<String, String>) : AbstractAction(conn[Keys.connection]!!) {
+    fun openConnectionChecked(conn: MutableMap<String, String>?, drivertype: String) {
+        if (conn == null) return
+        conn[Keys.typ] = drivertype
+        openTypedConnectionChecked(conn)
+    }
+
+    private fun openTypedConnectionChecked(conn: MutableMap<String, String>) {
+        try {
+            control.createConnection(conn)
+        } catch (x: Throwable) {
+            JOptionPane.showMessageDialog(guiFrame, "Opening connection ${conn[Keys.name]} failed: ${x.getMessage()}")
+        }
+    }
+
+    inner class Reopener(val conn: MutableMap<String, String>) : AbstractAction(conn[Keys.name]!!) {
 
         override fun actionPerformed(e: ActionEvent) {
-            control.createConnection(conn)
+            openTypedConnectionChecked(conn)
         }
     }
 }

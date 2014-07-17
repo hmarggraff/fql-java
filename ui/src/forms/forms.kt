@@ -24,6 +24,9 @@ import org.funql.ri.gui.swing.dialog
 import org.funql.ri.util.KotlinWorkarounds
 import java.awt.Color
 import org.funql.ri.kotlinutil.mapextensions.toStringMap
+import java.awt.Button
+import javax.swing.Icon
+import java.awt.event.ActionEvent
 
 
 fun form(cols: Int, init: FormBuilder.() -> Unit): FormBuilder {
@@ -50,6 +53,7 @@ fun formDialog(owner: Frame?, title: String, cols: Int, init: FormBuilder.() -> 
         g.ok = true; dialog.setVisible(false);dialog.dispose()
     }
     val buttons = panel{
+        g.extraButtons.forEach { add(it) }
         add(g.okButton)
         add(button("Cancel", { dialog.setVisible(false);dialog.dispose() }))
         setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED))
@@ -72,6 +76,7 @@ public open class FormBuilder(val target: JComponent, val cols: Int): GridBagCon
     var ok: Boolean = false
     val okButton = JButton("Ok")
     val validators = ArrayList<Validator>()
+    val extraButtons = ArrayList<JButton>()
 
     public fun a(c: JComponent) {
         record(c)
@@ -259,9 +264,9 @@ public open class FormBuilder(val target: JComponent, val cols: Int): GridBagCon
             values[s] = c
     }
 
-    protected fun validateAll() {
-        okButton.setEnabled(validators.all { it.valid() })
-    }
+    public fun validateAll() { okButton.setEnabled(validators.all { it.valid() }) }
+
+    public fun addValidatorForOk(v: ()->Boolean){ validators.add(object:Validator{ override fun valid(): Boolean = v() }) }
 
     val validateDocumentChangeListener = object : DocumentListener{
 
@@ -275,15 +280,21 @@ public open class FormBuilder(val target: JComponent, val cols: Int): GridBagCon
             validateAll()
         }
     }
+    public fun addButton(text: String, icon: Icon? = null, action : (ActionEvent)-> Unit){
+        val extraButton = button(text, action)
+        extraButton.setIcon(icon)
+        extraButtons.add(0,extraButton)
+    }
+    public fun addButton(b: JButton){ extraButtons.add(b) }
 }
 
 
-abstract class Validator()
+trait Validator
 {
-    public abstract fun valid(): Boolean
+    public fun valid(): Boolean
 }
 
-class NonEmptyTextValidator(val c: JTextComponent): Validator() {
+class NonEmptyTextValidator(val c: JTextComponent): Validator {
     public override fun valid(): Boolean {
         return c.getDocument()!!.getLength() > 0
     }
