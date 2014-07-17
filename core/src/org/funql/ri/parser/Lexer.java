@@ -62,6 +62,7 @@ public class Lexer {
 	Into,
 	Instanceof,
 	Is,
+	Join,
 	LBrace,
 	LBracket,
 	LParen,
@@ -79,6 +80,7 @@ public class Lexer {
 	Nil,
 	Not,
 	Open,
+        On,
 	Or,
 	Param,
 	Plus,
@@ -97,7 +99,7 @@ public class Lexer {
 	True,
 	Unequal,
 	Unknown,
-	Where
+        Where
     }
 
     protected static Hashtable<String, Token> keywords = new Hashtable<String, Token>();
@@ -129,6 +131,7 @@ public class Lexer {
 	keywords.put("in", Token.In);
 	keywords.put("into", Token.Into);
 	keywords.put("is", Token.Instanceof);
+	keywords.put("join", Token.Join);
 	keywords.put("like", Token.Like);
 	keywords.put("limit", Token.Limit);
 	keywords.put("link", Token.Link);
@@ -138,6 +141,7 @@ public class Lexer {
 	keywords.put("not", Token.Not);
 	keywords.put("null", Token.Nil);
 	keywords.put("open", Token.Open);
+	keywords.put("on", Token.On);
 	keywords.put("or", Token.Or);
 	keywords.put("put", Token.Put);
 	keywords.put("select", Token.Select);
