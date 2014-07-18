@@ -23,6 +23,14 @@ public abstract class BinaryNode extends UnaryNode
         lispify(sb, "left", "operand");
     }
 
+    @Override
+    public boolean visit(NodeVisitor visitor)
+    {
+        if (left.visit(visitor)) return true;
+        if (operand.visit(visitor)) return true;
+        return visitor.process(this);
+    }
+
     protected boolean realEqual(RunEnv env, Object from) throws FqlDataException
     {
         Object leftValue = left.getValue(env, from);

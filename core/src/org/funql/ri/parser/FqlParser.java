@@ -208,7 +208,7 @@ public class FqlParser {
         JoinClause ret;
         if (t == Token.As) {
        	    String alias = expect_name("entry point alias");
-       	    ret = new JoinClause(root, alias, entryPointSlot, joinExpression);
+       	    ret = new JoinClause(root, alias, entryPointSlot, joinExpression,);
        	} else {
        	    lex.pushBack();
        	    ret = new JoinClause(root, root, entryPointSlot, joinExpression);

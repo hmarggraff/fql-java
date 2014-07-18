@@ -35,4 +35,6 @@ public interface FqlNodeInterface
     void dump(StringBuffer sb);
 
     void buildMemberName(StringBuffer target);
+
+    boolean visit(NodeVisitor visitor);
 }
