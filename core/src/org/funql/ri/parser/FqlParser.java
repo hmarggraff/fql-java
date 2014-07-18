@@ -29,6 +29,7 @@ import org.funql.ri.data.FqlDataException;
 import org.funql.ri.data.FqlIterator;
 import org.funql.ri.data.FunqlConnection;
 import org.funql.ri.exec.FqlStatement;
+import org.funql.ri.exec.node.JoinClause;
 import org.funql.ri.exec.ProvidedConnection;
 import org.funql.ri.exec.RunEnv;
 import org.funql.ri.exec.node.*;
@@ -125,7 +126,7 @@ public class FqlParser {
 	    t = nextToken();
 	}
 	if (t == Token.From || t == Token.Into) {
-	    clauses.add(parseTopLevel(t));
+	    clauses.add(parseTopFromInto(t));
 	} else {
 	    throw new FqlParseException("Expected from, but found " + tokenVal(t), this);
 	}
@@ -144,7 +145,10 @@ public class FqlParser {
     private void parseNestableClauses(List<FqlStatement> innerClauses) throws FqlParseException {
 	Token t;
 	while (Token.EOF != (t = nextToken())) {
-	    if (t == Token.Where) {
+	    if (t == Token.Join)
+            {
+                innerClauses.add(parseJoin());
+            } else if (t == Token.Where) {
 		innerClauses.add(new WhereClause(FqlExpressionParser.parseExpression(this)));
 
 	    } else if (t == Token.Select) {
@@ -164,6 +168,52 @@ public class FqlParser {
 		throw new FqlParseException("Expected keyword, but found " + tokenVal(t), this);
 	    }
 	}
+    }
+
+    private FqlStatement parseJoin() throws FqlParseException
+    {
+        final Token t1 = nextToken();
+        final String firstname = name_or_string(t1);
+        final String root;
+
+        final NamedIndex connectionIndex;
+        Token t = nextToken();
+        if (t == Token.Dot)
+        {
+            root = expect_name("root");
+            connectionIndex = connections.get(firstname);
+            if (connectionIndex == null)
+            {
+                throw new FqlParseException("Connection named '" + firstname + "' not found.", this);
+            }
+            t = nextToken();
+        }
+        else if (connections.size() == 1)
+        {
+            {
+                connectionIndex = (NamedIndex) connections.values().toArray()[0];
+                root = firstname;
+            }
+        }
+        else
+        {
+            throw new FqlParseException("Expected 'connection_name.root'", this);
+        }
+        EntryPointSlot entryPointSlot = new EntryPointSlot(connectionIndex, root, iteratorCount);
+
+       	if (t != Token.On)
+            throw new FqlParseException("Expected 'on'", this);
+        final FqlNodeInterface joinExpression = FqlExpressionParser.parseExpression(this);
+
+        JoinClause ret;
+        if (t == Token.As) {
+       	    String alias = expect_name("entry point alias");
+       	    ret = new JoinClause(root, alias, entryPointSlot, joinExpression,);
+       	} else {
+       	    lex.pushBack();
+       	    ret = new JoinClause(root, root, entryPointSlot, joinExpression);
+       	}
+        return ret;
     }
 
     private FqlStatement parseLimit() throws FqlParseException {
@@ -316,7 +366,7 @@ public class FqlParser {
 	clauses.add(new RefClause(targetName, entryPointSlot, fieldpath, single));
     }
 
-    protected FqlStatement parseTopLevel(Token which) throws FqlParseException {
+    protected FqlStatement parseTopFromInto(Token which) throws FqlParseException {
 	if (connections.size() == 0) {
 	    throw new FqlParseException("No connection specified", this);
 	}

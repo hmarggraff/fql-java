@@ -20,12 +20,13 @@ fun getConnections(): List<MutableMap<String, String>> {
         val keys: Array<String>? = node.keys()
         if (keys == null) break;
         val m = HashMap<String, String>()
-        ret.add(m)
         for (k in keys)
         {
             val value: String? = node.get(k, null)
             if (value != null) m.put(k, value)
         }
+        if (m.contains(Keys.connection))
+            ret.add(m)
     }
     return ret;
 }

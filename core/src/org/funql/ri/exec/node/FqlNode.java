@@ -147,5 +147,9 @@ public abstract class FqlNode implements FqlNodeInterface
     }
 
 
-
+    @Override
+    public boolean visit(NodeVisitor visitor)
+    {
+        return visitor.process(this);
+    }
 }

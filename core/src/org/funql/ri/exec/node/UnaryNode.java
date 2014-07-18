@@ -24,4 +24,12 @@ public abstract class UnaryNode extends FqlNode
     public FqlNodeInterface getOperand() {
         return operand;
     }
+
+    @Override
+    public boolean visit(NodeVisitor visitor)
+    {
+        final boolean stop = operand.visit(visitor);
+        if (stop) return stop;
+        return visitor.process(this);
+    }
 }
