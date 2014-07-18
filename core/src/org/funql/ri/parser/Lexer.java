@@ -66,6 +66,7 @@ public class Lexer {
 	LBrace,
 	LBracket,
 	LParen,
+	Left,
 	Less,
 	LessOrEqual,
 	Like,
@@ -82,6 +83,7 @@ public class Lexer {
 	Open,
         On,
 	Or,
+	Outer,
 	Param,
 	Plus,
 	Put,
@@ -89,6 +91,7 @@ public class Lexer {
 	RBrace,
 	RBracket,
 	RParen,
+	Right,
 	Select,
 	Single,
 	Slash,
@@ -132,6 +135,7 @@ public class Lexer {
 	keywords.put("into", Token.Into);
 	keywords.put("is", Token.Instanceof);
 	keywords.put("join", Token.Join);
+	keywords.put("left", Token.Left);
 	keywords.put("like", Token.Like);
 	keywords.put("limit", Token.Limit);
 	keywords.put("link", Token.Link);
@@ -143,7 +147,9 @@ public class Lexer {
 	keywords.put("open", Token.Open);
 	keywords.put("on", Token.On);
 	keywords.put("or", Token.Or);
+	keywords.put("outer", Token.Outer);
 	keywords.put("put", Token.Put);
+	keywords.put("right", Token.Right);
 	keywords.put("select", Token.Select);
 	keywords.put("single", Token.Single);
 	keywords.put("some", Token.Some);

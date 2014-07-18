@@ -50,4 +50,8 @@ public class FromClause implements FqlStatement {
     public void buildMemberName(StringBuffer target) {
         target.append(containerName);
     }
+
+    public EntryPointSlot getConnectionSlot() {
+        return connectionSlot;
+    }
 }

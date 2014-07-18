@@ -126,7 +126,7 @@ public class FqlParser {
 	    t = nextToken();
 	}
 	if (t == Token.From || t == Token.Into) {
-	    clauses.add(parseTopFromInto(t));
+	    clauses.add(parseToplevelFromOrInto(t));
 	} else {
 	    throw new FqlParseException("Expected from, but found " + tokenVal(t), this);
 	}
@@ -145,9 +145,10 @@ public class FqlParser {
     private void parseNestableClauses(List<FqlStatement> innerClauses) throws FqlParseException {
 	Token t;
 	while (Token.EOF != (t = nextToken())) {
-	    if (t == Token.Join)
+	    if (t == Token.Join || t == Token.Left || t == Token.Right)
             {
-                innerClauses.add(parseJoin());
+                final FromClause lastStatement = (FromClause) innerClauses.get(innerClauses.size() - 1);
+                innerClauses.add(parseJoin(t, lastStatement.getConnectionSlot()));
             } else if (t == Token.Where) {
 		innerClauses.add(new WhereClause(FqlExpressionParser.parseExpression(this)));
 
@@ -170,8 +171,17 @@ public class FqlParser {
 	}
     }
 
-    private FqlStatement parseJoin() throws FqlParseException
+    private FqlStatement parseJoin(Token t0, NamedIndex upstreamSource) throws FqlParseException
     {
+        boolean outerLeft = false;
+        boolean outerRight = false;
+
+        if (t0 == Token.Left || t0 == Token.Right){
+            expect_next(Token.Outer);
+            outerLeft = t0 == Token.Left;
+            outerRight = t0 == Token.Right;
+        }
+
         final Token t1 = nextToken();
         final String firstname = name_or_string(t1);
         final String root;
@@ -205,13 +215,14 @@ public class FqlParser {
             throw new FqlParseException("Expected 'on'", this);
         final FqlNodeInterface joinExpression = FqlExpressionParser.parseExpression(this);
 
+        t = nextToken();
         JoinClause ret;
         if (t == Token.As) {
        	    String alias = expect_name("entry point alias");
-       	    ret = new JoinClause(root, alias, entryPointSlot, joinExpression,);
+       	    ret = new JoinClause(root, alias, entryPointSlot, joinExpression,upstreamSource, outerLeft, outerRight);
        	} else {
        	    lex.pushBack();
-       	    ret = new JoinClause(root, root, entryPointSlot, joinExpression);
+       	    ret = new JoinClause(root, root, entryPointSlot, joinExpression,upstreamSource, outerLeft, outerRight);
        	}
         return ret;
     }
@@ -366,7 +377,7 @@ public class FqlParser {
 	clauses.add(new RefClause(targetName, entryPointSlot, fieldpath, single));
     }
 
-    protected FqlStatement parseTopFromInto(Token which) throws FqlParseException {
+    protected FqlStatement parseToplevelFromOrInto(Token which) throws FqlParseException {
 	if (connections.size() == 0) {
 	    throw new FqlParseException("No connection specified", this);
 	}

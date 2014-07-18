@@ -7,6 +7,7 @@ import org.funql.ri.data.NamedValues;
 import org.funql.ri.exec.FqlStatement;
 import org.funql.ri.exec.RunEnv;
 import org.funql.ri.util.MultiMapBoolean;
+import org.funql.ri.util.NamedIndex;
 import org.funql.ri.util.NamedValuesImpl;
 
 import java.util.Iterator;
@@ -19,13 +20,13 @@ public class JoinClause implements FqlStatement
 {
     private final String containerName;
     private final FqlNodeInterface joinExpression;
-    private final EntryPointSlot connectionSlot;
-    private final EntryPointSlot upstreamSlot;
+    private final NamedIndex connectionSlot;
+    private final NamedIndex upstreamSlot;
     private final boolean outerLeft;
     private final boolean outerRight;
     private final String[] names;
 
-    public JoinClause(String containerName, String alias, EntryPointSlot connectionSlot, FqlNodeInterface joinExpression, EntryPointSlot upstreamSlot, boolean outerLeft, boolean outerRight)
+    public JoinClause(String containerName, String alias, NamedIndex connectionSlot, FqlNodeInterface joinExpression, NamedIndex upstreamSlot, boolean outerLeft, boolean outerRight)
     {
         this.containerName = containerName;
         this.connectionSlot = connectionSlot;
@@ -33,7 +34,7 @@ public class JoinClause implements FqlStatement
         this.upstreamSlot = upstreamSlot;
         this.outerLeft = outerLeft;
         this.outerRight = outerRight;
-        names = new String[]{upstreamSlot.getEntryPointName(), alias};
+        names = new String[]{upstreamSlot.getName(), alias};
     }
 
     public FqlIterator execute(RunEnv env, FqlIterator precedent) throws FqlDataException
