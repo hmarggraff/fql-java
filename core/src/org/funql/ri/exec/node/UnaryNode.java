@@ -1,5 +1,7 @@
 package org.funql.ri.exec.node;
 
+import org.funql.ri.exec.NodeVisitor;
+
 /**
  */
 public abstract class UnaryNode extends FqlNode
@@ -28,8 +30,8 @@ public abstract class UnaryNode extends FqlNode
     @Override
     public boolean visit(NodeVisitor visitor)
     {
-        final boolean stop = operand.visit(visitor);
+        final boolean stop = visitor.process(this);
         if (stop) return stop;
-        return visitor.process(this);
+        return operand.visit(visitor);
     }
 }

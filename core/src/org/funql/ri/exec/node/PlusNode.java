@@ -61,4 +61,10 @@ public class PlusNode extends BinaryNode
         }
         throw fqlDataException("Cannot add classes " + leftValue.getClass() + " with " + rightValue.getClass());
     }
+
+    @Override
+    public String getOperator() {
+        return "+";
+    }
+
 }

@@ -1,4 +1,4 @@
-package org.funql.ri.exec.node;
+package org.funql.ri.exec.clause;
 
 /* Copyright (C) 2011, Hans Marggraff and other copyright owners as documented in the project's IP log.
  This program and the accompanying materials are made available under the terms of the Eclipse Distribution License
@@ -29,6 +29,7 @@ import org.funql.ri.data.FqlIterator;
 import org.funql.ri.data.FunqlConnection;
 import org.funql.ri.exec.FqlStatement;
 import org.funql.ri.exec.RunEnv;
+import org.funql.ri.exec.EntryPointSlot;
 
 public class FromClause implements FqlStatement {
     private final String containerName;

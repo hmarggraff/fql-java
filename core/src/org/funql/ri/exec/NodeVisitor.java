@@ -1,4 +1,6 @@
-package org.funql.ri.exec.node;
+package org.funql.ri.exec;
+
+import org.funql.ri.exec.node.FqlNodeInterface;
 
 /**
  * Created by hmf on 17.07.2014.

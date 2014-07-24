@@ -28,4 +28,9 @@ public class AndNode extends BinaryNode
 
         return ((Boolean)leftValue) && ((Boolean)rightValue);
     }
+
+    @Override
+    public String getOperator() {
+        return "and";
+    }
 }

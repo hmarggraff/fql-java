@@ -28,4 +28,9 @@ public class OrNode extends BinaryNode
 
         return ((Boolean)leftValue) || ((Boolean)rightValue);
     }
+
+    @Override
+    public String getOperator() {
+        return "or";
+    }
 }

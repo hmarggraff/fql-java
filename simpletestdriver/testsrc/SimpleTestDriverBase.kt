@@ -2,7 +2,7 @@ package org.funql.ri.coretest
 
 import java.util.ArrayList
 import kotlin.test.assertEquals
-import org.fqlsource.fqltest.simpletestdriver.SimpleTestConnection
+import org.funql.ri.simpletestdriver.SimpleTestConnection
 import org.funql.ri.parser.FqlParser
 import java.util.HashMap
 import org.funql.ri.data.FqlIterator

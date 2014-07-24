@@ -1,10 +1,11 @@
-package org.funql.ri.exec.node;
+package org.funql.ri.exec.clause;
 
 import org.funql.ri.data.FqlDataException;
 import org.funql.ri.data.FqlIterator;
 import org.funql.ri.data.NamedValues;
 import org.funql.ri.exec.FqlStatement;
 import org.funql.ri.exec.RunEnv;
+import org.funql.ri.exec.node.FqlNodeInterface;
 
 /**
  * User: hmf

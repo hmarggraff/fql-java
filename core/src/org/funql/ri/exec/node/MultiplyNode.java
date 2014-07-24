@@ -46,4 +46,10 @@ public class MultiplyNode extends BinaryNode
         }
         throw fqlDataException("Cannot multiply classes " + leftValue.getClass() + " and " + rightValue.getClass());
     }
+
+    @Override
+    public String getOperator() {
+        return "*";
+    }
+
 }

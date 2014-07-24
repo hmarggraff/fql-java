@@ -25,4 +25,9 @@ public class QuestionNode extends TernaryNode
             val = operand.getValue(env, from);
         return val;
     }
+
+    @Override
+    public String getOperator() {
+        return ":";
+    }
 }

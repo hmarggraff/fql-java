@@ -1,6 +1,7 @@
 package org.funql.ri.exec.node;
 
 import org.funql.ri.data.FqlDataException;
+import org.funql.ri.exec.EntryPointSlot;
 import org.funql.ri.exec.RunEnv;
 
 /**

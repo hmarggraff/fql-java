@@ -26,6 +26,7 @@ package org.funql.ri.parser;
  */
 
 import org.funql.ri.exec.BuiltIns;
+import org.funql.ri.exec.EntryPointSlot;
 import org.funql.ri.exec.node.*;
 import org.funql.ri.parser.Lexer.Token;
 

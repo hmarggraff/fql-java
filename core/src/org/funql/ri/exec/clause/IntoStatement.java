@@ -1,4 +1,4 @@
-package org.funql.ri.exec.node;
+package org.funql.ri.exec.clause;
 
 /*
    Copyright (C) 2011, Hans Marggraff and other copyright owners as documented in the project's IP log.
@@ -32,6 +32,8 @@ import org.funql.ri.exec.FqlAssertionError;
 import org.funql.ri.exec.FqlStatement;
 import org.funql.ri.exec.RunEnv;
 import org.funql.ri.exec.Updater;
+import org.funql.ri.exec.EntryPointSlot;
+import org.funql.ri.exec.node.FqlNodeInterface;
 
 import java.util.ArrayList;
 import java.util.HashSet;

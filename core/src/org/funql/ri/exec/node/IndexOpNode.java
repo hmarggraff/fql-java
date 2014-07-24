@@ -20,4 +20,10 @@ public class IndexOpNode extends BinaryNode
         Object ret = mapContainer.lookup(key);
         return ret;
     }
+
+    @Override
+    public String getOperator() {
+        return "[";
+    }
+
 }

@@ -13,14 +13,15 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.fqlsource.fqltest.simpletestdriver
+package org.funql.ri.simpletestdriver
 
 import org.funql.ri.exec.RunEnv
 import org.funql.ri.exec.node.ConstStringNode
 import org.funql.ri.exec.node.ContainerNameNode
 import org.funql.ri.exec.node.DotNode
 import org.funql.ri.exec.node.IndexOpNode
-import org.funql.ri.exec.node.EntryPointSlot
+import org.funql.ri.exec.EntryPointSlot
+import org.funql.ri.simpletestdriver.SimpleTestConnection
 import org.funql.ri.util.NamedIndex
 import spock.lang.Shared
 

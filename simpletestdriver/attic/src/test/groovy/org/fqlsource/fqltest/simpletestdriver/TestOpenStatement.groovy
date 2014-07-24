@@ -13,7 +13,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.fqlsource.fqltest.simpletestdriver
+package org.funql.ri.simpletestdriver
 
 import org.funql.ri.parser.FqlParser
 import org.yaml.snakeyaml.Yaml

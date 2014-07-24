@@ -1,4 +1,4 @@
-package org.fqlsource.fqltest.simpletestdriver;
+package org.funql.ri.simpletestdriver;
 
 import org.funql.ri.data.FqlIterator;
 import org.funql.ri.data.FqlMultiMapContainer;

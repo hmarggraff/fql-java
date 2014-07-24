@@ -1,6 +1,7 @@
 package org.funql.ri.exec.node;
 
 import org.funql.ri.data.FqlDataException;
+import org.funql.ri.exec.NodeVisitor;
 import org.funql.ri.exec.RunEnv;
 
 import java.math.BigDecimal;
@@ -86,6 +87,12 @@ public abstract class BinaryNode extends UnaryNode
             return isEqual;
         }
     }
+
+    public FqlNodeInterface getLeft() {
+        return left;
+    }
+
+    public  abstract String getOperator();
 
 
 }

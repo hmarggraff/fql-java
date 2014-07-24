@@ -19,6 +19,7 @@ package org.funql.ri.exec.node;
 
 
 import org.funql.ri.data.FqlDataException;
+import org.funql.ri.exec.NodeVisitor;
 import org.funql.ri.util.Named;
 
 import java.lang.reflect.Field;
@@ -123,7 +124,7 @@ public abstract class FqlNode implements FqlNodeInterface
     {
         if (thisClass == Object.class)
         {
-            throw new NoSuchFieldException(member);
+            throw new NoSuchFieldException(thisClass.getName() + '.' + member);
         }
         Field field = null;
         try

@@ -18,8 +18,8 @@ package org.fqlsource.fqltest.mockdrivertest;
 
 import org.funql.ri.data.FunqlConnection;
 import org.funql.ri.data.FqlDataException;
-import org.fqlsource.fqltest.simpletestdriver.SimpleTestDriver;
-import org.fqlsource.fqltest.simpletestdriver.SimpleTestIterator;
+import org.funql.ri.simpletestdriver.SimpleTestDriver;
+import org.funql.ri.simpletestdriver.SimpleTestIterator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;

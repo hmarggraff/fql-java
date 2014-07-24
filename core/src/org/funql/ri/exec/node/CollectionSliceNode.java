@@ -46,4 +46,9 @@ public class CollectionSliceNode extends TernaryNode
         }
         return new CollectionSlice(srcCollection, startIx, endIx, row, col);
     }
+
+    @Override
+    public String getOperator() {
+        return "..";
+    }
 }

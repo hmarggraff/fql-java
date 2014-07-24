@@ -41,4 +41,11 @@ public class ModuloNode extends BinaryNode
         }
         throw fqlDataException("Cannot apply modulo operator to classes " + leftValue.getClass() + " and " + rightValue.getClass());
     }
+
+
+    @Override
+    public String getOperator() {
+        return "mod";
+    }
+
 }

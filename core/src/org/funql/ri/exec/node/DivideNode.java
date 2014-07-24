@@ -46,4 +46,9 @@ public class DivideNode extends BinaryNode
         }
         throw fqlDataException("Cannot divide classes " + leftValue.getClass() + " and " + rightValue.getClass());
     }
+
+    @Override
+    public String getOperator() {
+        return "/";
+    }
 }

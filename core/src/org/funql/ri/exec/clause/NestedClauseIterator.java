@@ -1,4 +1,4 @@
-package org.funql.ri.exec.node;
+package org.funql.ri.exec.clause;
 
 import org.funql.ri.data.FqlIterator;
 import org.funql.ri.data.NamedValues;

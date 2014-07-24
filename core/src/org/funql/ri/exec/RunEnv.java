@@ -26,7 +26,6 @@ package org.funql.ri.exec;
  */
 
 import org.funql.ri.data.*;
-import org.funql.ri.exec.node.EntryPointSlot;
 
 import java.util.HashMap;
 import java.util.Stack;

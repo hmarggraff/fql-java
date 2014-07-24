@@ -1,4 +1,4 @@
-package org.funql.ri.exec.node;
+package org.funql.ri.exec;
 
 import org.funql.ri.util.NamedIndex;
 

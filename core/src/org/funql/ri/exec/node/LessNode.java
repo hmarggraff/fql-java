@@ -52,4 +52,11 @@ public class LessNode extends BinaryNode
         }
         throw fqlDataException("Comparing classes " + leftValue.getClass() + " with " + rightValue.getClass());
     }
+
+
+    @Override
+    public String getOperator() {
+        return "<";
+    }
+
 }

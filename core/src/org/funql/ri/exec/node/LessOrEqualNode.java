@@ -52,4 +52,9 @@ public class LessOrEqualNode extends BinaryNode
         }
         throw fqlDataException("Comparing (<=) classes " + leftValue.getClass() + " with " + rightValue.getClass());
     }
+
+    @Override
+    public String getOperator() {
+        return "<=";
+    }
 }

@@ -18,4 +18,9 @@ public class EqualsNode extends BinaryNode
     {
         return realEqual(env, from);
     }
+
+    @Override
+    public String getOperator() {
+        return "=";
+    }
 }

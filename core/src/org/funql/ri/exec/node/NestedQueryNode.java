@@ -4,8 +4,8 @@ import org.funql.ri.data.FqlDataException;
 import org.funql.ri.data.FqlIterator;
 import org.funql.ri.exec.FqlStatement;
 import org.funql.ri.exec.RunEnv;
-import org.funql.ri.util.FqlIterator4Iterable;
-import org.funql.ri.util.ListFqlIterator;
+import org.funql.ri.exec.clause.FromClause;
+import org.funql.ri.exec.clause.NestedFromClause;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,10 +46,10 @@ public class NestedQueryNode extends FqlNode {
     @Override
     public void buildMemberName(StringBuffer target) {
         final FqlStatement fqlStatement = clauses.get(0);
-        if (fqlStatement instanceof  NestedFromClause) {
+        if (fqlStatement instanceof NestedFromClause) {
             NestedFromClause nfc = (NestedFromClause) fqlStatement;
             nfc.buildMemberName(target);
-        } else if (fqlStatement instanceof  FromClause) {
+        } else if (fqlStatement instanceof FromClause) {
             FromClause nfc = (FromClause) fqlStatement;
             nfc.buildMemberName(target);
         }

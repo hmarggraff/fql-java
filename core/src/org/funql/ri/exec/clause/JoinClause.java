@@ -1,4 +1,4 @@
-package org.funql.ri.exec.node;
+package org.funql.ri.exec.clause;
 
 import org.funql.ri.data.FqlDataException;
 import org.funql.ri.data.FqlIterator;
@@ -6,6 +6,9 @@ import org.funql.ri.data.FunqlConnection;
 import org.funql.ri.data.NamedValues;
 import org.funql.ri.exec.FqlStatement;
 import org.funql.ri.exec.RunEnv;
+import org.funql.ri.exec.node.EqualsNode;
+import org.funql.ri.exec.EquiJoinChecker;
+import org.funql.ri.exec.node.FqlNodeInterface;
 import org.funql.ri.util.MultiMapBoolean;
 import org.funql.ri.util.NamedIndex;
 import org.funql.ri.util.NamedValuesImpl;
@@ -18,13 +21,13 @@ import java.util.List;
  */
 public class JoinClause implements FqlStatement
 {
-    private final String containerName;
-    private final FqlNodeInterface joinExpression;
-    private final NamedIndex connectionSlot;
-    private final NamedIndex upstreamSlot;
-    private final boolean outerLeft;
-    private final boolean outerRight;
-    private final String[] names;
+    public final String containerName;
+    public final FqlNodeInterface joinExpression;
+    public final NamedIndex connectionSlot;
+    public final NamedIndex upstreamSlot;
+    public final boolean outerLeft;
+    public final boolean outerRight;
+    public final String[] names;
 
     public JoinClause(String containerName, String alias, NamedIndex connectionSlot, FqlNodeInterface joinExpression, NamedIndex upstreamSlot, boolean outerLeft, boolean outerRight)
     {
@@ -44,11 +47,11 @@ public class JoinClause implements FqlStatement
         {
             final EqualsNode equalsNode = (EqualsNode) joinExpression;
             final EquiJoinChecker equiJoinCheckerLeft = new EquiJoinChecker(upstreamSlot, connectionSlot);
-            final boolean leftClean = equalsNode.left.visit(equiJoinCheckerLeft);
+            final boolean leftClean = equalsNode.getLeft().visit(equiJoinCheckerLeft);
             if (leftClean)
             {
                 final EquiJoinChecker equiJoinCheckerRight = new EquiJoinChecker(upstreamSlot, connectionSlot);
-                final boolean rightClean = equalsNode.left.visit(equiJoinCheckerRight);
+                final boolean rightClean = equalsNode.getLeft().visit(equiJoinCheckerRight);
                 if (equiJoinCheckerLeft.isDependentOnLeft() && equiJoinCheckerRight.isDependentOnRight() ||
                       equiJoinCheckerRight.isDependentOnLeft() && equiJoinCheckerRight.isDependentOnLeft())
                 {
@@ -105,9 +108,9 @@ public class JoinClause implements FqlStatement
                             env.pushObject(rightValue);
                             final Object value;
                             if (leftRight)
-                                value = equalsNode.operand.getValue(env, rightValue);
+                                value = equalsNode.getOperand().getValue(env, rightValue);
                             else
-                                value = equalsNode.left.getValue(env, rightValue);
+                                value = equalsNode.getLeft().getValue(env, rightValue);
                             leftIx = 0;
                             final MultiMapBoolean.ListBoolPair<NamedValues> listBoolPair = leftHash.get(value);
                             leftValues = listBoolPair.getValues();
@@ -148,9 +151,9 @@ public class JoinClause implements FqlStatement
                 env.pushObject(next);
                 final Object value;
                 if (leftRight)
-                    value = equalsNode.left.getValue(env, next);
+                    value = equalsNode.getLeft().getValue(env, next);
                 else
-                    value = equalsNode.operand.getValue(env, next);
+                    value = equalsNode.getOperand().getValue(env, next);
                 leftHash.add(value, next);
             }
             finally

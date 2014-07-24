@@ -73,4 +73,9 @@ public class LikeNode extends BinaryNode
         return sx >= st;
     }
 
+    @Override
+    public String getOperator() {
+        return "like";
+    }
+
 }

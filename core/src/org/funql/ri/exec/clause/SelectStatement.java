@@ -1,4 +1,4 @@
-package org.funql.ri.exec.node;
+package org.funql.ri.exec.clause;
 
 /*
    Copyright (C) 2011, Hans Marggraff and other copyright owners as documented in the project's IP log.
@@ -30,6 +30,7 @@ import org.funql.ri.data.FqlIterator;
 import org.funql.ri.data.NamedValues;
 import org.funql.ri.exec.FqlStatement;
 import org.funql.ri.exec.RunEnv;
+import org.funql.ri.exec.node.FqlNodeInterface;
 import org.funql.ri.util.NamedValuesImpl;
 
 import java.util.ArrayList;
@@ -102,5 +103,9 @@ public class SelectStatement implements FqlStatement {
 		return new NamedValuesImpl(fieldNames, fields);
 	    }
 	};
+    }
+
+    public String[] getFieldNames() {
+        return fieldNames;
     }
 }

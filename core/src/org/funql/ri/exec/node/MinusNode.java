@@ -67,4 +67,10 @@ public class MinusNode extends BinaryNode
         }
         throw fqlDataException("Cannot subtract classes " + leftValue.getClass() + " with " + rightValue.getClass());
     }
+
+    @Override
+    public String getOperator() {
+        return "-";
+    }
+
 }

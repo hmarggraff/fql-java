@@ -1,5 +1,7 @@
-package org.funql.ri.exec.node;
+package org.funql.ri.exec;
 
+import org.funql.ri.exec.node.ContainerNameNode;
+import org.funql.ri.exec.node.FqlNodeInterface;
 import org.funql.ri.util.NamedIndex;
 
 /**
