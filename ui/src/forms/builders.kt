@@ -6,6 +6,7 @@ import java.awt.*
 import javax.swing.text.JTextComponent
 import javax.swing.event.DocumentListener
 import javax.swing.event.DocumentEvent
+import kotlin.swing.panel
 
 
 fun dialog(owner: Frame?, title: String, init: JDialog.() -> Unit): JDialog {
@@ -95,6 +96,30 @@ fun button(icon: Icon, toolTip: String? = null, fn: (ActionEvent) -> Unit): JBut
 
 
     return ret
+}
+
+public open class RadioPanel(name: String, vararg labels: Pair<String, String>): JPanel(FlowLayout()){
+    val group = ButtonGroup();
+
+    {
+        setName(name)
+        for (label: Pair<String, String> in labels) {
+            val b = JRadioButton(label.second)
+            b.setName(label.first)
+            add(b)
+            group.add(b)
+        }
+        (getComponent(0) as JRadioButton).setSelected(true)
+    }
+
+    fun getSelected(): String {
+        val arrayOfComponents = getComponents()!!
+        for (c in arrayOfComponents) {
+            if (c is JRadioButton && c.isSelected()) return c.getName()
+        }
+        throw RuntimeException("Internal error no Button in radiogroup is selected")
+    }
+
 }
 
 

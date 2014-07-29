@@ -255,7 +255,7 @@ public class FqlParser {
 
     private FqlStatement parseObject() throws FqlParseException {
 	ArrayList<FqlNodeInterface> fieldList = parseFieldList();
-	return new SelectStatement(fieldList);
+	return new SelectClause(fieldList);
     }
 
     private ArrayList<FqlNodeInterface> parseFieldList() throws FqlParseException {

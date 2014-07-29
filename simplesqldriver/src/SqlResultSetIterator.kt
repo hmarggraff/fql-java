@@ -22,7 +22,7 @@ import org.funql.ri.data.NamedValues
 import kotlin.jdbc.getColumnNames
 import org.funql.ri.util.NamedValuesImpl
 
-public class SiSqlArrayIterator(name: String, val data: ResultSet) : KNamedImpl(name), FqlIterator
+public class SqlResultSetIterator(name: String, val data: ResultSet) : KNamedImpl(name), FqlIterator
 {
     val names: Array<String> = data.getColumnNames()
 

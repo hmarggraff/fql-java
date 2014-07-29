@@ -30,6 +30,8 @@ import org.apache.logging.log4j.MarkerManager
 import org.funql.ri.classloading.JarClassLoader
 import org.funql.ri.gui.swing.enabledBy
 import org.funql.ri.gui.swing.forms.Validator
+import java.awt.FlowLayout
+import org.funql.ri.gui.swing.RadioPanel
 
 fun main(args: Array<String>): Unit {
     val v = SwingView()
@@ -232,6 +234,7 @@ public class SwingView : RunnerView {
             row("Connection URL", nonEmpty(JTextField(), Keys.connection))
             row("User name", nameComponent(JTextField(), Keys.user))
             row("Password", nameComponent(JTextField(), Keys.passwd))
+            row("Execution", RadioPanel(Keys.execution, Keys.local to "Local",Keys.server to "Server"))
         }
         if (from == null) return
         val ret = HashMap<String, String>()

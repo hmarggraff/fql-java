@@ -27,6 +27,7 @@ import org.funql.ri.kotlinutil.mapextensions.toStringMap
 import java.awt.Button
 import javax.swing.Icon
 import java.awt.event.ActionEvent
+import org.funql.ri.gui.swing.RadioPanel
 
 
 fun form(cols: Int, init: FormBuilder.() -> Unit): FormBuilder {
@@ -221,6 +222,7 @@ public open class FormBuilder(val target: JComponent, val cols: Int): GridBagCon
             is JComboBox<*> -> getSelectedItem()
             is JList<*> -> getSelectedValue()
             is JTree -> getSelectionModel()?.getSelectionPath()?.getLastPathComponent()
+            is RadioPanel -> getSelected()
             else -> null
         }
         return v

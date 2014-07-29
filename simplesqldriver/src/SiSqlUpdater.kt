@@ -14,7 +14,7 @@ import org.funql.ri.kotlinutil.KUpdater
 import org.funql.ri.data.FqlDataException
 import org.funql.ri.util.NamedValuesImpl
 
-class SisqlUpdater(val table: String, val conn: Connection, fieldNames: Array<out String>) : KUpdater(fieldNames) {
+class SqlUpdater(val table: String, val conn: Connection, fieldNames: Array<out String>) : KUpdater(fieldNames) {
 
     val primaryKey: String = {
         val databaseMetaData = conn.getMetaData()!!

@@ -41,12 +41,12 @@ import java.util.HashSet;
  * User: hmf
  * Date: 07.03.11
  */
-public class SelectStatement implements FqlStatement {
+public class SelectClause implements FqlStatement {
     private final ArrayList<FqlNodeInterface> fieldList;
     String[] fieldNames;
 
 
-    public SelectStatement(ArrayList<FqlNodeInterface> fieldList) {
+    public SelectClause(ArrayList<FqlNodeInterface> fieldList) {
 	this.fieldList = fieldList;
 	fieldNames = new String[fieldList.size()];
 	HashSet<String> usednames = new HashSet<>();

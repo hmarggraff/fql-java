@@ -14,4 +14,7 @@ object Keys {
     public final val klass: String = "class"
     public final val typ: String = "type"
     public final val connection: String = "connection"
+    public final val execution: String = "execution"
+    public final val local: String = "local"
+    public final val server: String = "server"
 }

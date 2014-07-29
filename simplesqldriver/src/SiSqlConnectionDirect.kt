@@ -35,12 +35,12 @@ public open class SiSqlConnectionDirect(name: String, propsArg: Map<String, Stri
 
     public override fun getIterator(streamName: String?): FqlIterator {
         val resultSet = connection.createStatement()!!.executeQuery("select * from " + streamName)
-        return SiSqlArrayIterator(streamName!!, resultSet)
+        return SqlResultSetIterator(streamName!!, resultSet)
     }
 
 
 
-    override fun getUpdater(targetName: String?, fieldNames: Array<out String>?): Updater = SisqlUpdater(targetName!!, connection, fieldNames!!)
+    override fun getUpdater(targetName: String?, fieldNames: Array<out String>?): Updater = SqlUpdater(targetName!!, connection, fieldNames!!)
 
     public override fun useMap(name: String?, fieldpath: List<String>?, single: Boolean): FqlMapContainer {
         if (fieldpath!!.size() != 1)

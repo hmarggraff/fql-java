@@ -12,6 +12,7 @@ import com.mongodb.DBRef
 import org.funql.ri.data.FqlIterator
 import org.yaml.snakeyaml.Yaml
 import org.funql.ri.sisql.SiSqlConnection
+import org.funql.ri.msql.MappedSqlConnection
 import java.io.FileInputStream
 import java.util.HashMap
 import org.funql.ri.classloading.JarClassLoader
@@ -103,7 +104,11 @@ class RunnerControl(val view: RunnerView) {
         }
         props.set("driverType", "jdbc")
         org.funql.ri.gui.prefs.saveConnection(props)
-        val ret = SiSqlConnection(props[Keys.name]!!, props)
+        val executionLocal = props[Keys.execution]?.equals(Keys.local)!!
+
+        val ret = if (executionLocal) SiSqlConnection(props!!)
+           else MappedSqlConnection(props)
+
         connections.add(ret)
 
     }

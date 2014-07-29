@@ -1,10 +1,11 @@
+package org.funql.ri.msql
 /**
  * Created by hans_m on 24.07.2014.
  */
 
 import org.funql.ri.exec.FqlStatement
 import org.funql.ri.exec.clause.FromClause
-import org.funql.ri.exec.clause.SelectStatement
+import org.funql.ri.exec.clause.SelectClause
 import org.funql.ri.util.FqlRiStringUtils
 import org.funql.ri.kotlinutil.joinList
 import org.funql.ri.exec.clause.JoinClause
@@ -14,61 +15,77 @@ import org.funql.ri.exec.node.FqlNodeInterface
 import org.funql.ri.exec.node.BinaryNode
 import org.funql.ri.exec.node.MemberNode
 import org.funql.ri.exec.node.DotNode
+import org.funql.ri.exec.RunEnv
+import org.funql.ri.data.FqlIterator
+import org.funql.ri.data.FqlDataException
+import org.funql.ri.data.FunqlConnection
+import org.funql.ri.exec.EntryPointSlot
 
-class SqlMapper(val source: List<FqlStatement>){
-    val sql = StringBuffer()
+class SqlMapper(val connectionSlot:EntryPointSlot, val containerName:String, val source: List<FqlStatement>): FqlStatement{
+    val mappedStatements = arrayListOf<FqlStatement>(this)
+    val sql = toSql()
+
     public fun toSql(): String {
+        val sqlBuilder = StringBuffer()
         var fromTable: String = ""
         val joins = ArrayList<JoinClause>()
         var whereClause: WhereClause? = null
-        var selectStatement: SelectStatement? = null
+        var selectClause: SelectClause? = null
         for (clause in source){
             when (clause) {
                 is FromClause -> fromTable = clause.getConnectionSlot()!!.getEntryPointName()!!
-                is SelectStatement -> selectStatement = clause
+                is SelectClause -> selectClause = clause
                 is JoinClause -> joins.add(clause)
                 is WhereClause ->  whereClause = clause
+                else -> mappedStatements.add(clause)
             }
         }
-        sql.append("select ")
-        if (selectStatement != null)
-            joinList(selectStatement!!.getFieldNames()!!, ',', sql)
+        sqlBuilder.append("select ")
+        if (selectClause != null)
+            joinList(selectClause!!.getFieldNames()!!, ',', sqlBuilder)
         else
-            sql.append('*')
-        sql.append("\n")
+            sqlBuilder.append('*')
+        sqlBuilder.append("\n")
 
-        sql.append("from ", fromTable,"\n")
+        sqlBuilder.append("from ", fromTable,"\n")
         for (j in joins){
-            sql.append("join ",  j.containerName, " on ")
+            sqlBuilder.append("join ",  j.containerName, " on ")
 
-            process(j.joinExpression)
-            sql.append("\n")
+            mapExpression(j.joinExpression, sqlBuilder)
+            sqlBuilder.append("\n")
         }
         if (whereClause != null){
-            sql.append("where ")
-            whereClause!!.getExpr()!!.dump(sql)
-            sql.append("\n")
+            sqlBuilder.append("where ")
+            whereClause!!.getExpr()!!.dump(sqlBuilder)
+            sqlBuilder.append("\n")
         }
-        return sql.toString()
+        return sqlBuilder.toString()
     }
 
-    fun process(node: FqlNodeInterface?): Boolean {
+    fun mapExpression(node: FqlNodeInterface?, sqlBuilder: StringBuffer): Boolean {
         when (node) {
-            is BinaryNode -> binary(node)
-            is MemberNode -> sql.append(node.getMemberName())
+            is BinaryNode -> binary(node, sqlBuilder)
+            is MemberNode -> sqlBuilder.append(node.getMemberName())
             is DotNode -> {
-                process(node.getOperand())
-                sql.append(".", node.getMemberName())
+                mapExpression(node.getOperand(), sqlBuilder)
+                sqlBuilder.append(".", node.getMemberName())
             }
-            else -> sql.append("[", node.javaClass.getName(), "]")
+            else -> sqlBuilder.append("[", node.javaClass.getName(), "]")
         }
         return false
     }
 
-    fun binary(node: BinaryNode){
-        process(node.getLeft())
-        sql.append(node.getOperator())
-        process(node.getOperand())
+    fun binary(node: BinaryNode, sqlBuilder: StringBuffer){
+        mapExpression(node.getLeft(), sqlBuilder)
+        sqlBuilder.append(node.getOperator(), sqlBuilder)
+        mapExpression(node.getOperand(), sqlBuilder)
     }
 
+
+
+    override fun execute(env: RunEnv?, precedent: FqlIterator?): FqlIterator  {
+        val funqlConnection = env!!.getConnection(connectionSlot.getIndex())!! as MappedSqlConnection
+        val listContainer = funqlConnection.getIterator(sql)!!
+        return listContainer
+    }
 }
