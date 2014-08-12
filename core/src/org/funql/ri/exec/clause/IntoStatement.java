@@ -32,7 +32,7 @@ import org.funql.ri.exec.FqlAssertionError;
 import org.funql.ri.exec.FqlStatement;
 import org.funql.ri.exec.RunEnv;
 import org.funql.ri.exec.Updater;
-import org.funql.ri.exec.EntryPointSlot;
+import org.funql.ri.exec.ContainerSlot;
 import org.funql.ri.exec.node.FqlNodeInterface;
 
 import java.util.ArrayList;
@@ -46,10 +46,10 @@ import java.util.HashSet;
 public class IntoStatement implements FqlStatement {
     private final ArrayList<FqlNodeInterface> fieldList;
     private final String containerName;
-    protected final EntryPointSlot connectionSlot;
+    protected final ContainerSlot connectionSlot;
 
 
-    public IntoStatement(String containerName, EntryPointSlot connectionSlot, ArrayList<FqlNodeInterface> fieldList) {
+    public IntoStatement(String containerName, ContainerSlot connectionSlot, ArrayList<FqlNodeInterface> fieldList) {
         this.containerName = containerName;
         this.connectionSlot = connectionSlot;
         this.fieldList = fieldList;

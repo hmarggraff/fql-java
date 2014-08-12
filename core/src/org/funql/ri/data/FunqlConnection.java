@@ -17,6 +17,7 @@ package org.funql.ri.data;
 
 
 import org.funql.ri.exec.Updater;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -31,7 +32,7 @@ public interface FunqlConnection
 
     void close();
 
-    FqlIterator getIterator(String streamName) throws FqlDataException;
+    @NotNull FqlIterator getIterator(@NotNull String streamName) throws FqlDataException;
 
     /**
      * Create an updater for the target data sink (table/collection/container)
@@ -39,10 +40,10 @@ public interface FunqlConnection
      * @param fieldNames list of field names collected by the parser (may not be null)
      * @return an Updater using this connection
      */
-    Updater getUpdater(String targetName, String[] fieldNames);
-    Object getMember(Object from, String member);
+    @NotNull Updater getUpdater(@NotNull String targetName, @NotNull String[] fieldNames);
+    Object getMember(@NotNull Object from, @NotNull String member);
 
-    FqlMapContainer useMap(String name, List<String> fieldpath, boolean single);
-    String getName();
-    Object nextSequenceValue(String sequenceName);
+    FqlMapContainer useMap(@NotNull String name, @NotNull List<String> fieldpath, boolean single);
+    @NotNull String getName();
+    @NotNull Object nextSequenceValue(@NotNull String sequenceName);
 }

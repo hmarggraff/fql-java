@@ -18,14 +18,14 @@ package org.funql.ri.simpletestdriver;
 
 import org.funql.ri.data.*;
 import org.funql.ri.exec.Updater;
+import org.funql.ri.kotlinutil.KUpdater;
 import org.funql.ri.util.NamedImpl;
+import org.funql.ri.util.NamedValuesImpl;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
-public class SimpleTestConnection extends NamedImpl implements FunqlConnectionWithRange {
+public class SimpleTestConnection extends NamedImpl implements FunqlConnection {
     final Map<String, String> props;
     String prefix = "";
     int factor = 1;
@@ -64,11 +64,11 @@ public class SimpleTestConnection extends NamedImpl implements FunqlConnectionWi
         }
     }
 
-    public static Date getTime(String fieldName) {
+    public static Date getTime(@NotNull String fieldName) {
         return new Date(letterNum(fieldName));
     }
 
-    public FqlIterator getIterator(String streamName) throws FqlDataException {
+    public @NotNull FqlIterator getIterator(@NotNull String streamName) throws FqlDataException {
         if (Character.isJavaIdentifierStart(streamName.charAt(0)) && Character.isDigit(streamName.charAt(1))) {
             long count = letterNum(streamName);
             return new SimpleTestIterator(this, streamName, (int) count);
@@ -77,17 +77,12 @@ public class SimpleTestConnection extends NamedImpl implements FunqlConnectionWi
     }
 
     @Override
-    public FqlMapContainer useMap(String name, List<String> fieldPath, boolean single) {
+    public FqlMapContainer useMap(@NotNull String name, @NotNull List<String> fieldPath, boolean single) {
         return new SimpleTestMap(this, name, fieldPath, single);
     }
 
     @Override
-    public FqlIterator range(String name, String startKey, String endKey, boolean includeEnd) {
-        return new SimpleTestRange(letterNum(startKey), letterNum(endKey), includeEnd);
-    }
-
-    @Override
-    public Object getMember(Object from, String member) {
+    public Object getMember(@NotNull Object from, @NotNull String member) {
         if (member.startsWith("L")) {
             return letterNum(member) * factor;
         } else if (member.startsWith("D")) {
@@ -114,8 +109,8 @@ public class SimpleTestConnection extends NamedImpl implements FunqlConnectionWi
     }
 
     @Override
-    public Updater getUpdater(String targetName, String[] fieldNames) {
-        return null;
+    public Updater getUpdater(@NotNull String targetName, @NotNull String[] fieldNames) {
+        return new SimpleTestUpdater(fieldNames);
     }
 
     @Override

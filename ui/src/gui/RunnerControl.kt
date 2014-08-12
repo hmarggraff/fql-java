@@ -4,15 +4,13 @@ import java.io.File
 import java.io.FileWriter
 import java.io.FileReader
 import org.funql.ri.data.FunqlConnection
-import org.funql.ri.jsondriver.JsonConnection
+import org.funql.ri.driver.json.JsonConnection
 import java.util.ArrayList
 import org.funql.ri.parser.FqlParser
 import org.funql.ri.mongodriver.FunqlMongoConnection
 import com.mongodb.DBRef
 import org.funql.ri.data.FqlIterator
 import org.yaml.snakeyaml.Yaml
-import org.funql.ri.sisql.SiSqlConnection
-import org.funql.ri.msql.MappedSqlConnection
 import java.io.FileInputStream
 import java.util.HashMap
 import org.funql.ri.classloading.JarClassLoader
@@ -20,12 +18,14 @@ import org.funql.ri.util.Keys
 import java.util.Arrays
 import java.util.Comparator
 import org.funql.ri.data.NamedValues
+import org.funql.ri.sqldriver.scanning.SqlScanConnection
+import org.funql.ri.sqldriver.mapping.MappedSqlConnection
 
 class RunnerControl(val view: RunnerView) {
     var textChanged = false;
     var funqlFile: File? = null;
     val connections = ArrayList<FunqlConnection>()
-    private var _jdbcDrivers: MutableMap<String, Map<String, String>>? = null
+    private var jdbcDrivers: MutableMap<String, Map<String, String>>? = null
 
 
     fun writeFile(file: File, text: String) {
@@ -106,8 +106,7 @@ class RunnerControl(val view: RunnerView) {
         org.funql.ri.gui.prefs.saveConnection(props)
         val executionLocal = props[Keys.execution]?.equals(Keys.local)!!
 
-        val ret = if (executionLocal) SiSqlConnection(props!!)
-           else MappedSqlConnection(props)
+        val ret = if (executionLocal) SqlScanConnection(props) else MappedSqlConnection(props)
 
         connections.add(ret)
 
@@ -137,9 +136,9 @@ class RunnerControl(val view: RunnerView) {
                 if (obj == FqlIterator.sentinel) break
                 else if (obj is Array<Any?>) {
                     val singleton = obj.size == 1
-                    dump(if (singleton) obj[0] else obj, sb, 0, singleton)
+                    dump(if (singleton) obj[0] else obj, sb, 0)
                 } else
-                    dump(obj, sb, 0, false)
+                    dump(obj, sb, 0)
             }
             if (cnt > 1) sb.append(']')
             view setResultText sb.toString()
@@ -154,7 +153,7 @@ class RunnerControl(val view: RunnerView) {
         connections.remove(conn)
     }
 
-    fun dump(s: Any?, sb: StringBuffer, indent: Int, inObject: Boolean) {
+    fun dump(s: Any?, sb: StringBuffer, indent: Int) {
         //newline(neednewline, indent, sb)
         if (s is Map<*, *>) {
             newline(s.size > 2, indent, sb)
@@ -165,19 +164,19 @@ class RunnerControl(val view: RunnerView) {
                 if (cnt > 0) sb.append(',')
                 cnt++
                 sb.append(e.getKey()).append(':')
-                dump(e.getValue(), sb, indent + 1, true)
+                dump(e.getValue(), sb, indent + 1)
             }
             sb.append("}")
 
         } else if (s is NamedValues) {
-            val values = s.getValues()!!
-            val names = s.getNames()!!
+            val values = s.getValues()
+            val names = s.getNames()
             newline(values.size > 2, indent, sb)
             sb.append("{")
             for (cnt in 0 .. values.size-1) {
                 if (cnt > 0) sb.append(',')
                 sb.append(names[cnt]).append(':')
-                dump(values[cnt], sb, indent + 1, true)
+                dump(values[cnt], sb, indent + 1)
             }
             sb.append("}")
         } else if (s is Iterable<Any?>) {
@@ -189,7 +188,7 @@ class RunnerControl(val view: RunnerView) {
                 cnt++
                 newline(true, indent, sb)
                 //sb.append((it as NamedValueImpl).getName()).append(':')
-                dump(it, sb, indent + 1, false)
+                dump(it, sb, indent + 1)
             }
             newline(true, indent, sb)
             sb.append("]")
@@ -218,21 +217,21 @@ class RunnerControl(val view: RunnerView) {
     }
 
     public fun getJdbcDrivers(): Array<Map<String, String>> {
-        if (_jdbcDrivers == null) {
+        if (jdbcDrivers == null) {
             val file = File(driverFile())
             //val path = file.getAbsolutePath()
             if (!file.exists())
                 extractDriversFromResourcesToFile()
             [suppress("CAST_NEVER_SUCCEEDS")]
             if (file.exists()) {
-                _jdbcDrivers = Yaml().load(FileInputStream(file)) as MutableMap<String, Map<String, String>>
+                jdbcDrivers = Yaml().load(FileInputStream(file)) as MutableMap<String, Map<String, String>>
             } else
-                _jdbcDrivers = HashMap<String, Map<String, String>>()
+                jdbcDrivers = HashMap<String, Map<String, String>>()
         }
 
-        val iterator = _jdbcDrivers!!.iterator()
+        val iterator = jdbcDrivers!!.iterator()
 
-        val driverArray = Array<Map<String, String>>(_jdbcDrivers!!.size) {
+        val driverArray = Array<Map<String, String>>(jdbcDrivers!!.size) {
             val entry = iterator.next()
             val map: MutableMap<String, String> = entry.value as MutableMap;
             map.put(Keys.driver, entry.key);
@@ -247,24 +246,24 @@ class RunnerControl(val view: RunnerView) {
         return driverArray
     }
     public fun putDriver(driverInfo: Map<String, String>) {
-        if (_jdbcDrivers == null)
-            _jdbcDrivers = HashMap<String, Map<String, String>>()
+        if (jdbcDrivers == null)
+            jdbcDrivers = HashMap<String, Map<String, String>>()
 
-        _jdbcDrivers!!.put(driverInfo[Keys.driver]!!, driverInfo)
+        jdbcDrivers!!.put(driverInfo[Keys.driver]!!, driverInfo)
         saveJdbcDrivers()
     }
 
     public fun saveJdbcDrivers() {
-        if (_jdbcDrivers == null) return;
-        val drivers = _jdbcDrivers!!
+        if (jdbcDrivers == null) return;
+        val drivers = jdbcDrivers!!
         val yaml = Yaml()
-        yaml.dump(_jdbcDrivers, FileWriter(driverFile()))
+        yaml.dump(drivers, FileWriter(driverFile()))
     }
 
     private fun driverFile(): String = Factory.str("drivers.yaml", "driversTest.yaml")
 
     public fun removeDriver(name: String) {
-        _jdbcDrivers?.remove(name)
+        jdbcDrivers?.remove(name)
     }
 
     public fun extractDriversFromResourcesToFile() {

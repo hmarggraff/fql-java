@@ -8,7 +8,7 @@ public fun StringBuilder.invoke(a: Any?) {
        this.append(a)
     }
 
-public fun joinList(strings: Array<String>, separator: Char, target:StringBuffer): StringBuffer {
+public fun joinList(strings: Array<String?>?, separator: Char, target:StringBuffer): StringBuffer {
     if (strings != null) {
         var continuation = false
 

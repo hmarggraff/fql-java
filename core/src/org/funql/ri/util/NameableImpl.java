@@ -15,21 +15,18 @@ package org.funql.ri.util;
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  */
 public class NameableImpl extends NamedImpl
 {
-    public NameableImpl()
-    {
-        super(null);
-    }
-
-    public NameableImpl(String name)
+    public NameableImpl(@NotNull String name)
     {
         super(name);
     }
 
-    public void setName(String newName)
+    public void setName(@NotNull String newName)
     {
         name = newName;
     }

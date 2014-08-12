@@ -21,7 +21,7 @@ import org.funql.ri.exec.RunEnv;
 import org.funql.ri.exec.node.DotNode;
 import org.funql.ri.exec.node.MemberNode;
 import org.funql.ri.simpletestdriver.SimpleTestConnection;
-import org.funql.ri.exec.EntryPointSlot;
+import org.funql.ri.exec.ContainerSlot;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -38,7 +38,7 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 public class NavNodesTest extends NodeTestBase
 {
     static RunEnv env;
-    protected static EntryPointSlot epI3;
+    protected static ContainerSlot epI3;
     protected static FqlIterator source;
 
     @BeforeClass
@@ -54,7 +54,7 @@ public class NavNodesTest extends NodeTestBase
 	source = conn.getIterator("I3");
 	env.setIterator(0, source);
 
-	epI3 = new EntryPointSlot(conn.getName(), 0, "I3", 0);
+	epI3 = new ContainerSlot(conn.getName(), 0, "I3", 0);
 
     }
 

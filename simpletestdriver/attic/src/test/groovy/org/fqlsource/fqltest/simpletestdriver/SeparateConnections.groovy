@@ -15,12 +15,13 @@
 
 package org.funql.ri.simpletestdriver
 
+import org.funql.ri.exec.ContainerSlot
 import org.funql.ri.exec.RunEnv
 import org.funql.ri.exec.node.ConstStringNode
 import org.funql.ri.exec.node.ContainerNameNode
 import org.funql.ri.exec.node.DotNode
 import org.funql.ri.exec.node.IndexOpNode
-import org.funql.ri.exec.EntryPointSlot
+import org.funql.ri.exec.ContainerSlot
 import org.funql.ri.simpletestdriver.SimpleTestConnection
 import org.funql.ri.util.NamedIndex
 import spock.lang.Shared
@@ -30,10 +31,10 @@ import spock.lang.Shared
 class SeparateConnections extends spock.lang.Specification {
   @Shared long millis = System.currentTimeMillis();
 
-  @Shared EntryPointSlot it00 = new EntryPointSlot('TestLookup', 0, 'a1', 0)
-  @Shared EntryPointSlot map00 = new EntryPointSlot(it00.name, it00.index, 'map', 0)
-  @Shared EntryPointSlot it11 = new EntryPointSlot('Separate', 1, 'b1', 1)
-  @Shared EntryPointSlot map11 = new EntryPointSlot(it11.name, it11.index, 'sep', 1)
+  @Shared ContainerSlot it00 = new ContainerSlot('TestLookup', 0, 'a1', 0)
+  @Shared ContainerSlot map00 = new ContainerSlot(it00.name, it00.index, 'map', 0)
+  @Shared ContainerSlot it11 = new ContainerSlot('Separate', 1, 'b1', 1)
+  @Shared ContainerSlot map11 = new ContainerSlot(it11.name, it11.index, 'sep', 1)
   @Shared RunEnv env = makeRunEnv()
 
   RunEnv makeRunEnv()
@@ -43,18 +44,18 @@ class SeparateConnections extends spock.lang.Specification {
     RunEnv env = new RunEnv(2, 2, null)
     env.setConnectionAt(0, conn1)
     env.setConnectionAt(1, conn2)
-    List<String> path0 = [map00.entryPointName]
+    List<String> path0 = [map00.containerName]
     List<String> fp0 = ['bla', 'blubb']
     env.putMapContainer(0, conn1.useMap(fp0))
     env.putMapContainer(1, conn2.useMap(['f1.f1a']))
-    env.setIterator(0, conn1.getIterator(it00.entryPointName))
-    env.setIterator(1, conn2.getIterator(it11.entryPointName))
+    env.setIterator(0, conn1.getIterator(it00.containerName))
+    env.setIterator(1, conn2.getIterator(it11.containerName))
     return env
   }
 
   def 'Separate Connection Navigation'() {
     setup:
-      ContainerNameNode lookup = new ContainerNameNode(new NamedIndex(map11.entryPointName, 1), 0, 1)
+      ContainerNameNode lookup = new ContainerNameNode(new NamedIndex(map11.containerName, 1), 0, 1)
       ConstStringNode csn = new ConstStringNode('lookup', 0, 2)
       IndexOpNode ion = new IndexOpNode(lookup, csn, 0, 1)
 
@@ -68,7 +69,7 @@ class SeparateConnections extends spock.lang.Specification {
 
   def 'Separate Map'(String key, Class resultClass, Object result) {
     setup:
-        ContainerNameNode lookup = new ContainerNameNode(new NamedIndex(map11.entryPointName, 1), 0, 1)
+        ContainerNameNode lookup = new ContainerNameNode(new NamedIndex(map11.containerName, 1), 0, 1)
         ConstStringNode csn = new ConstStringNode(key, 0, 2)
         IndexOpNode ion = new IndexOpNode(lookup, csn, 0, 1)
     expect:

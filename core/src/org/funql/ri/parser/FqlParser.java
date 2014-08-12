@@ -28,13 +28,15 @@ package org.funql.ri.parser;
 import org.funql.ri.data.FqlDataException;
 import org.funql.ri.data.FqlIterator;
 import org.funql.ri.data.FunqlConnection;
-import org.funql.ri.exec.EntryPointSlot;
+import org.funql.ri.exec.ContainerSlot;
 import org.funql.ri.exec.FqlStatement;
 import org.funql.ri.exec.clause.*;
 import org.funql.ri.exec.ProvidedConnection;
 import org.funql.ri.exec.RunEnv;
 import org.funql.ri.exec.node.*;
 import org.funql.ri.util.NamedIndex;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -42,22 +44,25 @@ import static org.funql.ri.parser.Lexer.Token;
 
 public class FqlParser {
 
-    String txt;
-    Lexer lex;
+    @NotNull String txt;
+    @NotNull Lexer lex;
+    @NotNull
     protected Map<String, NamedIndex> connections = new HashMap<String, NamedIndex>();
-    final Map<String, EntryPointSlot> maps = new HashMap<String, EntryPointSlot>();
+    final Map<String, ContainerSlot> maps = new HashMap<String, ContainerSlot>();
+    @NotNull
     public Map<String, NamedIndex> parameters = new HashMap<String, NamedIndex>();
-    protected Stack<EntryPointSlot> iteratorStack = new Stack<EntryPointSlot>();
+    @NotNull
+    protected Stack<ContainerSlot> iteratorStack = new Stack<ContainerSlot>();
     private final List<FqlStatement> clauses = new ArrayList<FqlStatement>();
     protected int iteratorCount = 0;
 
 
-    public FqlParser(String txt) {
+    public FqlParser(@NotNull String txt) {
 	this.txt = txt;
 	lex = new Lexer(txt);
     }
 
-    public FqlParser(String queryText, Iterable<FunqlConnection> conn) {
+    public FqlParser(@NotNull String queryText, @Nullable Iterable<FunqlConnection> conn) {
 	this(queryText);
 	if (conn != null) {
 	    for (FunqlConnection funqlConnection : conn) {
@@ -66,20 +71,22 @@ public class FqlParser {
 	}
     }
 
-    public FqlParser(String queryText, FunqlConnection conn) {
+    public FqlParser(@NotNull String queryText, @NotNull FunqlConnection conn) {
 	this(queryText);
 	connections.put(conn.getName(), new ProvidedConnection(connections.size(), conn));
     }
 
-    public static FqlIterator runQuery(String queryText, Object[] parameterValues,
-				       FunqlConnection conn) throws FqlParseException, FqlDataException {
+    @Nullable
+    public static FqlIterator runQuery(@NotNull String queryText, Object[] parameterValues,
+                                       @NotNull FunqlConnection conn) throws FqlParseException, FqlDataException {
 	List<FunqlConnection> arr = new ArrayList<>(1);
 	arr.add(conn);
 	return runQuery(queryText, parameterValues, arr);
     }
 
-    public static FqlIterator runQuery(String queryText, Object[] parameterValues,
-				       List<FunqlConnection> conn) throws FqlParseException, FqlDataException {
+    @Nullable
+    public static FqlIterator runQuery(@NotNull String queryText, Object[] parameterValues,
+				       @Nullable List<FunqlConnection> conn) throws FqlParseException, FqlDataException {
 	final FqlParser parser = new FqlParser(queryText, conn);
 	final List<FqlStatement> fqlStatements = parser.parseClauses();
 	final RunEnv runEnv = new RunEnv(parser.connections.size(), parser.maps.size(),
@@ -97,15 +104,18 @@ public class FqlParser {
 	return precedent;
     }
 
+    @NotNull
     public static List<FqlStatement> parse(String queryText) throws FqlParseException {
 	final FqlParser parser = new FqlParser(queryText);
 	return parser.parseClauses();
     }
 
+    @Nullable
     public static FqlIterator runQuery(String queryText) throws FqlParseException, FqlDataException {
 	return runQuery(queryText, null, (List<FunqlConnection>) null);
     }
 
+    @NotNull
     public String getQueryString() {
 	return txt;
     }
@@ -114,6 +124,7 @@ public class FqlParser {
 	return lex.getPos();
     }
 
+    @NotNull
     public List<FqlStatement> parseClauses() throws FqlParseException {
 	Lexer.Token t = nextToken();
 	if (t == Token.Open) {
@@ -136,14 +147,15 @@ public class FqlParser {
 	return clauses;
     }
 
-    private String tokenVal(Token t) {
+    @NotNull
+    private String tokenVal(@NotNull Token t) {
 	if (t == Token.Name)
 	    return lex.nameVal;
 	else if (t == Token.String) return '"' + lex.stringVal + '"';
 	else return t.toString();
     }
 
-    private void parseNestableClauses(List<FqlStatement> innerClauses) throws FqlParseException {
+    private void parseNestableClauses(@NotNull List<FqlStatement> innerClauses) throws FqlParseException {
 	Token t;
 	while (Token.EOF != (t = nextToken())) {
 	    if (t == Token.Join || t == Token.Left || t == Token.Right)
@@ -160,11 +172,9 @@ public class FqlParser {
 		innerClauses.add(parseLimit());
 
 	    } else if (t == Token.End) {
-		{
 		    innerClauses.add(new EndClause());
 		    iteratorStack.pop();
 		    break;
-		}
 
 	    } else {
 		throw new FqlParseException("Expected keyword, but found " + tokenVal(t), this);
@@ -172,7 +182,8 @@ public class FqlParser {
 	}
     }
 
-    private FqlStatement parseJoin(Token t0, NamedIndex upstreamSource) throws FqlParseException
+    @NotNull
+    private FqlStatement parseJoin(@NotNull Token t0, @NotNull NamedIndex upstreamSource) throws FqlParseException
     {
         boolean outerLeft = false;
         boolean outerRight = false;
@@ -210,7 +221,7 @@ public class FqlParser {
         {
             throw new FqlParseException("Expected 'connection_name.root'", this);
         }
-        EntryPointSlot entryPointSlot = new EntryPointSlot(connectionIndex, root, iteratorCount);
+        ContainerSlot containerSlot = new ContainerSlot(connectionIndex, root, iteratorCount);
 
        	if (t != Token.On)
             throw new FqlParseException("Expected 'on'", this);
@@ -220,14 +231,15 @@ public class FqlParser {
         JoinClause ret;
         if (t == Token.As) {
        	    String alias = expect_name("entry point alias");
-       	    ret = new JoinClause(root, alias, entryPointSlot, joinExpression,upstreamSource, outerLeft, outerRight);
+       	    ret = new JoinClause(root, alias, containerSlot, joinExpression,upstreamSource, outerLeft, outerRight);
        	} else {
        	    lex.pushBack();
-       	    ret = new JoinClause(root, root, entryPointSlot, joinExpression,upstreamSource, outerLeft, outerRight);
+       	    ret = new JoinClause(root, root, containerSlot, joinExpression,upstreamSource, outerLeft, outerRight);
        	}
         return ret;
     }
 
+    @NotNull
     private FqlStatement parseLimit() throws FqlParseException {
 	Token t = nextToken();
 	if (t == Token.ConstInteger) {
@@ -241,6 +253,7 @@ public class FqlParser {
 	    throw new FqlParseException("limit must be literal number or a parameter", this);
     }
 
+    @NotNull
     protected FqlNode parseParam() throws FqlParseException {
 	String paramName = lex.nameVal;
 	if (paramName.length() == 0) {
@@ -253,11 +266,13 @@ public class FqlParser {
     }
 
 
+    @NotNull
     private FqlStatement parseObject() throws FqlParseException {
 	ArrayList<FqlNodeInterface> fieldList = parseFieldList();
 	return new SelectClause(fieldList);
     }
 
+    @NotNull
     private ArrayList<FqlNodeInterface> parseFieldList() throws FqlParseException {
 	ArrayList<FqlNodeInterface> fieldList = new ArrayList<FqlNodeInterface>();
 	do {
@@ -269,6 +284,7 @@ public class FqlParser {
 	return fieldList;
     }
 
+    @NotNull
     private void parseOpen() throws FqlParseException {
 	check_token(Token.LBrace);
 	HashMap<String, String> config = new HashMap<String, String>();
@@ -321,6 +337,7 @@ public class FqlParser {
 
     }
 
+    @NotNull
     protected void parseLink() throws FqlParseException {
 	Token t = nextToken();
 	boolean single = false;
@@ -373,12 +390,13 @@ public class FqlParser {
 	    throw new FqlParseException("If the name of the link target is a string, " +
 		    "then you must specify an alias with 'as'.", this);
 
-	final EntryPointSlot entryPointSlot = new EntryPointSlot(connectionIndex, entryPointName, maps.size());
-	maps.put(entryPointName, entryPointSlot);
-	clauses.add(new RefClause(targetName, entryPointSlot, fieldpath, single));
+	final ContainerSlot containerSlot = new ContainerSlot(connectionIndex, entryPointName, maps.size());
+	maps.put(entryPointName, containerSlot);
+	clauses.add(new RefClause(targetName, containerSlot, fieldpath, single));
     }
 
-    protected FqlStatement parseToplevelFromOrInto(Token which) throws FqlParseException {
+    @NotNull
+    protected FqlStatement parseToplevelFromOrInto(@NotNull Token which) throws FqlParseException {
 	if (connections.size() == 0) {
 	    throw new FqlParseException("No connection specified", this);
 	}
@@ -415,9 +433,10 @@ public class FqlParser {
 
     }
 
-    private IntoStatement buildIntoClause(String root, NamedIndex connectionIndex, Token t) throws FqlParseException {
-	EntryPointSlot entryPointSlot = new EntryPointSlot(connectionIndex, root, iteratorCount);
-	iteratorStack.push(entryPointSlot);
+    @NotNull
+    private IntoStatement buildIntoClause(String root, @NotNull NamedIndex connectionIndex, @NotNull Token t) throws FqlParseException {
+	ContainerSlot containerSlot = new ContainerSlot(connectionIndex, root, iteratorCount);
+	iteratorStack.push(containerSlot);
 	ArrayList<String> names;
 	if (lex.currToken == Token.As) {
 	    names = parseNameList();
@@ -425,10 +444,11 @@ public class FqlParser {
 	if (lex.currToken != Token.Put)
 	    throw new FqlParseException("Expected put.", this);
 	ArrayList<FqlNodeInterface> fieldList = parseFieldList();
-	IntoStatement intoStatement = new IntoStatement(root, entryPointSlot, fieldList);
+	IntoStatement intoStatement = new IntoStatement(root, containerSlot, fieldList);
 	return intoStatement;
     }
 
+    @NotNull
     ArrayList<String> parseNameList() throws FqlParseException {
 	ArrayList<String> names = new ArrayList<>();
 
@@ -443,21 +463,22 @@ public class FqlParser {
 	}
     }
 
-    private FromClause buildFromClause(String root, NamedIndex connectionIndex, Token t) throws FqlParseException {
+    private FromClause buildFromClause(@NotNull String root, @NotNull NamedIndex connectionIndex, @NotNull Token t) throws FqlParseException {
 	FromClause fromClause;
-	EntryPointSlot entryPointSlot = new EntryPointSlot(connectionIndex, root, iteratorCount);
+	ContainerSlot containerSlot = new ContainerSlot(connectionIndex, root, iteratorCount);
 	if (t == Token.As) {
 	    String alias = expect_name("entry point alias");
-	    fromClause = new FromClause(root, alias, entryPointSlot);
+	    fromClause = new FromClause(root, alias, containerSlot);
 	} else {
 	    lex.pushBack();
-	    fromClause = new FromClause(root, root, entryPointSlot);
+	    fromClause = new FromClause(root, root, containerSlot);
 	}
-	iteratorStack.push(entryPointSlot);
+	iteratorStack.push(containerSlot);
 	return fromClause;
     }
 
 
+    @NotNull
     FqlNodeInterface parseNestedQuery() throws FqlParseException {
 	final FqlNodeInterface fromNode = FqlExpressionParser.parseQuestion(this);
 	List<FqlStatement> innerClauses = new ArrayList<FqlStatement>();
@@ -477,7 +498,8 @@ public class FqlParser {
 
     }
 
-    private FqlStatement parseNestedFrom(FqlNodeInterface fromNode) throws FqlParseException {
+    @NotNull
+    private FqlStatement parseNestedFrom(@NotNull FqlNodeInterface fromNode) throws FqlParseException {
 	if (fromNode instanceof DotNode) {
 	    DotNode dn = (DotNode) fromNode;
 	    final FqlNodeInterface operand = dn.getOperand();
@@ -493,7 +515,7 @@ public class FqlParser {
     }
 
 
-    Token expect_next(final Token expect) throws FqlParseException {
+    Token expect_next(@NotNull final Token expect) throws FqlParseException {
 	final Token t;
 	t = nextToken();
 	if (t != expect) {
@@ -502,7 +524,7 @@ public class FqlParser {
 	return nextToken();
     }
 
-    void check_token(final Token expect) throws FqlParseException {
+    void check_token(@NotNull final Token expect) throws FqlParseException {
 	final Token t;
 	t = nextToken();
 	if (t != expect) {
@@ -510,7 +532,7 @@ public class FqlParser {
 	}
     }
 
-    protected String name_or_string(Token t) throws FqlParseException {
+    protected String name_or_string(@NotNull Token t) throws FqlParseException {
 	final String entryPointName;
 	if (t == Token.String) {
 	    entryPointName = lex.stringVal;
@@ -523,7 +545,7 @@ public class FqlParser {
 	return entryPointName;
     }
 
-    String name_or_string(final String msg) throws FqlParseException {
+    String name_or_string(@NotNull final String msg) throws FqlParseException {
 	final Token t;
 	final String name1;
 	t = nextToken();
@@ -537,7 +559,7 @@ public class FqlParser {
 	return name1;
     }
 
-    String expect_name(final String msg) throws FqlParseException {
+    String expect_name(@NotNull final String msg) throws FqlParseException {
 	final Token t;
 	t = nextToken();
 	if (t == Token.Name) {
@@ -547,11 +569,12 @@ public class FqlParser {
 	}
     }
 
+    @NotNull
     private Token nextToken() throws FqlParseException {
 	return lex.nextToken();
     }
 
-    NamedIndex getParameter(String paramName) {
+    NamedIndex getParameter(@NotNull String paramName) {
 	NamedIndex parameter = parameters.get(paramName);
 	if (parameter == null) {
 	    parameter = new NamedIndex(paramName, parameters.size());

@@ -2,6 +2,7 @@ package org.funql.ri.test.facility
 
 import java.util.ArrayList
 import java.util.Date
+import kotlin.reflect.KMemberProperty
 
 class Building(id:String, val levels: Array<Level>)
 class Level(rooms: Array<Room>)

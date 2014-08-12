@@ -6,7 +6,6 @@ import org.testng.annotations.Test
 import java.net.URLClassLoader
 import java.net.URL
 import kotlin.test.assertNotNull
-import org.funql.ri.classloading.JarClassLoader
 import java.io.File
 
 class JarClassLoaderTest()

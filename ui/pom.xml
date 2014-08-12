@@ -47,12 +47,12 @@
         </dependency>
         <dependency>
             <groupId>org.funql.ri</groupId>
-            <artifactId>funql-sisqldriver</artifactId>
+            <artifactId>sqlscandriver</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.funql.ri</groupId>
-            <artifactId>funql-sqlmapper</artifactId>
+            <artifactId>sqlmappingdriver</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

@@ -1,7 +1,7 @@
 package org.funql.ri.exec.node;
 
 import org.funql.ri.data.FqlDataException;
-import org.funql.ri.exec.EntryPointSlot;
+import org.funql.ri.exec.ContainerSlot;
 import org.funql.ri.exec.RunEnv;
 import org.funql.ri.exec.FqlBuiltinFunction;
 
@@ -11,10 +11,10 @@ public class FunctionNode extends FqlNode
 {
     private final FqlBuiltinFunction function;
     private final FqlNodeInterface[] argNodes;
-    private final EntryPointSlot dataSlot;
+    private final ContainerSlot dataSlot;
 
 
-    public FunctionNode(FqlBuiltinFunction function, EntryPointSlot dataSlot, FqlNodeInterface[] argNodes, int row, int col)
+    public FunctionNode(FqlBuiltinFunction function, ContainerSlot dataSlot, FqlNodeInterface[] argNodes, int row, int col)
     {
 
         super(row, col);
@@ -31,7 +31,7 @@ public class FunctionNode extends FqlNode
             argvals[i] = argNodes[i].getValue(env, from);
 
         }
-        return function.val(env, env.getConnection(dataSlot.getEntryPointIndex()), from, argvals);
+        return function.val(env, env.getConnection(dataSlot.getContainerIndex()), from, argvals);
     }
 
     public void dump(StringBuffer sb)

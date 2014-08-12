@@ -29,14 +29,14 @@ import org.funql.ri.data.FqlIterator;
 import org.funql.ri.data.FunqlConnection;
 import org.funql.ri.exec.FqlStatement;
 import org.funql.ri.exec.RunEnv;
-import org.funql.ri.exec.EntryPointSlot;
+import org.funql.ri.exec.ContainerSlot;
 
 public class FromClause implements FqlStatement {
     private final String containerName;
     protected String alias;
-    protected final EntryPointSlot connectionSlot;
+    protected final ContainerSlot connectionSlot;
 
-    public FromClause(String containerName, String alias, EntryPointSlot connectionSlot) {
+    public FromClause(String containerName, String alias, ContainerSlot connectionSlot) {
         this.containerName = containerName;
         this.alias = alias;
         this.connectionSlot = connectionSlot;
@@ -52,7 +52,7 @@ public class FromClause implements FqlStatement {
         target.append(containerName);
     }
 
-    public EntryPointSlot getConnectionSlot() {
+    public ContainerSlot getConnectionSlot() {
         return connectionSlot;
     }
 }

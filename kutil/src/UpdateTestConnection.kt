@@ -19,22 +19,19 @@ import org.funql.ri.util.NamedValuesImpl
 class UpdateTestConnection(name:String):KFunqlConnection(name){
     val updaters = HashMap<String, KTestUpdater>()
 
-    override fun kgetIterator(streamName: String): FqlIterator {
+    override fun getIterator(streamName: String): FqlIterator {
         throw UnsupportedOperationException()
     }
 
-    override fun krange(name: String, startKey: String, endKey: String, includeEnd: Boolean): FqlIterator {
+    override fun useMap(name: String, fieldpath: List<String>, single: Boolean): FqlMapContainer? {
         throw UnsupportedOperationException()
     }
-    override fun kuseMap(name: String, fieldpath: List<String>, single: Boolean): FqlMapContainer? {
-        throw UnsupportedOperationException()
-    }
-    override fun kgetMember(from: Any?, member: String): Any? {
+    override fun getMember(from: Any, member: String): Any? {
         throw UnsupportedOperationException()
     }
 
 
-    override fun kgetUpdater(targetName: String, fieldNames: Array<out String>): Updater {
+    override fun getUpdater(targetName: String, fieldNames: Array<out String>): Updater {
         val ret = KTestUpdater(targetName, fieldNames)
         updaters.put(targetName, ret)
         return ret
@@ -49,7 +46,7 @@ class UpdateTestConnection(name:String):KFunqlConnection(name){
  * an updater that updates a linkedHashMap for later examination in tests
  */
 class KTestUpdater(val name: String, fieldNames: Array<out String>):KUpdater(fieldNames){
-    public val data:LinkedHashMap<Any, Any?> = LinkedHashMap<Any, Any?>()
+    public val data:LinkedHashMap<Any, Any?> = LinkedHashMap()
 
     override fun kput(values: Array<out Any?>): NamedValues {
         data.put(data.size(), buildMap(values))

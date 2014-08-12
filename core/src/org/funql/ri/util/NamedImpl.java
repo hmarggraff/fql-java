@@ -15,23 +15,25 @@ package org.funql.ri.util;
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.jetbrains.annotations.NotNull;
+
 public class NamedImpl implements Named
 {
-    protected String name;
+    @NotNull protected String name;
 
-    public NamedImpl(String name)
+    public NamedImpl(@NotNull String name)
     {
         this.name = name;
     }
 
-    public String getName()
+    public @NotNull String getName()
     {
         return name;
     }
 
     @Override
 
-    public int compareTo(Named s)
+    public int compareTo(@NotNull Named s)
     {
         return name.compareTo(s.getName());
     }

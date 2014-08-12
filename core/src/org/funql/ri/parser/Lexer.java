@@ -26,6 +26,8 @@ package org.funql.ri.parser;
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Hashtable;
 
 public class Lexer {
@@ -105,9 +107,11 @@ public class Lexer {
         Where
     }
 
+    @NotNull
     protected static Hashtable<String, Token> keywords = new Hashtable<String, Token>();
 
-    protected Token currToken;
+    @NotNull
+    protected Token currToken = Token.EOF;
     protected int pos;
     protected int row = 1;
     protected int col;
@@ -174,6 +178,7 @@ public class Lexer {
 	return row;
     }
 
+    @NotNull
     protected char nextChar() throws FqlParseException {
 	if (pos >= src.length()) {
 	    throw new FqlParseException("UnexpectedEof", src, row, col);
@@ -197,6 +202,7 @@ public class Lexer {
 	}
     }
 
+    @NotNull
     public Token nextToken() throws FqlParseException {
 	if (isPushBack) {
 	    isPushBack = false;
@@ -206,6 +212,8 @@ public class Lexer {
 	return currToken;
     }
 
+
+    @NotNull
     protected Token nextToken1() throws FqlParseException {
 	loop:
 	while (pos < src.length()) {
@@ -366,6 +374,7 @@ public class Lexer {
 	isPushBack = true;
     }
 
+    @NotNull
     protected Token scanName(char p0) throws FqlParseException {
 	StringBuffer b = new StringBuffer();
 	b.append(p0);
@@ -396,6 +405,7 @@ public class Lexer {
 	}
     }
 
+    @NotNull
     protected Token scanNumber(char p0) throws FqlParseException {
 	boolean isFloat = false;
 	boolean isDot = false;
@@ -430,6 +440,7 @@ public class Lexer {
 	}
     }
 
+    @NotNull
     protected Token scanString() throws FqlParseException {
 	StringBuilder b = new StringBuilder();
 	while (pos < src.length()) {
@@ -453,6 +464,7 @@ public class Lexer {
 	throw new FqlParseException("Unexpected EOF in quoted Name", src, row, col);
     }
 
+    @NotNull
     protected Token scanQuotedName() throws FqlParseException {
 	StringBuilder b = new StringBuilder();
 	while (pos < src.length()) {

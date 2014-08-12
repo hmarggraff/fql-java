@@ -26,7 +26,7 @@ package org.funql.ri.parser;
  */
 
 import org.funql.ri.exec.BuiltIns;
-import org.funql.ri.exec.EntryPointSlot;
+import org.funql.ri.exec.ContainerSlot;
 import org.funql.ri.exec.node.*;
 import org.funql.ri.parser.Lexer.Token;
 
@@ -41,7 +41,7 @@ public class FqlExpressionParser {
     }
 
 
-    private FqlNodeInterface parseFunctionCall(String symName, EntryPointSlot source) throws FqlParseException {
+    private FqlNodeInterface parseFunctionCall(String symName, ContainerSlot source) throws FqlParseException {
         final BuiltIns func = BuiltIns.get(symName);
         if (func == null) {
             throw new FqlParseException("Built-in function not found: " + symName, p);
@@ -361,7 +361,7 @@ public class FqlExpressionParser {
         String symName = p.lex.nameVal;
         Lexer.Token tok = next();
         FqlNodeInterface left;
-       EntryPointSlot source = p.iteratorStack.peek();
+       ContainerSlot source = p.iteratorStack.peek();
 
         if (tok == Lexer.Token.LParen) {
             left = parseFunctionCall(symName, source);

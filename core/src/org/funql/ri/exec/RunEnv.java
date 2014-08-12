@@ -98,7 +98,7 @@ public class RunEnv {
         return mapContainers[index];
     }
 
-    public Object getMember(Object from, String memberName, EntryPointSlot dataSlot) {
+    public Object getMember(Object from, String memberName, ContainerSlot dataSlot) {
         Object object = connections[dataSlot.getIndex()].getMember(from, memberName);
         return object;
     }

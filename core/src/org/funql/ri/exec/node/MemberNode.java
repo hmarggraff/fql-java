@@ -1,7 +1,7 @@
 package org.funql.ri.exec.node;
 
 import org.funql.ri.data.FqlDataException;
-import org.funql.ri.exec.EntryPointSlot;
+import org.funql.ri.exec.ContainerSlot;
 import org.funql.ri.exec.RunEnv;
 
 /**
@@ -11,9 +11,9 @@ import org.funql.ri.exec.RunEnv;
 public class MemberNode extends FqlNode
 {
     private final String memberName;
-    private final EntryPointSlot dataSlot;
+    private final ContainerSlot dataSlot;
 
-    public MemberNode(String memberName, EntryPointSlot dataSlot, int row, int col)
+    public MemberNode(String memberName, ContainerSlot dataSlot, int row, int col)
     {
         super(row, col);
         this.memberName = memberName;

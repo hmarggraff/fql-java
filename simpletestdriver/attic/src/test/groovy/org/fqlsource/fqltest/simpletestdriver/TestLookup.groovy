@@ -24,7 +24,7 @@ import org.funql.ri.util.NamedIndex
 
 import spock.lang.Shared
 import org.funql.ri.exec.node.DotNode
-import org.funql.ri.exec.EntryPointSlot
+import org.funql.ri.exec.ContainerSlot
 
 /**
  */
@@ -71,7 +71,7 @@ class TestLookup extends spock.lang.Specification {
       ContainerNameNode lookup = new ContainerNameNode(new NamedIndex('map', 0), 0, 1)
       ConstStringNode csn = new ConstStringNode('lookup', 0, 2)
       IndexOpNode ion = new IndexOpNode(lookup, csn, 0, 1)
-      def eps = new EntryPointSlot(env.connections[0].getName(), 0, 'map', 0)
+      def eps = new ContainerSlot(env.connections[0].getName(), 0, 'map', 0)
       DotNode dn = new DotNode(ion, 'nav', eps, 0, 1)
     when:
       def value = dn.getValue(env, null)
