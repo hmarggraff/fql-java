@@ -27,7 +27,7 @@
     <profile>
         <id>kotlin-snapshot</id>
         <properties>
-            <kotlin.version>0.1-SNAPSHOT</kotlin.version>
+            <kotlin.version>1.6.0-M1</kotlin.version>
             <kotlin.maven.version>0.1-SNAPSHOT</kotlin.maven.version>
         </properties>
     </profile>
